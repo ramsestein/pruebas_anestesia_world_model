@@ -40,7 +40,7 @@ from diagnostics import cohort_gap as cg
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "src" / "diagnostics" / "REPORT_gap_addendum.txt"
+REPORT_PATH = ROOT / "reports" / "REPORT_gap_addendum.txt"
 CACHE_PATH = OUT_DIR / "gap_addendum_results.json"
 ROJO_TXT = ROOT / "reports" / "_pytest_gap_addendum_rojo.txt"
 VERDE_TXT = ROOT / "reports" / "_pytest_gap_addendum_verde.txt"

@@ -46,13 +46,13 @@ TOKENS_MANIFEST = ROOT / "data" / "tokens_v1" / "manifest_tokens.json"
 CONTRACT_PATH = ROOT / "contrato_ae_v1.md"
 TOKENS_CONTRACT_PATH = ROOT / "contrato_tokens_v1.md"
 OUT_ROOT = ROOT / "data" / "ae_v1"
-REPORT_PATH = ROOT / "src" / "ae" / "REPORT_ae_v4.txt"
+REPORT_PATH = ROOT / "reports" / "REPORT_ae_v4.txt"
 ROJO_TXT = ROOT / "reports" / "_pytest_ae_v4_rojo.txt"
 VERDE_TXT = ROOT / "reports" / "_pytest_ae_v4_verde.txt"
 V1_SNAPSHOT = ROOT / "data" / "ae_v1" / "v1_snapshot.json"
 V2_SNAPSHOT = ROOT / "data" / "ae_v1" / "v2_snapshot.json"
-REPORT_WINDOW_V2 = ROOT / "src" / "autoencoder" / "REPORT_window_v2_RECONSTRUIDO.txt"
-REPORT_TOKENS_V4 = ROOT / "src" / "tokens" / "REPORT_tokens_v4.txt"
+REPORT_WINDOW_V2 = ROOT / "reports" / "REPORT_window_v2_RECONSTRUIDO.txt"
+REPORT_TOKENS_V4 = ROOT / "reports" / "REPORT_tokens_v4.txt"
 
 SEED = 42
 LATENT_DIM = 32
@@ -110,7 +110,7 @@ PROVENANCE_GAPS = [
         "status": "missing_original",
         "note": "El informe original del proceso de ventanas no se conserva. "
                 "Existe una reconstrucción retrospectiva en "
-                "src/autoencoder/REPORT_window_v2_RECONSTRUIDO.txt derivada del "
+                "reports/REPORT_window_v2_RECONSTRUIDO.txt derivada del "
                 "manifest de windows_v2, del esquema de particiones y de "
                 "window.py; NO es el artefacto original y no constituye "
                 "procedencia.",
@@ -1380,7 +1380,7 @@ ASSUMPTIONS = [
     "la inicialización de torch; el determinismo exacto se verifica en CPU "
     "(test e).",
     "REPORT_tokens_v4.txt es el informe original del tokenizador (existe en "
-    "src/tokens/) y su sha se mantiene como entrada ascendente. REPORT_window_v2.txt "
+    "reports/) y su sha se mantiene como entrada ascendente. REPORT_window_v2.txt "
     "original NO se conserva: se declara en provenance_gaps (status "
     "missing_original) y la reconstrucción retrospectiva se renombra a "
     "REPORT_window_v2_RECONSTRUIDO.txt con advertencia en la primera línea; su "
@@ -1478,7 +1478,7 @@ def write_report() -> None:
         L.append(f"  tokens_v1/manifest_tokens.json    sha256 {m['sha256_tokens_v1_manifest']}")
         L.append(f"  windows_v2/manifest.json          sha256 {m['sha256_windows_v2_manifest']}")
         L.append(f"  windows_v2/split.parquet          sha256 {m['sha256_split_parquet']}")
-        L.append(f"  tokens/REPORT_tokens_v4.txt       sha256 {m['sha256_report_tokens_v4']}")
+        L.append(f"  reports/REPORT_tokens_v4.txt      sha256 {m['sha256_report_tokens_v4']}")
         L.append(f"  decisión de contrato              variante elegida: B (ae_bal)")
         L.append(f"  planificador                      {m['scheduler']}")
         if "provenance_gaps" in m:

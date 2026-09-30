@@ -37,7 +37,7 @@ flowchart LR
 | Ventanas | `windows_v4` (cohorte v7 + real) | `data/windows_v4/` |
 | Tokens v1 | generados **sobre windows_v2 (PERDIDO)**; pendientes de regenerar sobre windows_v4 | `src/tokens/` |
 | AE de fisiología | **entrenado y congelado: variante `ae_bal`** | `data/ae_v1/ae_bal/{encoder.pt,decoder.pt,manifest_ae.json}` |
-| Transferencia sintético→real | **confirmada** (sonda v9) | `src/diagnostics/REPORT_v9.txt`, `REPORT_v7_transfer_probe.txt` |
+| Transferencia sintético→real | **confirmada** (sonda v9) | `reports/REPORT_v9.txt`, `reports/REPORT_v7_transfer_probe.txt` |
 | Modelo de transición | no empezado | — |
 
 Decisiones **cerradas** (no reabrir sin motivo fuerte):

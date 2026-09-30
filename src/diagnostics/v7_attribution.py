@@ -41,7 +41,7 @@ from diagnostics import v6_validate as vv
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "src" / "diagnostics" / "REPORT_v7_attribution.txt"
+REPORT_PATH = ROOT / "reports" / "REPORT_v7_attribution.txt"
 CACHE_PATH = OUT_DIR / "v7_attribution_results.json"
 ROJO_TXT = ROOT / "reports" / "_pytest_v7_attribution_rojo.txt"
 VERDE_TXT = ROOT / "reports" / "_pytest_v7_attribution_verde.txt"

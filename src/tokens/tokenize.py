@@ -53,7 +53,7 @@ CF_META_DIR = ROOT / "data" / "cf_v5" / "metadata"
 OUT_DIR = ROOT / "data" / "tokens_v1" / "windows"
 OUT_ROOT = ROOT / "data" / "tokens_v1"
 MANIFEST_PATH = OUT_ROOT / "manifest_tokens.json"
-REPORT_PATH = ROOT / "src" / "tokens" / "REPORT_tokens.txt"
+REPORT_PATH = ROOT / "reports" / "REPORT_tokens.txt"
 
 GRID_S = 5.0
 STEP_S = 60

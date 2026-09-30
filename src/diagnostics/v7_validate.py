@@ -28,7 +28,7 @@ vv.WINDOWS_V6 = ROOT / "data" / "windows_v4"
 vv.SYNTH_SOURCES_V6 = ["synthetic_v7", "vaso_reinf_v7", "cf_v7"]
 vv.CF_V6_METADATA = ROOT / "data" / "cf_v7" / "metadata"
 vv.CACHE_PATH = ROOT / "data" / "diagnostics" / "v7_validate_results.json"
-vv.REPORT_PATH = ROOT / "src" / "diagnostics" / "REPORT_generator_validation_v7.txt"
+vv.REPORT_PATH = ROOT / "reports" / "REPORT_generator_validation_v7.txt"
 vv.ROJO_TXT = ROOT / "reports" / "_pytest_v7_validate_rojo.txt"
 vv.VERDE_TXT = ROOT / "reports" / "_pytest_v7_validate_verde.txt"
 

@@ -349,12 +349,12 @@ def test_t_provenance_shas():
     assert "note" in g and "no constituye procedencia" in g["note"]
     assert len(g["sha256_reconstruction"]) == 64
     # el fichero reconstruido existe y lleva la advertencia en mayúsculas
-    p = ROOT / "src" / "autoencoder" / "REPORT_window_v2_RECONSTRUIDO.txt"
+    p = ROOT / "reports" / "REPORT_window_v2_RECONSTRUIDO.txt"
     assert p.exists()
     first = p.read_text(encoding="utf-8").splitlines()[0]
     assert "RECONSTRUCCIÓN RETROSPECTIVA" in first.upper()
     # tokens_v4 original sigue existiendo
-    assert (ROOT / "src" / "tokens" / "REPORT_tokens_v4.txt").exists()
+    assert (ROOT / "reports" / "REPORT_tokens_v4.txt").exists()
 
 
 @pytest.mark.integration

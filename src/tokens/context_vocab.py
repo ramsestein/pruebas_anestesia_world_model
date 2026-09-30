@@ -14,7 +14,7 @@ Salida:
   data/context_v1/vocab.json      entradas (86) con scope v1/v2 + sha256
   data/context_v1/tokens.parquet  una fila por (caseid, item_id) — solo v1
   data/context_v1/coverage.parquet por (item_id, source, split) — solo v1
-  src/tokens/REPORT_context_vocab_v2.txt  informe de la iteración 2
+  reports/REPORT_context_vocab_v2.txt  informe de la iteración 2
 
 Reglas centrales:
   - Split heredado de windows_v2 (columna `split` de cases.parquet, verificada
@@ -52,7 +52,7 @@ WINDOWS_V2 = ROOT / "data" / "windows_v2"
 CASES_PATH = WINDOWS_V2 / "cases.parquet"
 SPLIT_PATH = WINDOWS_V2 / "split.parquet"
 OUT_DIR = ROOT / "data" / "context_v1"
-REPORT_PATH = Path(__file__).resolve().parent / "REPORT_context_vocab_v2.txt"
+REPORT_PATH = ROOT / "reports" / "REPORT_context_vocab_v2.txt"
 
 SOURCE_ORDER = ["real", "synthetic_v5", "cf_v5", "vaso_reinf_v5"]
 SOURCE_DIRS = {

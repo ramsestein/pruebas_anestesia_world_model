@@ -60,7 +60,7 @@ from diagnostics import cohort_gap as cg
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "src" / "diagnostics" / "REPORT_v7_transfer_probe.txt"
+REPORT_PATH = ROOT / "reports" / "REPORT_v7_transfer_probe.txt"
 CACHE_PATH = OUT_DIR / "v7_transfer_probe_results.json"
 REPORTS_DIR = ROOT / "reports"
 
