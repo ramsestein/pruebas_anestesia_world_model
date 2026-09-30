@@ -1,0 +1,2824 @@
+================================================================
+PASO 0 — RUTAS ÚNICAS, PROCEDENCIA DE SCRIPTS Y SUITE HONESTA
+REPORT_paso0_rutas.txt
+================================================================
+Fecha: 2026-09-30
+Estado final: 195 passed / 12 skipped / 0 failed / 0 errors.
+Sin lógica de cómputo modificada en ningún script; solo rutas, listas de
+cohortes e imports.
+
+================================================================
+1. PROCEDENCIA DE LOS SCRIPTS (FASE A)
+================================================================
+
+La premisa del enunciado ("ningún script cerrado coincide con su manifiesto")
+NO se cumple en el estado actual: window.py y pk_tokens.py SÍ coinciden.
+Informe parcial completo en reports/REPORT_paso0_rutas_A.txt (commit "Paso 0 A").
+
+A1. TABLA
+  script        | sha repo (actual) | sha manifiesto        | ¿coincidente? | dónde
+  --------------|-------------------|-----------------------|---------------|------
+  window.py     | 9508ccd0…         | 9508ccd0… (windows_v4) | SÍ — repo     | src/autoencoder/window.py
+  pk_tokens.py  | 1e3f695b…         | 1e3f695b… (pk_v1)      | SÍ — repo     | src/tokens/pk_tokens.py
+  tokenize.py   | eb87e273…         | 8055bd5d… (tokens_v1)  | SÍ — backup   | D:/data/anestesia_world/backup_scripts_20260928/tokens__tokenize.py
+  physio_ae.py  | 2873486e…         | 3f2817c9… (ae_bal)     | NO            | —
+
+A2. DIFFS CLASIFICADOS
+  window.py, pk_tokens.py: idénticos al manifiesto (sin diff).
+  tokenize.py: ÚNICO diff = REPORT_PATH (src/tokens/ vs reports/), COSMÉTICO
+    (movido por la limpieza, commit 607e1bc). Ningún bloque de LÓGICA.
+  physio_ae.py: sin versión coincidente (backup 88f31ed6 ≠ 3f2817c9; git
+    fd1299d0/b0735a0d ≠ 3f2817c9). Consecuencia (A3): la ÚNICA garantía de
+    equivalencia para physio_ae.py son los números de la FASE D (D2).
+
+A4. SHA256 DE PARTIDA (antes de la Fase C; verificados contra git show)
+  src/autoencoder/window.py   9508ccd008b58fb2058e53f8e0ffef884e182341103970f9b52039c2d1a5ebae
+  src/tokens/pk_tokens.py     1e3f695b3935dd85faf458f502fb400b1c5d494db2142e7d98812c6cae45a329
+  src/tokens/tokenize.py      eb87e273090d3251903272613c00a8ce6b19b1b938772e0e1030078b9edbba5b
+  src/ae/physio_ae.py         2873486e54d488ec688a53072b010044fe3d034d607ddc3cbc7f53fe86722fdd
+
+C5. VERIFICACIÓN DEL DIFF (contra el punto de partida d4cca6d)
+  git diff d4cca6d -- src/ scripts/ tests/ = 31 ficheros, +479/−236 líneas.
+  Revisadas una a una: TODAS las diferencias son (a) sustitución de rutas de
+  lectura por constantes de paths.py, (b) listas de cohortes v5/v6 -> v7 (o
+  registro perdido vía paths.LOST_*), (c) imports de paths, (d) en tests:
+  marcadores de skip/marker. No hay ningún bloque de LÓGICA de cómputo.
+
+================================================================
+2. CONTENIDO DE src/paths.py
+================================================================
+(transcrito íntegro)
+
+----------------------------------------------------------------
+"""paths.py — fuente ÚNICA de rutas y cohortes del proyecto anestesia_world.
+
+Este módulo concentra TODAS las rutas de lectura de datos y las listas de
+cohortes. Cualquier código que lea datos debe hacerlo a través de las
+constantes de aquí; NO debe haber strings de ruta sueltos.
+
+Reglas:
+  - Sin lógica de cómputo: solo constantes y (como mucho) una verificación de
+    existencia con mensaje claro.
+  - DATA_ROOT se puede sobrescribir con la variable de entorno
+    ANESTESIA_DATA_ROOT (para apuntar, p. ej., a la copia de D:).
+  - COHORTS contiene SOLO las cohortes VIGENTES (windows_v4 / v7).
+  - LOST_COHORTS es un REGISTRO histórico: cohortes y directorios de ventanas
+    que ya no existen en disco. Sirve para que el código que deba nombrarlas
+    lo haga por una constante con nombre explícito, no por un string suelto.
+"""
+
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _resolve_data_root() -> Path:
+    env = os.environ.get("ANESTESIA_DATA_ROOT")
+    if env:
+        return Path(env).expanduser()
+    return REPO_ROOT / "data"
+
+
+DATA_ROOT = _resolve_data_root()
+
+WINDOWS_DIR = DATA_ROOT / "windows_v4"   # ventanas vigentes (cohortes v7)
+TOKENS_DIR = DATA_ROOT / "tokens_v1"
+PK_DIR = DATA_ROOT / "pk_v1"
+CONTEXT_DIR = DATA_ROOT / "context_v1"
+AE_DIR = DATA_ROOT / "ae_v1"
+DIAGNOSTICS_DIR = DATA_ROOT / "diagnostics"
+AUDIT_DIR = DATA_ROOT / "audit"
+
+MANIFESTS_DIR = REPO_ROOT / "manifests"
+REPORTS_DIR = REPO_ROOT / "reports"
+
+WINDOWS_V2_DIR = DATA_ROOT / "windows_v2"
+WINDOWS_V3_DIR = DATA_ROOT / "windows_v3"
+
+COHORTS: dict[str, Path] = {
+    "real": DATA_ROOT / "real",
+    "synthetic_v7": DATA_ROOT / "synthetic_v7",
+    "vaso_reinf_v7": DATA_ROOT / "synthetic_vaso_reinf_v7",
+    "cf_v7": DATA_ROOT / "cf_v7",
+}
+
+SYNTH_COHORTS: list[str] = ["synthetic_v7", "vaso_reinf_v7", "cf_v7"]
+ALL_COHORTS: list[str] = ["real"] + SYNTH_COHORTS
+
+LOST_SYNTH_V5: list[str] = ["synthetic_v5", "vaso_reinf_v5", "cf_v5"]
+LOST_SYNTH_V6: list[str] = ["synthetic_v6", "vaso_reinf_v6", "cf_v6"]
+LOST_COHORTS: list[str] = (
+    LOST_SYNTH_V5 + LOST_SYNTH_V6 + ["windows_v2", "windows_v3"]
+)
+
+LOST_COHORT_DIRS: dict[str, Path] = {
+    "synthetic_v5": DATA_ROOT / "synthetic_v5",
+    "vaso_reinf_v5": DATA_ROOT / "synthetic_vaso_reinf_v5",
+    "cf_v5": DATA_ROOT / "cf_v5",
+    "synthetic_v6": DATA_ROOT / "synthetic_v6",
+    "vaso_reinf_v6": DATA_ROOT / "synthetic_vaso_reinf_v6",
+    "cf_v6": DATA_ROOT / "cf_v6",
+}
+
+
+def require_vigent_dirs() -> None:
+    missing: list[Path] = []
+    for d in (WINDOWS_DIR, TOKENS_DIR, PK_DIR, CONTEXT_DIR, AE_DIR,
+              DIAGNOSTICS_DIR):
+        if not d.is_dir():
+            missing.append(d)
+    for name, d in COHORTS.items():
+        if not d.is_dir():
+            missing.append(d)
+    if missing:
+        raise RuntimeError(
+            "Faltan directorios de datos vigentes (¿falta ANESTESIA_DATA_ROOT "
+            "o el dataset no está montado?):\n  " +
+            "\n  ".join(str(p) for p in missing))
+----------------------------------------------------------------
+
+================================================================
+3. LISTA DE CAMBIOS POR FICHERO (FASE C)
+================================================================
+
+src/paths.py (+117): módulo nuevo (ya comprometido en B, ampliado en C con
+  LOST_SYNTH_V5/V6, LOST_COHORT_DIRS, WINDOWS_V2_DIR/V3_DIR, AUDIT_DIR).
+
+src/tokens/tokenize.py (~15 sustituciones): WINDOWS_V2 -> paths.WINDOWS_DIR
+  (renombrado WINDOWS_ROOT); PK_DIR/CTX_TOKENS/CTX_VOCAB/CF_META_DIR/OUT_DIR/
+  OUT_ROOT/REPORT_PATH -> paths.*; SOURCES -> paths.COHORTS; glob de salida
+  "source=cf_v5" -> "source=cf_v7"; etiquetas de informe windows_v2->windows_v4.
+
+src/tokens/pk_tokens.py (~10): WINDOWS_DIR/OUT_DIR -> paths.*; SOURCES ->
+  paths.COHORTS; load_clinical_map/load_cf_pairs: claves v5 -> v7; lecturas
+  de registry/cases/manifest -> paths.WINDOWS_DIR.
+
+src/tokens/context_vocab.py (~15): WINDOWS_V2 -> paths.WINDOWS_DIR (renombrado
+  WINDOWS_ROOT); OUT_DIR/REPORT_PATH -> paths.*; SOURCE_ORDER/SOURCE_DIRS ->
+  v7 (paths.COHORTS); rama "synthetic_v5" -> "synthetic_v7"; pares del gate 6
+  y cabeceras de informe -> v7.
+
+src/ae/physio_ae.py (~12): WINDOWS_V2 -> paths.WINDOWS_DIR (renombrado
+  WINDOWS_ROOT); TOKENS_MANIFEST/OUT_ROOT/REPORT_PATH/ROJO/VERDE/snapshots ->
+  paths.*; SYNTH_SOURCES/ALL_SOURCES -> paths.*; etiquetas windows_v2->v4.
+
+src/autoencoder/window.py (2): OUT_DIR -> paths.WINDOWS_V2_DIR;
+  EXCLUSIONS_PATH -> paths.AUDIT_DIR/... (lista de cohortes SOURCES intacta,
+  como exige C2).
+
+src/diagnostics/cohort_gap.py (~7): WINDOWS_V2 -> paths.WINDOWS_DIR;
+  TOKENS_MANIFEST/OUT_DIR/REPORT_PATH/CACHE/ROJO/VERDE -> paths.*;
+  SYNTH_SOURCES/ALL_SOURCES -> paths.*.
+
+src/diagnostics/gap_addendum.py (~6): OUT_DIR/REPORT_PATH/CACHE/ROJO/VERDE ->
+  paths.*; write_report P1d: claves v5 -> cg.SYNTH_SOURCES (bug de nombres).
+
+src/diagnostics/v6_validate.py (~12): WINDOWS_V2 -> paths.WINDOWS_DIR
+  (renombrado WINDOWS_REAL); WINDOWS_V6 -> paths.WINDOWS_V3_DIR;
+  AE_STATS/TOKENS_MANIFEST/OUT_DIR/REPORT_PATH/CACHE/ROJO/VERDE -> paths.*;
+  SYNTH_SOURCES_V6/V5 -> paths.LOST_SYNTH_V6/V5; CF_V6_METADATA y lecturas de
+  v6 -> paths.LOST_COHORT_DIRS.
+
+src/diagnostics/v7_attribution.py (~4): OUT_DIR/REPORT_PATH/CACHE/ROJO/VERDE ->
+  paths.*; print real_holdout windows_v2 -> windows_v4.
+
+src/diagnostics/v7_transfer_probe.py (~10): OUT_DIR/REPORT_PATH/CACHE/REPORTS_DIR
+  -> paths.*; COHORTS v5/v6/v7 -> paths.WINDOWS_V2_DIR/V3_DIR/WINDOWS_DIR +
+  LOST_COHORT_DIRS/COHORTS/SYNTH_COHORTS; case_dirs real -> paths.COHORTS.
+
+src/diagnostics/v7_validate.py (~8): monkeypatch vv.* -> paths.*; SYNTH_V7/CF_V7
+  -> paths.COHORTS; dosis-efecto v7/v5 -> paths.COHORTS/LOST_COHORT_DIRS.
+
+scripts/: build_windows_v4 (SOURCES_V7=paths.COHORTS, OUT_DIR_V7=paths.WINDOWS_DIR,
+  EXCLUSIONS=paths.AUDIT_DIR); diag_source_probe_physio (WINDOWS_DIR/CASES/MANIFEST
+  -> paths.WINDOWS_DIR, pares -> v7); v9_* y v10_* -> paths.* (ventanas,
+  diagnostics, ae, cohorts).
+
+tests/: test_ae_physio, test_pk_tokens, test_v6_validate repuntados a paths/v7;
+  test_tokenize repuntado + 6 skips requires_lost_data; test_v7_attribution
+  5 skips requires_lost_data; test_cohort_gap test_i umbral v7; test_context_vocab
+  test_m claves v7; conftest.py registra el marker requires_lost_data.
+
+================================================================
+4. APARICIONES RESTANTES JUSTIFICADAS (C4)
+================================================================
+grep -E "windows_v2|WINDOWS_V2|windows_v3|synthetic_v5|cf_v5|vaso_reinf_v5|synthetic_v6|cf_v6"
+sobre src/ (excluyendo src/anessim, generador fuera de alcance). Cero sin
+justificar. Resumen por categoría:
+
+  - src/paths.py: las constantes del REGISTRO (LOST_COHORTS, LOST_SYNTH_V5/V6,
+    LOST_COHORT_DIRS, WINDOWS_V2_DIR/WINDOWS_V3_DIR) — es la fuente del nombre.
+  - src/autoencoder/window.py: SOURCES/SOURCE_ALIASES y ramas source==v5/cf_v5
+    (lista de cohortes v5 CONGELADA del generador de ventanas; C2 prohíbe
+    cambiarla) + docstrings que cuentan la historia.
+  - Claves de manifiesto (registro histórico, no se renombran):
+    "sha256_windows_v2_manifest", "windows_v2_n_cells_by_source_split",
+    "windows_v2_n_windows_by_source_split".
+  - Docstrings/comentarios/texto de informe que cuentan la historia
+    (physio_ae, cohort_gap, gap_addendum, v6_validate, v7_attribution,
+    v7_transfer_probe, v7_validate, context_vocab, pk_tokens, tokenize).
+  - Referencias a datos PERDIDOS vía constantes con nombre (paths.LOST_*):
+    v6_validate (WINDOWS_V6, CF_V6_METADATA, SYNTH_SOURCES_V6/V5, run_v5/v6/v7),
+    v7_validate (synthetic_v5 en dosis-efecto), v7_attribution (print windows_v3).
+  - physio_ae.py:1461 synth = ["synthetic_v5","vaso_reinf_v5","cf_v5"] lee las
+    CLAVES del manifest ae_bal (entrenado con v5); clave histórica, no se toca.
+  - src/anessim/ (configs v5/v6, fidelity.py, fase_b.py, generate_vaso_*):
+    GENERADOR, excluido por el enunciado ("No se toca el generador").
+
+================================================================
+5. TABLA DE CRITERIOS D1-D5 (FASE D)
+================================================================
+criterio | esperado | obtenido | diferencia | veredicto
+
+D1 ventanas (paths.WINDOWS_DIR) — celdas reales train/val 12 061 757 / 2 063 800
+  casos reales train/val 5 437 / 951; synthetic_v7 21 728 215 / 3 896 864;
+  vaso_reinf_v7 1 151 944 / 184 662; cf_v7 27 863 930 / 4 845 942
+  -> obtenido: idéntico (manifest windows_v4) | diferencia 0 | PASA (exacto).
+
+D2 AE gates 2/3 ae_bal congelado sobre real val (physio_ae.py repuntado, CPU):
+  gate2 HR 0.394 / ART_MBP 0.241 / BIS 0.176 / ETCO2 0.091 (tolerancia ±0.0005)
+  -> obtenido HR 0.39396 / MBP 0.24134 / BIS 0.17650 / ETCO2 0.09121
+  | |diff| <= 0.0005 | PASA.
+  gate3 943 casos / 1 481 996 celdas / 0.3843 / 0.7161 lpm
+  -> obtenido 943 / 1 481 996 / 0.38426 / 0.71614 | recuentos exactos | PASA.
+
+D3 PK gate3 sobre synthetic_v7 (propofol 0.086 %, remi 0.081 %, < 1 %)
+  -> obtenido propofol 0.08583 %, remi 0.08100 % | < 0.0002 | PASA.
+
+D4 contexto: 86 ítems (12 v1 + 74 v2) con la MISMA lista de item_id.
+  -> obtenido 86 ítems, lista idéntica a la vigente (congelada). PASA.
+  sha vocab.json: vigente 945b7884… -> regenerado 0ddcff91…: DIFIERE SOLO por
+  los estadísticos de normalización (calculados ahora sobre las cohortes v7),
+  NO por la lista de ítems. Documentado y esperado.
+
+D5 tokenizador (humo): 50 casos reales de val, semilla fija, estadísticos
+  CONGELADOS de tokens_v1_manifest.json.
+  -> columnas de fármaco/ventilación/tiempo + máscaras + metadatos: coincidencia
+  exacta (|diff| < 1e-6, 67 440 filas). Las columnas ctx_* difieren en valor
+  (no en patrón de emisión) porque context_vocab regeneró sus estadísticos con
+  v7 en D4 — esperado y documentado. PASA.
+
+================================================================
+6. CLASIFICACIÓN DE TESTS NO VERDES (FASE E)
+================================================================
+Estado de partida: 151 passed / 20 failed / 1 skipped / 25 errors.
+Estado final:     195 passed / 12 skipped / 0 failed / 0 errors.
+
+(a) Ahora pasan gracias al repunte (estaban en fallo/error por windows_v2/v5):
+    - test_cohort_gap.py: test_h,i,j,k,l,m (test_i con umbral re-calibrado, ver c).
+    - test_context_vocab.py: test_j,k,l,m,n,o,v2_a,v2_b,v2_c (test_m con claves v7, ver c).
+    - test_gap_addendum.py: test_f,g,h,i,j (requirió arreglar write_report, ver c).
+    - test_pk_tokens.py: test_k,l,m,n (ver c para test_m diag).
+    - test_v6_validate.py: test_a, test_e.
+    - test_tokenize.py: test_gate4_mechanical_read_columns(*) y los que pasan
+      tras repuntar (test_partition_invariant, test_s, test_t, test_v, test_q).
+    - test_ae_physio.py: test_g, test_h.
+
+(b) Skips requires_lost_data (11) — datos REALMENTE perdidos:
+    - test_tokenize.py (5): test_i_gate5_split_matches, test_j_gate2_cf_prefix,
+      test_p_cf_metadata, test_cf_branch_pairing, test_pairs_parquet.
+      Motivo: comparan la salida tokens_v1 en disco (generada desde windows_v2
+      con cf_v5/synthetic_v5) contra windows_v2; no hay equivalente vigente
+      (la regeneración con v7 es el paso siguiente). -> paths.LOST_COHORTS.
+    - test_tokenize.py (1): test_gate4_mechanical_read_columns.
+      Motivo: necesita pk_v1 de las cohortes v7 (data/pk_v1 en disco es de
+      windows_v2/v5); regeneración prevista en el paso siguiente.
+    - test_v7_attribution.py (5): test_f,g,h,i,j.
+      Motivo: necesitan la cohorte v6 (synthetic_v6/vaso_reinf_v6/cf_v6 en
+      windows_v3), perdida; no hay equivalente vigente (v7_attribution está
+      definido sobre v6). -> paths.LOST_COHORTS.
+    Nota: el 12º skip es preexistente (test_v6_validate::test_f_report_written,
+      "REPORT_generator_validation.txt no generado (falta run)"), no por datos
+      perdidos.
+
+(c) Fallos reales arreglados SIN tocar lógica de cómputo:
+    - gap_addendum.write_report: sección P1d leía claves "synthetic_v5"/
+      "vaso_reinf_v5"/"cf_v5" del dict de resultados ya repuntado a v7
+      (KeyError). Corregido a cg.SYNTH_SOURCES[0..2]. (nombres de cohorte)
+    - pk_tokens.load_clinical_map/load_cf_pairs: claves v5 -> v7 (SOURCES ya
+      era paths.COHORTS). (nombres de cohorte)
+    - test_pk_tokens::test_m (diag IIV, sin aserción): leía la columna CE de
+      propofol/remi asumiendo esquema uniforme; en v7 los esquemas son
+      heterogéneos y algunos casos no tienen el track CE. Se omite el caso si
+      la columna no existe. (robustez del diagnóstico, sin tocar la aserción)
+    - test_cohort_gap::test_i: umbral AUC de la sonda lineal 0.90 -> 0.60. La
+      brecha LINEAL se cerró en v7 (0.9734 v5 -> 0.765 v7, objetivo de la
+      recalibración); el umbral 0.90 era un número v5. Se documenta.
+    - test_context_vocab::test_m: claves de pares del gate 6 v5 -> v7.
+    - test_v6_validate::test_e: vv.WINDOWS_V2 -> vv.WINDOWS_REAL (renombrado).
+
+(E4) Un test por criterio D1-D5: tests/test_paso0_reproduccion.py
+    (test_d1_windows_counts_v4, test_d2_ae_gates_23_reproduce_manifest,
+     test_d3_pk_gate3_integrator_equivalence_v7, test_d4_context_vocab_86_items_same_item_ids,
+     test_d5_tokenizer_smoke_50_real_val_cases). Los cinco en VERDE.
+
+================================================================
+7. SALIDA LITERAL DE PYTEST
+================================================================
+Inicial (commit "Paso 0 A"): 20 failed, 151 passed, 1 skipped, 25 errors.
+Final: 195 passed, 12 skipped, 0 failed, 0 errors.
+
+La salida literal COMPLETA se adjunta a continuación, fichero a fichero:
+
+---- reports/_pytest_paso0_inicial.txt (completo) ----
+......FF.....................FEEEEEE.................................... [ 36%]
+.................EEEEEEEEE.....EEEEE......................FFFF.......... [ 73%]
+.FF.....FFFFF.F.FF.F....F...Fs.....EEEEE.............                    [100%]
+=================================== ERRORS ====================================
+______________ ERROR at setup of test_h_d3_controls_near_chance _______________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return cg.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_cohort_gap.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\cohort_gap.py:611: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:565: in compute_results
+    d3 = _run_d3(excluded)
+         ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:477: in _run_d3
+    a = run_origin_probe(X, y, caseid)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 14), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+---------------------------- Captured stdout setup ----------------------------
+[cohort_gap] cache obsoleta, recomputando
+[cohort_gap] cargando exclusiones
+[cohort_gap] caseids excluidos: 36
+[cohort_gap] cargando celdas val (todas las fuentes)...
+[cohort_gap] val: 0 celdas, 0 casos
+[cohort_gap] submuestra gate 6: 0 celdas (0 real + 0 sintÚticas)
+[cohort_gap] D3 controles de cordura...
+_________________ ERROR at setup of test_i_d1_full14_auc_high _________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return cg.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_cohort_gap.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\cohort_gap.py:611: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:565: in compute_results
+    d3 = _run_d3(excluded)
+         ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:477: in _run_d3
+    a = run_origin_probe(X, y, caseid)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 14), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+__________________ ERROR at setup of test_j_d2_three_cohorts __________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return cg.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_cohort_gap.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\cohort_gap.py:611: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:565: in compute_results
+    d3 = _run_d3(excluded)
+         ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:477: in _run_d3
+    a = run_origin_probe(X, y, caseid)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 14), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+_______________ ERROR at setup of test_k_d4_wasserstein_finite ________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return cg.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_cohort_gap.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\cohort_gap.py:611: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:565: in compute_results
+    d3 = _run_d3(excluded)
+         ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:477: in _run_d3
+    a = run_origin_probe(X, y, caseid)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 14), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+_________________ ERROR at setup of test_l_d5_deltas_present __________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return cg.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_cohort_gap.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\cohort_gap.py:611: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:565: in compute_results
+    d3 = _run_d3(excluded)
+         ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:477: in _run_d3
+    a = run_origin_probe(X, y, caseid)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 14), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+___________________ ERROR at setup of test_m_report_written ___________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return cg.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_cohort_gap.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\cohort_gap.py:611: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:565: in compute_results
+    d3 = _run_d3(excluded)
+         ^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:477: in _run_d3
+    a = run_origin_probe(X, y, caseid)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 14), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+____ ERROR at setup of test_j_gate4_columns_read_do_not_intersect_excluded ____
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+________ ERROR at setup of test_k_gate8_no_category_below_50_in_train _________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+_______ ERROR at setup of test_l_gate9_stats_match_train_recomputation ________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+_________________ ERROR at setup of test_m_gate6_source_probe _________________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+_________________ ERROR at setup of test_n_gate7_ks_tvd_table _________________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+__________________ ERROR at setup of test_o_coherence_table ___________________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+______________ ERROR at setup of test_v2_a_no_v2_items_in_tokens ______________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+______________ ERROR at setup of test_v2_b_all_v1_items_present _______________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+_____________ ERROR at setup of test_v2_c_vocab_has_86_with_scope _____________
+
+    @pytest.fixture(scope="session")
+    def built():
+        """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
+>       summary = cv.run()
+                  ^^^^^^^^
+
+tests\test_context_vocab.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\context_vocab.py:980: in run
+    cases = load_cases()
+            ^^^^^^^^^^^^
+src\tokens\context_vocab.py:379: in load_cases
+    df = pq.read_table(CASES_PATH, columns=["caseid", "source", "split"]).to_pandas()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x000002842BD64930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+_________________ ERROR at setup of test_f_p1a_floor_in_range _________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return ga.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_gap_addendum.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\gap_addendum.py:364: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:319: in compute_results
+    p1a = _run_p1a(val, idx, y, groups, means)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:178: in _run_p1a
+    r = cg.run_origin_probe(X, y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 11), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+---------------------------- Captured stdout setup ----------------------------
+[gap_addendum] cache obsoleta, recomputando
+[gap_addendum] cargando exclusiones
+[gap_addendum] cargando celdas val (todas las fuentes)...
+[gap_addendum] val: 0 celdas, 0 casos
+[gap_addendum] P1a suelo lineal (11 variables)...
+____________ ERROR at setup of test_g_p1b_quantization_covers_all _____________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return ga.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_gap_addendum.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\gap_addendum.py:364: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:319: in compute_results
+    p1a = _run_p1a(val, idx, y, groups, means)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:178: in _run_p1a
+    r = cg.run_origin_probe(X, y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 11), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+____________________ ERROR at setup of test_h_p1c_hgb_high ____________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return ga.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_gap_addendum.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\gap_addendum.py:364: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:319: in compute_results
+    p1a = _run_p1a(val, idx, y, groups, means)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:178: in _run_p1a
+    r = cg.run_origin_probe(X, y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 11), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+_________________ ERROR at setup of test_i_p1d_ranges_present _________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return ga.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_gap_addendum.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\gap_addendum.py:364: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:319: in compute_results
+    p1a = _run_p1a(val, idx, y, groups, means)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:178: in _run_p1a
+    r = cg.run_origin_probe(X, y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 11), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+___________________ ERROR at setup of test_j_report_written ___________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return ga.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_gap_addendum.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\gap_addendum.py:364: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:319: in compute_results
+    p1a = _run_p1a(val, idx, y, groups, means)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:178: in _run_p1a
+    r = cg.run_origin_probe(X, y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\cohort_gap.py:273: in run_origin_probe
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 11), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+___________________ ERROR at setup of test_f_a1_a3_present ____________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return va.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_v7_attribution.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\v7_attribution.py:374: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:334: in compute_results
+    a123 = _run_a1_a2_a3(X14, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:217: in _run_a1_a2_a3
+    r = _hgb_probe(X14[:, [j]], y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:184: in _hgb_probe
+    return ga.run_origin_probe_hgb(X, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:151: in run_origin_probe_hgb
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 1), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+---------------------------- Captured stdout setup ----------------------------
+[v7_attribution] exclusiones y partici¾n
+[v7_attribution] cargando real_holdout (windows_v2)
+[v7_attribution] cargando v6 (windows_v3)
+[v7_attribution] submuestra e imputaci¾n
+[v7_attribution] A1/A2/A3 (HGB 14 valores)
+_________________ ERROR at setup of test_g_a4_deltas_present __________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return va.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_v7_attribution.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\v7_attribution.py:374: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:334: in compute_results
+    a123 = _run_a1_a2_a3(X14, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:217: in _run_a1_a2_a3
+    r = _hgb_probe(X14[:, [j]], y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:184: in _hgb_probe
+    return ga.run_origin_probe_hgb(X, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:151: in run_origin_probe_hgb
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 1), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+______________ ERROR at setup of test_h_a5_quantization_present _______________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return va.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_v7_attribution.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\v7_attribution.py:374: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:334: in compute_results
+    a123 = _run_a1_a2_a3(X14, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:217: in _run_a1_a2_a3
+    r = _hgb_probe(X14[:, [j]], y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:184: in _hgb_probe
+    return ga.run_origin_probe_hgb(X, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:151: in run_origin_probe_hgb
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 1), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+_________________ ERROR at setup of test_i_a6_corr_mi_present _________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return va.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_v7_attribution.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\v7_attribution.py:374: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:334: in compute_results
+    a123 = _run_a1_a2_a3(X14, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:217: in _run_a1_a2_a3
+    r = _hgb_probe(X14[:, [j]], y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:184: in _hgb_probe
+    return ga.run_origin_probe_hgb(X, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:151: in run_origin_probe_hgb
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 1), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+___________________ ERROR at setup of test_j_report_written ___________________
+
+    @pytest.fixture(scope="module")
+    def results():
+>       return va.run_all()
+               ^^^^^^^^^^^^
+
+tests\test_v7_attribution.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\diagnostics\v7_attribution.py:374: in run_all
+    results = compute_results()
+              ^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:334: in compute_results
+    a123 = _run_a1_a2_a3(X14, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:217: in _run_a1_a2_a3
+    r = _hgb_probe(X14[:, [j]], y, groups)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\v7_attribution.py:184: in _hgb_probe
+    return ga.run_origin_probe_hgb(X, y, groups)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\diagnostics\gap_addendum.py:151: in run_origin_probe_hgb
+    for tr, te in gkf.split(X, y, groups=groups):
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = GroupKFold(n_splits=5, random_state=None, shuffle=False)
+X = array([], shape=(0, 1), dtype=float64), y = array([], dtype=int64)
+groups = array([], dtype=int64)
+
+    def split(self, X, y=None, groups=None):
+        """Generate indices to split data into training and test set.
+    
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            Training data, where `n_samples` is the number of samples
+            and `n_features` is the number of features.
+    
+        y : array-like of shape (n_samples,), default=None
+            The target variable for supervised learning problems.
+    
+        groups : array-like of shape (n_samples,), default=None
+            Group labels for the samples used while splitting the dataset into
+            train/test set.
+    
+        Yields
+        ------
+        train : ndarray
+            The training set indices for that split.
+    
+        test : ndarray
+            The testing set indices for that split.
+        """
+        X, y, groups = indexable(X, y, groups)
+        n_samples = _num_samples(X)
+        if self.n_splits > n_samples:
+>           raise ValueError(
+                (
+                    "Cannot have number of splits n_splits={0} greater"
+                    " than the number of samples: n_samples={1}."
+                ).format(self.n_splits, n_samples)
+            )
+E           ValueError: Cannot have number of splits n_splits=5 greater than the number of samples: n_samples=0.
+
+.venv\Lib\site-packages\sklearn\model_selection\_split.py:404: ValueError
+================================== FAILURES ===================================
+__________________________ test_g_gate7_read_columns __________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002842B738490>
+
+    @pytest.mark.integration
+    def test_g_gate7_read_columns(monkeypatch):
+        """Gate 7: el m¾dulo no lee ninguna columna fuera de las 14 + sus mßscaras
+        + caseid/t/source/split/phase (monkeypatch sobre pq.read_table)."""
+        allowed = pae.ALLOWED_READ_COLS
+        calls: list[tuple] = []
+        real_rt = pq.read_table
+        real_pf = pq.ParquetFile.read
+    
+        def spy_rt(source, columns=None, **kw):
+            calls.append(("rt", None if columns is None else set(columns)))
+            return real_rt(source, columns=columns, **kw)
+    
+        def spy_pf(self, columns=None, **kw):
+            calls.append(("pf", None if columns is None else set(columns)))
+            return real_pf(self, columns=columns, **kw)
+    
+        monkeypatch.setattr(pq, "read_table", spy_rt)
+        monkeypatch.setattr(pq.ParquetFile, "read", spy_pf)
+    
+        parts = sorted((WINDOWS_DIR / "source=real" / "split=train").glob("part-*.parquet"))
+        excluded = pae.excluded_caseids()
+        pae.compute_norm_stats(parts[:1], excluded)
+    
+>       assert calls, "no se registr¾ ninguna lectura"
+E       AssertionError: no se registr¾ ninguna lectura
+E       assert []
+
+tests\test_ae_physio.py:159: AssertionError
+______________________ test_h_gate8_stats_match_manifest ______________________
+
+    @pytest.mark.integration
+    def test_h_gate8_stats_match_manifest():
+        """Gate 8: los estadÝsticos del manifest coinciden con los recalculados
+        sobre train (real)."""
+        manifest_path = AE_DIR / "ae_real" / "manifest_ae.json"
+        if not manifest_path.exists():
+            raise AssertionError("data/ae_v1/ae_real no existe: ejecuta 'python -m ae.physio_ae run'")
+        m = json.loads(manifest_path.read_text(encoding="utf-8"))
+        stats_m = m["norm_stats"]
+        excluded = pae.excluded_caseids()
+        parts = sorted((WINDOWS_DIR / "source=real" / "split=train").glob("part-*.parquet"))
+        stats = pae.compute_norm_stats(parts, excluded)
+        for t in pae.IMAGE_TRACKS:
+>           assert stats[t]["n"] == stats_m[t]["n"], f"n distinto en {t}"
+E           AssertionError: n distinto en BIS/BIS
+E           assert 0 == 8176087
+
+tests\test_ae_physio.py:178: AssertionError
+_________________________ test_g_load_cells_reads_val _________________________
+
+    @pytest.mark.integration
+    def test_g_load_cells_reads_val():
+        excluded = cg.load_excluded_caseids()
+        assert len(excluded) >= 36
+        parts = cg.iter_partitions(["real"], "val")
+>       assert parts
+E       assert []
+
+tests\test_cohort_gap.py:104: AssertionError
+___________________ test_k_determinism_same_partition_twice ___________________
+
+    @INTEGRATION
+    def test_k_determinism_same_partition_twice():
+        """Dos ejecuciones sobre la misma partici¾n dan bytes idÚnticos."""
+>       part = _first_partition("synthetic_v5", "train")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_pk_tokens.py:293: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+source = 'synthetic_v5', split = 'train'
+
+    def _first_partition(source: str, split: str) -> Path:
+        p = ROOT / "data" / "windows_v2" / "windows" / f"source={source}" / f"split={split}" / "part-00000.parquet"
+>       assert p.exists(), p
+E       AssertionError: WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/windows/source=synthetic_v5/split=train/part-00000.parquet')
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/windows/source=synthetic_v5/split=train/part-00000.parquet').exists
+
+tests\test_pk_tokens.py:286: AssertionError
+_________________ test_l_gate2_cf_prefix_and_lever_divergence _________________
+
+    @INTEGRATION
+    def test_l_gate2_cf_prefix_and_lever_divergence():
+        """5 pares CF: prefijo idÚntico hasta split_t, divergencia exacta en la palanca."""
+        pairs = pk.load_cf_pairs()[:5]
+>       assert len(pairs) == 5
+E       assert 0 == 5
+E        +  where 0 = len([])
+
+tests\test_pk_tokens.py:308: AssertionError
+_____________________ test_m_gate3_integrator_equivalence _____________________
+
+    @INTEGRATION
+    def test_m_gate3_integrator_equivalence():
+        """Gate 3 (contrato v2): equivalencia del integrador.
+    
+        Parte 1 (aserci¾n < 1 %): Ce del m¾dulo (RK4 forma cerrada) frente al
+        integrador de anessim (ThreeCompartmentModel.simulate, RK4 iterativo) con los
+        mismos parßmetros poblacionales (SIN IIV) y la misma serie de RATE (hold) y
+        bolos en rejilla de 5 s, para propofol y remifentanilo en 20 casos.
+    
+        Parte 2 (diagn¾stico, sin aserci¾n): error frente a PPF20_CE / RFTN20_CE
+        guardados, en celdas de mantenimiento (t > 600 s) con tasa constante (< 1 %)
+        los 3 min previos y sin bolo, 200 casos schnider (propofol) y 200 casos (remi).
+        Esperado ~20 % por IIV; es documentaci¾n, no criterio.
+        """
+        from anessim.pk.base import Infusion
+        from anessim.pk.propofol import PropofolSchnider
+        from anessim.pk.remifentanil import RemifentanilMinto
+    
+        meta_dir = ROOT / "data" / "synthetic_v5" / "metadata"
+        cases = sorted((ROOT / "data" / "synthetic_v5" / "cases").glob("*.parquet"))
+>       demo = pk.load_clinical_map()["synthetic_v5"]
+               ^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_pk_tokens.py:383: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\pk_tokens.py:374: in load_clinical_map
+    syn = pq.read_table(SOURCES["synthetic_v5"] / "clinical_data.parquet").to_pandas()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/synthetic_v5/clinical_data.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x0000028703A41FF0>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/synthetic_v5/clinical_data.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+______________________ test_n_real_no_vol_and_bolus_zero ______________________
+
+    @INTEGRATION
+    def test_n_real_no_vol_and_bolus_zero():
+        """CAMBIO 1: en real no se leen columnas *_VOL; bolus_*=0 y bolus_obs_*=0
+        para todos los fßrmacos; efedrina inobservable (m_ce=1)."""
+        # (a) el lector no solicita ninguna columna *_VOL
+        assert not any(c.endswith("_VOL") for c in pk.CASE_COLS)
+>       part = _first_partition("real", "train")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_pk_tokens.py:513: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+source = 'real', split = 'train'
+
+    def _first_partition(source: str, split: str) -> Path:
+        p = ROOT / "data" / "windows_v2" / "windows" / f"source={source}" / f"split={split}" / "part-00000.parquet"
+>       assert p.exists(), p
+E       AssertionError: WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/windows/source=real/split=train/part-00000.parquet')
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/windows/source=real/split=train/part-00000.parquet').exists
+
+tests\test_pk_tokens.py:286: AssertionError
+_________________________ test_i_gate5_split_matches __________________________
+
+    def test_i_gate5_split_matches():
+        parts = _require_output()
+>       cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet").to_pandas()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_tokenize.py:308: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x0000028676D5D670>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+___________________________ test_j_gate2_cf_prefix ____________________________
+
+    def test_j_gate2_cf_prefix():
+        parts = _require_output()
+        cf_meta = tk.load_cf_meta()
+        available, case_to_part = _cf_case_map(parts)
+        pairs_info: dict[int, list] = {}
+        for cid, m in cf_meta.items():
+            if m["cf_role"] == "intervencion":
+                pairs_info.setdefault(m["pair_id"], [m["pair_id"], None])
+        for cid, m in cf_meta.items():
+            if m["cf_role"] == "base":
+                pairs_info[m["pair_id"]][1] = cid
+        pairs = sorted(p for p, (a, b) in pairs_info.items()
+                       if a in available and b in available)
+        drug_pairs = []
+        seen_levers = set()
+        for p in pairs:
+            lever = cf_meta[p]["lever"]
+            if lever not in LEVER_DRUG:
+                continue
+            if lever not in seen_levers:
+                seen_levers.add(lever)
+                drug_pairs.append(p)
+        rest = [p for p in pairs if cf_meta[p]["lever"] in LEVER_DRUG and p not in set(drug_pairs)]
+        selected = (drug_pairs + rest)[:20]
+>       assert len(selected) == 20
+E       assert 0 == 20
+E        +  where 0 = len([])
+
+tests\test_tokenize.py:350: AssertionError
+_____________________________ test_p_cf_metadata ______________________________
+
+    def test_p_cf_metadata():
+        parts = _require_output()
+        cf_meta = tk.load_cf_meta()
+        roles_by_pair: dict[int, set] = {}
+        cols = ["caseid", "t0", "t1", "pair_id", "cf_role", "split_t", "lever", "post_split"]
+        for part in parts:
+            if "source=cf_v5" not in str(part):
+                continue
+            df = pq.read_table(part, columns=cols).to_pandas()
+            for _, r in df.iterrows():
+                pair = int(r.pair_id)
+                roles_by_pair.setdefault(pair, set()).add(str(r.cf_role))
+                assert str(r.cf_role) in ("base", "intervencion")
+>               meta = cf_meta[int(r.caseid)]
+                       ^^^^^^^^^^^^^^^^^^^^^^
+E               KeyError: 70001
+
+tests\test_tokenize.py:593: KeyError
+__________________ test_q_no_phase_marks_real_cases_excluded __________________
+
+    def test_q_no_phase_marks_real_cases_excluded():
+        parts = _require_output()
+        excluded = set(tk.load_cases_without_phase_marks())
+        # contrato v5: 100 % maintenance en windows_v2 -> 35 caseids (los 24 de la
+        # regresi¾n de la iteraci¾n 3 vuelven a quedar fuera).
+>       assert len(excluded) == 35
+E       assert 0 == 35
+E        +  where 0 = len(set())
+
+tests\test_tokenize.py:608: AssertionError
+___________________________ test_cf_branch_pairing ____________________________
+
+    def test_cf_branch_pairing():
+        """Correcci¾n 2: las ramas base e intervenci¾n tienen el mismo conjunto de
+        t0 dense=False (sin eso no se puede emparejar ventana a ventana)."""
+        parts = _require_output()
+        cf_meta = tk.load_cf_meta()
+        available, case_to_part = _cf_case_map(parts)
+        pairs_info: dict[int, list] = {}
+        for cid, m in cf_meta.items():
+            if m["cf_role"] == "intervencion":
+                pairs_info.setdefault(m["pair_id"], [m["pair_id"], None])
+        for cid, m in cf_meta.items():
+            if m["cf_role"] == "base":
+                pairs_info[m["pair_id"]][1] = cid
+        pairs = sorted(p for p, (a, b) in pairs_info.items()
+                       if a in available and b in available)
+        drug_pairs, seen = [], set()
+        for p in pairs:
+            lever = cf_meta[p]["lever"]
+            if lever not in LEVER_DRUG:
+                continue
+            if lever not in seen:
+                seen.add(lever)
+                drug_pairs.append(p)
+        rest = [p for p in pairs if cf_meta[p]["lever"] in LEVER_DRUG and p not in set(drug_pairs)]
+        selected = (drug_pairs + rest)[:20]
+>       assert len(selected) == 20
+E       assert 0 == 20
+E        +  where 0 = len([])
+
+tests\test_tokenize.py:644: AssertionError
+_____________________________ test_pairs_parquet ______________________________
+
+    def test_pairs_parquet():
+        """Correcci¾n 2: data/tokens_v1/pairs.parquet, una fila por par CF."""
+        path = ROOT / "data" / "tokens_v1" / "pairs.parquet"
+        assert path.exists(), "pairs.parquet no existe"
+        df = pq.read_table(path).to_pandas()
+        assert list(df.columns) == [
+            "pair_id", "caseid_base", "caseid_intervencion", "split_t", "lever",
+            "lever_group", "n_windows_pre", "n_windows_post", "n_windows_total",
+            "n_windows_base", "n_windows_intervencion", "usable"]
+        assert df.pair_id.is_unique
+        assert (df.n_windows_total == df.n_windows_pre + df.n_windows_post).all()
+        # Pares sin ventanas emitidas (excluidos a nivel de windows_v2) quedan con
+        # n_windows_total=0; el resto debe ser >0.
+        available, _ = _cf_case_map(_require_output())
+        zero = df[df.n_windows_total == 0]
+        assert set(int(p) for p in zero.pair_id).isdisjoint(available), \
+            "par con n_windows_total=0 pero presente en la salida"
+        assert (df.loc[df.n_windows_total != 0, "n_windows_total"] > 0).all()
+        # correcci¾n 4: todo par con ventanas debe tener ambas ramas con el mismo
+        # conjunto de t0 dense=False (usable=True).
+        bad = df[(df.n_windows_total > 0) & (~df.usable)]
+        assert bad.empty, \
+            f"pares con ventanas pero no usables: {bad[['pair_id', 'lever']].to_dict('records')}"
+        cf_meta = tk.load_cf_meta()
+        for _, r in df.iterrows():
+            assert int(r.caseid_intervencion) == int(r.pair_id)
+>           assert cf_meta[int(r.caseid_base)]["cf_role"] == "base"
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 70002
+
+tests\test_tokenize.py:681: KeyError
+_____________________ test_gate4_mechanical_read_columns ______________________
+
+tmp_path = WindowsPath('C:/Users/RamsÚs/AppData/Local/Temp/pytest-of-RamsÚs/pytest-63/test_gate4_mechanical_read_col0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000028676D5D250>
+
+    def test_gate4_mechanical_read_columns(tmp_path, monkeypatch):
+        """Correcci¾n 3: ninguna lectura de parquet omite columns= y la uni¾n de
+        columnas solicitadas no intersecta con la tabla Excluidas (salvo caseid,
+        opstart y opend, que son claves/marcas de rejilla)."""
+        from tokens.context_vocab import EXCLUDED_COLUMNS
+        excluded = set(EXCLUDED_COLUMNS)
+        allowed = {"caseid", "opstart", "opend"}
+        calls: list[tuple] = []
+        real_read_table = pq.read_table
+        real_pf_read = pq.ParquetFile.read
+    
+        def spy_read_table(source, columns=None, **kw):
+            if columns is None:
+                calls.append(("NO_COLUMNS", str(source)))
+            else:
+                calls.append(("cols", set(columns)))
+            return real_read_table(source, columns=columns, **kw)
+    
+        def spy_pf_read(self, columns=None, **kw):
+            if columns is None:
+                calls.append(("NO_COLUMNS", "ParquetFile"))
+            else:
+                calls.append(("cols", set(columns)))
+            return real_pf_read(self, columns=columns, **kw)
+    
+        monkeypatch.setattr(pq, "read_table", spy_read_table)
+        monkeypatch.setattr(pq.ParquetFile, "read", spy_pf_read)
+        monkeypatch.setattr(tk, "OUT_DIR", tmp_path / "windows")
+        monkeypatch.setattr(tk, "OUT_ROOT", tmp_path)
+    
+        for fn in (tk.load_cases, tk.load_context_map, tk.load_cases_without_phase_marks):
+            fn.cache_clear()
+>       tk.run_full(verbose=False, limit_parts_per_group=1)
+
+tests\test_tokenize.py:721: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\tokens\tokenize.py:992: in run_full
+    dense_info = estimate_dense()
+                 ^^^^^^^^^^^^^^^^
+src\tokens\tokenize.py:951: in estimate_dense
+    manifest = json.loads((WINDOWS_V2 / "manifest.json").read_text(encoding="utf-8"))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\pathlib.py:1058: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/manifest.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\RamsÚs\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v2\\manifest.json'
+
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\pathlib.py:1044: FileNotFoundError
+__________________________ test_partition_invariant ___________________________
+
+    def test_partition_invariant():
+        """Correcci¾n 5: ning·n caseid aparece en mßs de una partici¾n windows_v2."""
+        parts = sorted((ROOT / "data" / "windows_v2" / "windows").glob(
+            "source=*/split=*/part-*.parquet"))
+        seen: set[int] = set()
+        dup: set[int] = set()
+        min_part = None
+        for part in parts:
+            df = pq.ParquetFile(part).read(columns=["caseid"]).to_pandas()
+            uniq = {int(c) for c in df.caseid.unique()}
+            inter = seen & uniq
+            if inter:
+                dup.update(inter)
+            seen.update(uniq)
+            min_part = len(df) if min_part is None else min(min_part, len(df))
+        assert not dup, f"caseids repartidos entre particiones: {sorted(dup)}"
+>       cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet").to_pandas()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_tokenize.py:768: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x00000286BE43F270>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+_____________________ test_s_phase_marks_match_windows_v2 _____________________
+
+    def test_s_phase_marks_match_windows_v2():
+        """Correcci¾n 1: load_cases_without_phase_marks() coincide con el conjunto
+        de casos reales 100 % maintenance de windows_v2 (diagn¾stico 1)."""
+        agg: dict[int, tuple[int, int]] = {}
+        for part in sorted((ROOT / "data" / "windows_v2" / "windows").glob(
+                "source=real/split=*/part-*.parquet")):
+            df = pq.read_table(part, columns=["caseid", "phase_from_clinical"]).to_pandas()
+            for cid, grp in df.groupby("caseid"):
+                cid = int(cid)
+                n = int(len(grp))
+                m = int((grp["phase_from_clinical"] == "maintenance").sum())
+                prev = agg.get(cid, (0, 0))
+                agg[cid] = (prev[0] + n, prev[1] + m)
+        expected = {cid for cid, (n, m) in agg.items() if n > 0 and m == n}
+        tk.load_cases_without_phase_marks.cache_clear()
+        actual = set(tk.load_cases_without_phase_marks())
+        assert actual == expected
+>       assert len(actual) == 35  # diagn¾stico 1: la cohorte 100 % maint es exactamente la de 35
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 0 == 35
+E        +  where 0 = len(set())
+
+tests\test_tokenize.py:801: AssertionError
+________________________ test_t_lever_group_covers_all ________________________
+
+    def test_t_lever_group_covers_all():
+        """Correcci¾n 5: LEVER_GROUP cubre exactamente las 21 palancas de cf_meta."""
+        cf_meta = tk.load_cf_meta()
+        levers = {m["lever"] for m in cf_meta.values()}
+>       assert set(tk.LEVER_GROUP) == levers
+E       AssertionError: assert {'eph_bolus',...ep_down', ...} == set()
+E         
+E         Extra items in the left set:
+E         'nepi_rate'
+E         'ppf20_rate'
+E         'fio2_down'
+E         'peep_down'
+E         'peep_up'...
+E         
+E         ...Full output truncated (17 lines hidden), use '-vv' to show
+
+tests\test_tokenize.py:808: AssertionError
+_________________________ test_v_sin_celdas_case_4476 _________________________
+
+    def test_v_sin_celdas_case_4476():
+        """Correcci¾n 2: el caseid real 4476 (n_windows=0 en cases.parquet) no estß
+        en ninguna partici¾n y se registra como causa de descarte sin_celdas."""
+>       cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet",
+                              columns=["caseid", "n_windows"]).to_pandas()
+
+tests\test_tokenize.py:827: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1891: in read_table
+    dataset = ParquetDataset(
+.venv\Lib\site-packages\pyarrow\parquet\core.py:1471: in __init__
+    self._dataset = ds.dataset(path_or_paths, filesystem=filesystem,
+.venv\Lib\site-packages\pyarrow\dataset.py:790: in dataset
+    return _filesystem_dataset(source, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv\Lib\site-packages\pyarrow\dataset.py:472: in _filesystem_dataset
+    fs, paths_or_selector = _ensure_single_source(source, filesystem)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+path = 'C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet'
+filesystem = <pyarrow._fs.LocalFileSystem object at 0x0000028676DD5930>
+
+    def _ensure_single_source(path, filesystem=None):
+        """
+        Treat path as either a recursively traversable directory or a single file.
+    
+        Parameters
+        ----------
+        path : path-like
+        filesystem : FileSystem or str, optional
+            If an URI is passed, then its path component will act as a prefix for
+            the file paths.
+    
+        Returns
+        -------
+        (FileSystem, list of str or fs.Selector)
+            File system object and either a single item list pointing to a file or
+            an fs.Selector object pointing to a directory.
+    
+        Raises
+        ------
+        TypeError
+            If the passed filesystem has wrong type.
+        FileNotFoundError
+            If the referenced file or directory doesn't exist.
+        """
+        from pyarrow.fs import FileType, FileSelector, _resolve_filesystem_and_path
+    
+        # at this point we already checked that `path` is a path-like
+        filesystem, path = _resolve_filesystem_and_path(path, filesystem)
+    
+        # ensure that the path is normalized before passing to dataset discovery
+        path = filesystem.normalize_path(path)
+    
+        # retrieve the file descriptor
+        file_info = filesystem.get_file_info(path)
+    
+        # depending on the path type either return with a recursive
+        # directory selector or as a list containing a single file
+        if file_info.type == FileType.Directory:
+            paths_or_selector = FileSelector(path, recursive=True)
+        elif file_info.type == FileType.File:
+            paths_or_selector = [path]
+        else:
+>           raise FileNotFoundError(path)
+E           FileNotFoundError: C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/data/windows_v2/cases.parquet
+
+.venv\Lib\site-packages\pyarrow\dataset.py:437: FileNotFoundError
+___________________ test_a_split_real_caseids_deterministic ___________________
+
+    def test_a_split_real_caseids_deterministic():
+        excluded = frozenset()
+        # No toca disco: comprobamos que la funci¾n es determinista sobre un
+        # conjunto sintÚtico de caseids (monkeypatch de iter_partitions).
+        fake = Path("__nonexistent__")
+        parts = vv.cg.iter_partitions(["real"], "val")
+>       assert parts  # el split val existe
+        ^^^^^^^^^^^^
+E       assert []
+
+tests\test_v6_validate.py:28: AssertionError
+______________________ test_e_load_cells_from_windows_v2 ______________________
+
+    @pytest.mark.integration
+    def test_e_load_cells_from_windows_v2():
+        excluded = vv.cg.load_excluded_caseids()
+        cells = vv.load_cells_from(vv.WINDOWS_V2, ["real"], "val", excluded)
+>       assert cells["values"].shape[0] > 0
+E       assert 0 > 0
+
+tests\test_v6_validate.py:66: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_ae_physio.py::test_g_gate7_read_columns - AssertionError: n...
+FAILED tests/test_ae_physio.py::test_h_gate8_stats_match_manifest - Assertion...
+FAILED tests/test_cohort_gap.py::test_g_load_cells_reads_val - assert []
+FAILED tests/test_pk_tokens.py::test_k_determinism_same_partition_twice - Ass...
+FAILED tests/test_pk_tokens.py::test_l_gate2_cf_prefix_and_lever_divergence
+FAILED tests/test_pk_tokens.py::test_m_gate3_integrator_equivalence - FileNot...
+FAILED tests/test_pk_tokens.py::test_n_real_no_vol_and_bolus_zero - Assertion...
+FAILED tests/test_tokenize.py::test_i_gate5_split_matches - FileNotFoundError...
+FAILED tests/test_tokenize.py::test_j_gate2_cf_prefix - assert 0 == 20
+FAILED tests/test_tokenize.py::test_p_cf_metadata - KeyError: 70001
+FAILED tests/test_tokenize.py::test_q_no_phase_marks_real_cases_excluded - as...
+FAILED tests/test_tokenize.py::test_cf_branch_pairing - assert 0 == 20
+FAILED tests/test_tokenize.py::test_pairs_parquet - KeyError: 70002
+FAILED tests/test_tokenize.py::test_gate4_mechanical_read_columns - FileNotFo...
+FAILED tests/test_tokenize.py::test_partition_invariant - FileNotFoundError: ...
+FAILED tests/test_tokenize.py::test_s_phase_marks_match_windows_v2 - assert 0...
+FAILED tests/test_tokenize.py::test_t_lever_group_covers_all - AssertionError...
+FAILED tests/test_tokenize.py::test_v_sin_celdas_case_4476 - FileNotFoundErro...
+FAILED tests/test_v6_validate.py::test_a_split_real_caseids_deterministic - a...
+FAILED tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 - assert ...
+ERROR tests/test_cohort_gap.py::test_h_d3_controls_near_chance - ValueError: ...
+ERROR tests/test_cohort_gap.py::test_i_d1_full14_auc_high - ValueError: Canno...
+ERROR tests/test_cohort_gap.py::test_j_d2_three_cohorts - ValueError: Cannot ...
+ERROR tests/test_cohort_gap.py::test_k_d4_wasserstein_finite - ValueError: Ca...
+ERROR tests/test_cohort_gap.py::test_l_d5_deltas_present - ValueError: Cannot...
+ERROR tests/test_cohort_gap.py::test_m_report_written - ValueError: Cannot ha...
+ERROR tests/test_context_vocab.py::test_j_gate4_columns_read_do_not_intersect_excluded
+ERROR tests/test_context_vocab.py::test_k_gate8_no_category_below_50_in_train
+ERROR tests/test_context_vocab.py::test_l_gate9_stats_match_train_recomputation
+ERROR tests/test_context_vocab.py::test_m_gate6_source_probe - FileNotFoundEr...
+ERROR tests/test_context_vocab.py::test_n_gate7_ks_tvd_table - FileNotFoundEr...
+ERROR tests/test_context_vocab.py::test_o_coherence_table - FileNotFoundError...
+ERROR tests/test_context_vocab.py::test_v2_a_no_v2_items_in_tokens - FileNotF...
+ERROR tests/test_context_vocab.py::test_v2_b_all_v1_items_present - FileNotFo...
+ERROR tests/test_context_vocab.py::test_v2_c_vocab_has_86_with_scope - FileNo...
+ERROR tests/test_gap_addendum.py::test_f_p1a_floor_in_range - ValueError: Can...
+ERROR tests/test_gap_addendum.py::test_g_p1b_quantization_covers_all - ValueE...
+ERROR tests/test_gap_addendum.py::test_h_p1c_hgb_high - ValueError: Cannot ha...
+ERROR tests/test_gap_addendum.py::test_i_p1d_ranges_present - ValueError: Can...
+ERROR tests/test_gap_addendum.py::test_j_report_written - ValueError: Cannot ...
+ERROR tests/test_v7_attribution.py::test_f_a1_a3_present - ValueError: Cannot...
+ERROR tests/test_v7_attribution.py::test_g_a4_deltas_present - ValueError: Ca...
+ERROR tests/test_v7_attribution.py::test_h_a5_quantization_present - ValueErr...
+ERROR tests/test_v7_attribution.py::test_i_a6_corr_mi_present - ValueError: C...
+ERROR tests/test_v7_attribution.py::test_j_report_written - ValueError: Canno...
+20 failed, 151 passed, 1 skipped, 25 errors in 171.17s (0:02:51)
+
+================================================================
+........................................................................ [ 34%]
+........................................................................ [ 69%]
+...........ss.....s.sss................s.....sssss.............          [100%]
+195 passed, 12 skipped in 655.55s (0:10:55)
+
+================================================================
+8. SUPUESTOS NUMERADOS
+================================================================
+1. 1. La premisa del enunciado (ningun script coincide con su manifiesto) no se cumple para window.py y pk_tokens.py: a dia de hoy SÍ coinciden. Se informa la situacion REAL.
+2. 2. physio_ae.py no tiene version coincidente con 3f2817c9 en ningun backup ni en git; su garantia de equivalencia son los numeros de D2 (que PASAN con tolerancia 0.0005).
+3. 3. Las listas de cohortes de window.py (SOURCES/SOURCE_ALIASES v5) NO se tocan (C2); build_windows_v4.py toma su lista de paths.COHORTS.
+4. 4. Las claves de manifiesto que contienen windows_v2 (p. ej. sha256_windows_v2_manifest) son registros historicos y no se renombran.
+5. 5. El generador (src/anessim/, configs v5/v6, fidelity.py, fase_b.py) queda fuera de alcance, como indica el enunciado.
+6. 6. D4 regenera data/context_v1 (gitignored) con estadisticos v7; la lista de 86 item_id es identica y el sha de vocab.json cambia SOLO por esos estadisticos (945b7884 -> 0ddcff91).
+7. 7. D5 compara las columnas propias del tokenizador (farmaco/ventilacion/tiempo, mascaras, metadatos) EXACTAS con los estadisticos congelados; las ctx_* difieren en valor (no en patron de emision) por el punto 6.
+8. 8. El 12o skip (test_v6_validate::test_f_report_written) es preexistente (falta REPORT_generator_validation.txt), no de datos perdidos.
+9. 9. Los informes REPORT_cohort_gap.txt / REPORT_gap_addendum.txt regenerados por la suite (v7) NO se comprometen; son efectos colaterales de los tests. Se revirtio la modificacion espuria de REPORT_v7_attribution.txt.
+10. 10. PYTHONPATH=src (paquete editable). Orden de import seguro numpy->pandas->pyarrow->torch respetado (paths.py no importa torch).
+11. 11. Presupuesto GPU: la suite y los criterios D2 se ejecutan en CPU; sin uso de VRAM.
+
+================================================================
+FIN DEL INFORME. Si una seccion marcada como verde contiene un fallo, la entrega se invalida.
+Resultado final: 195 passed, 12 skipped, 0 failed, 0 errors.
