@@ -33,6 +33,8 @@ import warnings
 from functools import lru_cache
 from pathlib import Path
 
+import paths
+
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
@@ -40,19 +42,19 @@ import torch
 import torch.nn as nn
 
 ROOT = Path(__file__).resolve().parents[2]
-WINDOWS_V2 = ROOT / "data" / "windows_v2"
-WINDOWS_DIR = WINDOWS_V2 / "windows"
-TOKENS_MANIFEST = ROOT / "data" / "tokens_v1" / "manifest_tokens.json"
+WINDOWS_ROOT = paths.WINDOWS_DIR
+WINDOWS_DIR = WINDOWS_ROOT / "windows"
+TOKENS_MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
 CONTRACT_PATH = ROOT / "contrato_ae_v1.md"
 TOKENS_CONTRACT_PATH = ROOT / "contrato_tokens_v1.md"
-OUT_ROOT = ROOT / "data" / "ae_v1"
-REPORT_PATH = ROOT / "reports" / "REPORT_ae_v4.txt"
-ROJO_TXT = ROOT / "reports" / "_pytest_ae_v4_rojo.txt"
-VERDE_TXT = ROOT / "reports" / "_pytest_ae_v4_verde.txt"
-V1_SNAPSHOT = ROOT / "data" / "ae_v1" / "v1_snapshot.json"
-V2_SNAPSHOT = ROOT / "data" / "ae_v1" / "v2_snapshot.json"
-REPORT_WINDOW_V2 = ROOT / "reports" / "REPORT_window_v2_RECONSTRUIDO.txt"
-REPORT_TOKENS_V4 = ROOT / "reports" / "REPORT_tokens_v4.txt"
+OUT_ROOT = paths.AE_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_ae_v4.txt"
+ROJO_TXT = paths.REPORTS_DIR / "_pytest_ae_v4_rojo.txt"
+VERDE_TXT = paths.REPORTS_DIR / "_pytest_ae_v4_verde.txt"
+V1_SNAPSHOT = paths.AE_DIR / "v1_snapshot.json"
+V2_SNAPSHOT = paths.AE_DIR / "v2_snapshot.json"
+REPORT_WINDOW_V2 = paths.REPORTS_DIR / "REPORT_window_v2_RECONSTRUIDO.txt"
+REPORT_TOKENS_V4 = paths.REPORTS_DIR / "REPORT_tokens_v4.txt"
 
 SEED = 42
 LATENT_DIM = 32
@@ -144,8 +146,8 @@ READ_COLS: list[str] = META_COLS + VALUE_COLS + MASK_COLS
 STATS_COLS: list[str] = ["caseid", "phase_from_clinical"] + VALUE_COLS + MASK_COLS
 ALLOWED_READ_COLS: set[str] = set(READ_COLS)
 
-SYNTH_SOURCES: list[str] = ["synthetic_v5", "vaso_reinf_v5", "cf_v5"]
-ALL_SOURCES: list[str] = ["real", "synthetic_v5", "vaso_reinf_v5", "cf_v5"]
+SYNTH_SOURCES: list[str] = paths.SYNTH_COHORTS
+ALL_SOURCES: list[str] = paths.ALL_COHORTS
 
 ART_TRACKS = ["Solar8000/ART_MBP", "Solar8000/ART_SBP", "Solar8000/ART_DBP"]
 HR_TRACK = "Solar8000/HR"
@@ -1202,7 +1204,7 @@ def _build_provenance_gaps() -> list[dict]:
 
 
 def build_manifest(variant: str, result: dict, gates: dict, norm_stats: dict) -> dict:
-    win_manifest = json.loads((WINDOWS_V2 / "manifest.json").read_text(encoding="utf-8"))
+    win_manifest = json.loads((WINDOWS_ROOT / "manifest.json").read_text(encoding="utf-8"))
     enc_path = OUT_ROOT / variant / "encoder.pt"
     dec_path = OUT_ROOT / variant / "decoder.pt"
     hist = result["history"]
@@ -1214,8 +1216,8 @@ def build_manifest(variant: str, result: dict, gates: dict, norm_stats: dict) ->
         "sha256_contract_tokens": sha256(TOKENS_CONTRACT_PATH),
         "sha256_physio_ae_py": sha256(Path(__file__).resolve()),
         "sha256_tokens_v1_manifest": sha256(TOKENS_MANIFEST),
-        "sha256_windows_v2_manifest": sha256(WINDOWS_V2 / "manifest.json"),
-        "sha256_split_parquet": sha256(WINDOWS_V2 / "split.parquet"),
+        "sha256_windows_v2_manifest": sha256(WINDOWS_ROOT / "manifest.json"),
+        "sha256_split_parquet": sha256(WINDOWS_ROOT / "split.parquet"),
         "sha256_report_tokens_v4": sha256(REPORT_TOKENS_V4),
         "provenance_gaps": _build_provenance_gaps(),
         "acceptance": dict(ACCEPTANCE),
@@ -1476,8 +1478,8 @@ def write_report() -> None:
         L.append(f"  contrato_tokens_v1.md             sha256 {m['sha256_contract_tokens']}")
         L.append(f"  physio_ae.py                      sha256 {m['sha256_physio_ae_py']}")
         L.append(f"  tokens_v1/manifest_tokens.json    sha256 {m['sha256_tokens_v1_manifest']}")
-        L.append(f"  windows_v2/manifest.json          sha256 {m['sha256_windows_v2_manifest']}")
-        L.append(f"  windows_v2/split.parquet          sha256 {m['sha256_split_parquet']}")
+        L.append(f"  windows_v4/manifest.json          sha256 {m['sha256_windows_v2_manifest']}")
+        L.append(f"  windows_v4/split.parquet          sha256 {m['sha256_split_parquet']}")
         L.append(f"  reports/REPORT_tokens_v4.txt      sha256 {m['sha256_report_tokens_v4']}")
         L.append(f"  decisión de contrato              variante elegida: B (ae_bal)")
         L.append(f"  planificador                      {m['scheduler']}")
