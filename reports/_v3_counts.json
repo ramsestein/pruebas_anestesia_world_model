@@ -1,0 +1,22 @@
+﻿{
+  "n_rows": 14559904,
+  "by": {
+    "source=cf_v5/split=train": 2163342,
+    "source=cf_v5/split=val": 4579246,
+    "source=real/split=train": 736639,
+    "source=real/split=val": 1508668,
+    "source=synthetic_v5/split=train": 1667633,
+    "source=synthetic_v5/split=val": 3633467,
+    "source=vaso_reinf_v5/split=train": 86666,
+    "source=vaso_reinf_v5/split=val": 184243
+  },
+  "discards": {
+    "n_grid": 72394597,
+    "hueco": 346668,
+    "induccion": 2755943,
+    "emergencia": 3638967,
+    "valido": 65653019,
+    "emitido": 14559904,
+    "sin_opend": 11
+  }
+}

@@ -1,0 +1,19 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 10 items
+
+tests/test_v7_attribution.py::test_a_pairwise_mutual_information_scale PASSED [ 10%]
+tests/test_v7_attribution.py::test_b_corr_matrix_difference_frobenius PASSED [ 20%]
+tests/test_v7_attribution.py::test_c_top_discrepancies_sorted PASSED     [ 30%]
+tests/test_v7_attribution.py::test_d_quantization_table_columns PASSED   [ 40%]
+tests/test_v7_attribution.py::test_e_hgb_ablation_drop_sorted PASSED     [ 50%]
+tests/test_v7_attribution.py::test_f_a1_a3_present PASSED                [ 60%]
+tests/test_v7_attribution.py::test_g_a4_deltas_present PASSED            [ 70%]
+tests/test_v7_attribution.py::test_h_a5_quantization_present PASSED      [ 80%]
+tests/test_v7_attribution.py::test_i_a6_corr_mi_present PASSED           [ 90%]
+tests/test_v7_attribution.py::test_j_report_written PASSED               [100%]
+
+============================= 10 passed in 0.53s ==============================

@@ -1,0 +1,16 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 13 items / 6 deselected / 7 selected
+
+tests/test_v7_transfer_probe.py::test_a_scaler_fit_transform_inverse PASSED [ 14%]
+tests/test_v7_transfer_probe.py::test_b_scaler_zero_std_becomes_one PASSED [ 28%]
+tests/test_v7_transfer_probe.py::test_c_ratios_vs_persistence PASSED     [ 42%]
+tests/test_v7_transfer_probe.py::test_d_residual_prediction_matches_contract PASSED [ 57%]
+tests/test_v7_transfer_probe.py::test_e_sanity_variables_subset_of_moving PASSED [ 71%]
+tests/test_v9_reconstruction.py::test_a_split_holdout_sha_matches_cache PASSED [ 85%]
+tests/test_v9_reconstruction.py::test_b_reconstruction_numeric_check_all_match PASSED [100%]
+
+======================= 7 passed, 6 deselected in 2.24s =======================

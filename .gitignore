@@ -1,0 +1,32 @@
+# Datos (no se suben al repositorio)
+data/
+
+# Secretos / variables de entorno
+.env
+.env.*
+!.env.example
+
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Caches de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Artefactos de build/dist
+build/
+dist/
+*.egg-info/
+
+# IDE / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

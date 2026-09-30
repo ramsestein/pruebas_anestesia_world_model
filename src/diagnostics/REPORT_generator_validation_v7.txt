@@ -1,0 +1,396 @@
+REPORT_generator_validation.txt — validación v7 contra real_holdout
+==============================================================================
+
+0. Contexto
+----------------------------------------
+  v6_validate.py  sha256 6b7c41755d6bad45c25370a3602a2754a9aef862ad5e599757697e5224c00464
+  generado        2026-09-25T17:03:44.119010+00:00
+  holdout caseids 378
+  calib caseids   567
+  windows_v7      presente
+
+1. Supuestos numerados
+----------------------------------------
+  1. La cohorte real se parte por caseid con semilla 20260922 en real_calib (60 %) y real_holdout (40 %). El holdout no se toca durante la recalibración y solo se consulta aquí, una única vez.
+  2. V1 replica el protocolo del gate 6 (200 000 celdas, semilla 9876, GroupKFold 5 por caseid, StandardScaler por fold, LogisticRegression) sobre las 14 variables, real_holdout vs unión de las 3 cohortes v7.
+  3. V2 usa HistGradientBoostingClassifier(max_iter=300) con el mismo protocolo; 14 valores y 28 (valores+deltas t - t_menos_1).
+  4. V3 usa los 20 vecinos más cercanos (distancia EUCLÍDEA) en el espacio de 14 variables z-scoreadas con las stats del AE (norm_stats.json de ae_bal), sobre una submuestra de 20 000 celdas por cohorte (semilla 9876).
+  5. V5 delega en el gate 3 de tokens.pk_tokens (equivalencia de integrador frente a anessim) sobre casos de v7; se reporta el error estacionario.
+  6. V6 compara las dos ramas de cada par cf_v7 en el PREFIJO (t <= split_t) usando los truth de los casos; la divergencia debe ser 0 o numéricamente despreciable.
+  7. V7 agrega curvas dosis-efecto en bins de Ce/velocidad y compara v7 vs v5 con la misma rejilla de bins.
+
+2. Salida literal de pytest (ROJO)
+----------------------------------------
+============================= test session starts ==============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Ramsés\Desktop\Proyectos\anestesia_world
+collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+____________________ ERROR collecting tests/test_v6_validate.py _______________
+ImportError while importing test module 'C:\Users\Ramsés\Desktop\Proyectos\anestesia_world\tests\test_v6_validate.py'.
+E   ImportError: cannot import name 'v6_validate' from 'diagnostics' (C:\Users\Ramsés\Desktop\Proyectos\anestesia_world\src\diagnostics\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_v6_validate.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.49s
+
+
+3. Salida literal de pytest (VERDE)
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 6 items
+
+tests/test_v6_validate.py::test_a_split_real_caseids_deterministic FAILED [ 16%]
+tests/test_v6_validate.py::test_b_nn_overlap_range PASSED                [ 33%]
+tests/test_v6_validate.py::test_c_nn_overlap_identical_high PASSED       [ 50%]
+tests/test_v6_validate.py::test_d_dose_effect_curve PASSED               [ 66%]
+tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 FAILED      [ 83%]
+tests/test_v6_validate.py::test_f_report_written SKIPPED (REPORT_gen...) [100%]
+
+================================== FAILURES ===================================
+___________________ test_a_split_real_caseids_deterministic ___________________
+
+    def test_a_split_real_caseids_deterministic():
+        excluded = frozenset()
+        # No toca disco: comprobamos que la funci¾n es determinista sobre un
+        # conjunto sintÚtico de caseids (monkeypatch de iter_partitions).
+        fake = Path("__nonexistent__")
+        parts = vv.cg.iter_partitions(["real"], "val")
+>       assert parts  # el split val existe
+        ^^^^^^^^^^^^
+E       assert []
+
+tests\test_v6_validate.py:28: AssertionError
+______________________ test_e_load_cells_from_windows_v2 ______________________
+
+    @pytest.mark.integration
+    def test_e_load_cells_from_windows_v2():
+        excluded = vv.cg.load_excluded_caseids()
+        cells = vv.load_cells_from(vv.WINDOWS_V2, ["real"], "val", excluded)
+>       assert cells["values"].shape[0] > 0
+E       assert 0 > 0
+
+tests\test_v6_validate.py:66: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_v6_validate.py::test_a_split_real_caseids_deterministic - a...
+FAILED tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 - assert ...
+=================== 2 failed, 3 passed, 1 skipped in 2.33s ====================
+
+
+4. V1/V2 — sondas lineal y no lineal
+----------------------------------------
+  V1 lineal 14 valores: AUC =   0.7654 (objetivo <= 0.7036)
+  V2 HGB 14 valores:    AUC =   0.9767 (objetivo < 0.85)
+  V2 HGB 28 (val+deltas): AUC =   0.9950
+
+5. V3 — solapamiento de soportes (20-NN, 14 vars z-scoreadas)
+----------------------------------------
+  v7: media =   0.1465, mediana =   0.0500 (objetivo media > 0.25, mediana > 0.10)
+  v5: media =   0.0294, mediana =   0.0000 (objetivo media > 0.25, mediana > 0.10)
+
+6. V4 — W1 normalizada (real_holdout vs v7) por variable
+----------------------------------------
+  variable                  W1/std
+  BIS/BIS                   0.3456
+  Solar8000/HR              0.1122
+  Solar8000/PLETH_SPO2      0.1917
+  Primus/ETCO2              0.2541
+  Primus/PEEP_MBAR          0.0207
+  Primus/PIP_MBAR           0.0903
+  Primus/MV                 0.0951
+  Primus/TV                 0.0671
+  Primus/RR_CO2             0.1543
+  Solar8000/BT              0.9293
+  Solar8000/ART_MBP         0.2440
+  Solar8000/ART_SBP         0.0960
+  Solar8000/ART_DBP         0.4767
+  BIS/EMG                   0.0783
+
+7. V5 — pk_tokens gate 3
+----------------------------------------
+{
+  "n_cases": 20,
+  "propofol_err_mean": 0.0008582841901293859,
+  "remifentanilo_err_mean": 0.0008099506696130623,
+  "pass": true
+}
+
+8. V6 — divergencia de prefijo CF
+----------------------------------------
+{
+  "n_pairs": 6345,
+  "prefix_max_abs_diff": {
+    "max": 0.0,
+    "p50": 0.0,
+    "p99": 0.0
+  }
+}
+
+9. V7 — curvas dosis-efecto
+----------------------------------------
+{
+  "synthetic_v7": {
+    "propofol_bis": {
+      "x": [
+        0.7699395418167114,
+        1.6914803385734558,
+        1.944974958896637,
+        2.131229043006897,
+        2.291266679763794,
+        2.438527464866638,
+        2.5798803567886353,
+        2.7184947729110718,
+        2.8571300506591797,
+        2.998616099357605,
+        3.1445122957229614,
+        3.298029661178589,
+        3.462870788574218,
+        3.642919731140136,
+        3.845117688179016,
+        4.080111861228943,
+        4.366985082626343,
+        4.746626377105713,
+        5.3357579708099365,
+        15.37931752204895
+      ],
+      "y": [
+        69.67335510253906,
+        53.840492248535156,
+        51.315128326416016,
+        49.80247116088867,
+        48.65209197998047,
+        47.73162841796875,
+        46.83661651611328,
+        45.99757385253906,
+        45.287471771240234,
+        44.66067886352539,
+        44.00558090209961,
+        43.363548278808594,
+        42.698734283447266,
+        42.07475280761719,
+        41.42294692993164,
+        40.734397888183594,
+        39.956573486328125,
+        39.07748031616211,
+        38.03066635131836,
+        36.06504821777344
+      ]
+    },
+    "remi_map": {
+      "x": [
+        0.46786589026451114,
+        1.0798141419887544,
+        1.3226142525672913,
+        1.5042620301246643,
+        1.6620424389839172,
+        1.8071136474609375,
+        1.9453430771827698,
+        2.0814483165740967,
+        2.218847155570984,
+        2.359250068664551,
+        2.504609704017639,
+        2.658335328102112,
+        2.8250300884246826,
+        3.008721113204956,
+        3.2155107259750366,
+        3.456178665161133,
+        3.74998676776886,
+        4.137321138381957,
+        4.728431081771845,
+        12.04541821479797
+      ],
+      "y": [
+        86.04491424560547,
+        88.33352661132812,
+        87.43932342529297,
+        86.28631591796875,
+        85.3989486694336,
+        84.52204132080078,
+        83.74856567382812,
+        82.79822540283203,
+        81.9930419921875,
+        81.2169418334961,
+        80.48641967773438,
+        79.69532012939453,
+        79.02715301513672,
+        78.22635650634766,
+        77.43732452392578,
+        76.6108627319336,
+        75.66056060791016,
+        74.55952453613281,
+        73.18534088134766,
+        71.0158920288086
+      ]
+    },
+    "nora_map": {
+      "x": [
+        2.2853817962709784e-35,
+        5.992786213040327e-21,
+        7.66605685781124e-12,
+        1.5495621063734282e-06,
+        0.001113134595948393,
+        0.014405465452000447,
+        0.04468915555626149,
+        0.08374020159244544,
+        0.12934934422373778,
+        0.16681549698114395,
+        0.18103841692209244,
+        0.18873803317546844
+      ],
+      "y": [
+        90.58047485351562,
+        82.95448303222656,
+        80.63541412353516,
+        77.2485122680664,
+        72.89810943603516,
+        68.6042251586914,
+        69.66681671142578,
+        71.778076171875,
+        73.99195098876953,
+        70.33219909667969,
+        65.23847961425781,
+        65.11405944824219
+      ]
+    }
+  },
+  "synthetic_v5": {
+    "propofol_bis": {
+      "x": [
+        0.764210081100464,
+        1.6829624056816104,
+        1.9415656447410585,
+        2.1304893493652344,
+        2.2911529541015625,
+        2.4376391172409058,
+        2.576790690422058,
+        2.712970495223999,
+        2.8488746881484985,
+        2.9875508546829224,
+        3.1311991214752197,
+        3.2821069955825806,
+        3.444592690467836,
+        3.622646784782411,
+        3.8235381841659546,
+        4.058687686920166,
+        4.3437323570251465,
+        4.720024824142456,
+        5.312069416046143,
+        15.60626769065857
+      ],
+      "y": [
+        69.9097900390625,
+        54.31925964355469,
+        51.78956604003906,
+        50.225860595703125,
+        48.96471405029297,
+        47.95009231567383,
+        47.057228088378906,
+        46.26847457885742,
+        45.52429962158203,
+        44.80706787109375,
+        44.094749450683594,
+        43.421443939208984,
+        42.81718826293945,
+        42.159881591796875,
+        41.49724578857422,
+        40.78822708129883,
+        40.022247314453125,
+        39.14320373535156,
+        38.002479553222656,
+        36.14313888549805
+      ]
+    },
+    "remi_map": {
+      "x": [
+        0.45919132232666016,
+        1.0615121245384218,
+        1.302444577217102,
+        1.4816983819007872,
+        1.6364801526069641,
+        1.7789682745933533,
+        1.9150158762931824,
+        2.0487623810768127,
+        2.1830455541610725,
+        2.3200361013412483,
+        2.462121844291687,
+        2.6121374368667603,
+        2.7745391130447388,
+        2.9539672136306763,
+        3.1558157205581665,
+        3.390388250350952,
+        3.6769853830337524,
+        4.054997086524963,
+        4.635692930221552,
+        11.464495754241938
+      ],
+      "y": [
+        85.52704620361328,
+        88.16950225830078,
+        87.44671630859375,
+        86.46216583251953,
+        85.48263549804688,
+        84.54840850830078,
+        83.71363830566406,
+        82.8252944946289,
+        82.11100006103516,
+        81.292724609375,
+        80.44095611572266,
+        79.65406799316406,
+        78.85846710205078,
+        78.04424285888672,
+        77.29170989990234,
+        76.45460510253906,
+        75.47166442871094,
+        74.4835205078125,
+        73.19743347167969,
+        70.58157348632812
+      ]
+    },
+    "nora_map": {
+      "x": [
+        2.520161389212377e-37,
+        3.0263778988542226e-22,
+        1.8036329377498244e-12,
+        8.379528213621438e-07,
+        0.0008944491791112342,
+        0.013663966534659178,
+        0.043766929395496756,
+        0.0829824935644865,
+        0.1285777986049652,
+        0.1663755401968956,
+        0.1810034066438675,
+        0.18909890949726105
+      ],
+      "y": [
+        90.42262268066406,
+        82.90128326416016,
+        80.94962310791016,
+        77.31610870361328,
+        73.0362777709961,
+        68.3605728149414,
+        69.3693618774414,
+        71.56304931640625,
+        73.78252410888672,
+        70.41686248779297,
+        65.33204650878906,
+        65.22611236572266
+      ]
+    }
+  }
+}
+
+10. Conclusión (generada a partir de los números)
+----------------------------------------
+  V1 lineal:        FALLA (AUC   0.7654, objetivo <= 0.7036)
+  V2 no lineal:     FALLA (HGB 14   0.9767, objetivo < 0.85)
+  V3 solapamiento:  FALLA (media   0.1465, objetivo > 0.25)
+  V5 gate3 PK:      PASA (propofol   0.0009, remi   0.0008; < 1 %)
+  V6 prefijo CF:    PASA (max diff   0.0000)
+  V7 dosis-efecto:  PASA (max |v7 - v5| propofol->BIS =   0.4462, objetivo < 1.0 BIS)
+  INTEGRIDAD FARMACOLÓGICA (V5-V7): pasa.
+  Resumen: V1 FALLA, V2 FALLA, V3 FALLA, V5 PASA, V6 PASA, V7 PASA.

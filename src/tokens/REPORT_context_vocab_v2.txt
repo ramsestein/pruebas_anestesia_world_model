@@ -1,0 +1,180 @@
+REPORT_context_vocab_v2.txt — tokenizador de contexto (iteración 2)
+==============================================================================
+
+0. Contexto y ficheros
+----------------------------------------
+  contrato_tokens_v1.md        sha256 ae2e229857dcbbdc82006d44df0a03f66e4bdf49ee0f83cdae4f9a8d19a02cc6
+  context_vocab.py             sha256 527024b5749fb6a7a97d491d4bd79e249901feb9bc61c5abae25341239ccc6ab
+  windows_v2/split.parquet     sha256 40935d1cbda4d76ed0ea9b3bb817be4c018a40fc7d826f35d671431543efe8fd
+  fecha                        2026-09-18T18:05:23.633554
+  casos (windows_v2/cases)     28901
+  filas tokens (solo v1)       188458
+  items vocab (v1+v2)          86 (12 v1 + 74 v2)
+
+1. Tests y salida en ROJO
+----------------------------------------
+  Metodología tests-primero: los tests de la iteración 2 (test_m actualizado a la
+  ablación top-1 + pares, test_k restringido a v1, y los nuevos test_v2_a/b/c) se
+  escribieron ANTES de modificar context_vocab.py. Contra el módulo de la iteración
+  1 fallan en rojo por los símbolos/contrato nuevos:
+
+    test_v2_a_no_v2_items_in_tokens   -> KeyError: 'scope'
+    test_v2_b_all_v1_items_present    -> AttributeError: module 'context_vocab'
+                                         has no attribute 'V1_BASE_COLUMNS'
+    test_v2_c_vocab_has_86_with_scope -> KeyError: 'scope'
+    test_m_gate6_source_probe          -> KeyError: 'pairwise' (y ablation sin top1)
+
+  Los 53 tests unitarios (a..i) ya pasaban contra el módulo de la iteración 1 y
+  siguen pasando (no dependen del scope).
+
+2. Cambios respecto a v1
+----------------------------------------
+  El inventario v1 se reduce, por decisión de contrato tras el gate 6 = 0.9956 de la iteración 1, a demografía + riesgo global: age, sex:F, height, weight, bmi, asa y emop (con sus categorías, incluido 'otros' si aplica).
+  Cada entrada de vocab.json lleva scope 'v1' | 'v2'. v1 = 12 items (4 continuos + 1 binario + 7 categóricos); v2 = 74 items (19 continuos + 4 binarios + 51 categóricos) que se conservan con sus estadísticos pero NO se emiten.
+  tokens.parquet y coverage.parquet ahora solo contienen tokens scope v1.
+  La tabla eje -> item_id de vocab.json se mantiene completa (86 items) y cada entrada lleva su scope.
+  Gate 6: se repite sobre el inventario v1 y se añaden la ablación quitando el top-1 y el desglose por pares de cohortes (real vs synthetic_v5, real vs cf_v5, real vs vaso_reinf_v5, synthetic_v5 vs cf_v5).
+  Nuevo diagnóstico de fuga en fisiología en scripts/diag_source_probe_physio.py (sin salida a data/).
+
+3. Implementación
+----------------------------------------
+  Deduplicación INSPIRE: por caseid se conserva la fila con más valores no nulos; empate -> primera en orden estable (2 538 duplicados en real; la fila válida tiene ~28-31 columnas de contexto no nulas frente a 17 del stub).
+  Codificación de sex: la fuente usa 'F'/'M'; se emite 'sex:F' solo cuando el valor es femenino. No existe token 'sex:M'.
+  preop_ecg: normal = 'Normal Sinus Rhythm'; anormal = cualquiera de los 26 hallazgos del inventario; fuera del inventario o vacío -> no emitido (scope v2).
+  preop_pft: normal = 'Normal'; anormal = cualquiera de los 8 hallazgos; fuera del inventario o vacío -> no emitido (scope v2).
+  Normalización de item_id: minúsculas, sin tildes ni espacios; flotantes integrales sin '.0' (asa 2.0 -> 'asa:2').
+  Agrupación en 'otros': umbral 50 casos en train. Agrupadas por columna: asa=['5.0', '6.0']; position=['Left kidney', 'Right kidney', 'Sitting', 'Trendelenburg']; ane_type=['Regional']; top_diagnosis_chapter=['A', 'B', 'U']; airway=['Nasal', 'Tracheostomy']; cormack=['IIIb', 'IV'].
+  Vocabulario total: 86 items; v1 = 12, v2 = 74.
+  Scope v1 = ejes demografia y riesgo_global; scope v2 = el resto. Los estadísticos de normalización de v2 se calculan y guardan (referencia).
+  Split: heredado bit a bit de windows_v2 (columna 'split' de cases.parquet, verificada idéntica al mapeo de split.parquet); sha registrado en vocab.json.
+
+4. Salida en VERDE
+----------------------------------------
+  Tras implementar la iteración 2, la suite completa queda en VERDE:
+
+    pytest -q tests/test_context_vocab.py
+    ..............................................................           [100%]
+    62 passed in 155.50s
+
+  (53 unitarios + 9 de integración: j, k, l, m, n, o, v2_a, v2_b, v2_c). El gate 6
+  v1 pasa (0.5662 <= 0.60).
+
+5. Resultados
+----------------------------------------
+  5.1 Inventario v1 emitido (12 items)
+      - age
+      - height
+      - weight
+      - bmi
+      - sex:F
+      - asa:1
+      - asa:2
+      - asa:3
+      - asa:4
+      - asa:otros
+      - emop:0
+      - emop:1
+
+  5.2 Gate 6 v1 (sondeo de fuente, val, 5-fold)
+    balanced accuracy (valores)    : 0.5662
+    balanced accuracy (presencia)  : 0.5662
+    n_val=4327 n_real=951 n_synth=3376 n_items=12
+    coeficientes (todos los items v1):
+       1. emop:0                 -0.8064  [riesgo_global]
+       2. emop:1                 +0.8064  [riesgo_global]
+       3. asa:4                  -0.6331  [riesgo_global]
+       4. bmi                    -0.3107  [demografia]
+       5. asa:3                  -0.2921  [riesgo_global]
+       6. asa:otros              -0.2410  [riesgo_global]
+       7. weight                 +0.2307  [demografia]
+       8. asa:1                  -0.2249  [riesgo_global]
+       9. asa:2                  -0.2184  [riesgo_global]
+      10. height                 -0.1839  [demografia]
+      11. sex:F                  -0.0663  [demografia]
+      12. age                    +0.0441  [demografia]
+    ablación (balanced accuracy):
+      sin top-1 (emop:0) : 0.5662
+    por pares de cohortes (balanced accuracy con valores):
+par                   | accuracy | presencia | n_pos | n_neg
+----------------------+----------+-----------+-------+------
+real_vs_synthetic_v5  | 0.5659   | 0.5662    | 951   | 1455 
+real_vs_cf_v5         | 0.5665   | 0.5657    | 951   | 1848 
+real_vs_vaso_reinf_v5 | 0.4995   | 0.5000    | 951   | 73   
+synthetic_v5_vs_cf_v5 | 0.4987   | 0.4987    | 1455  | 1848 
+
+  5.3 Diagnóstico fisiología (scripts/diag_source_probe_physio.py)
+  Muestra: 2 000 casos val estratificados por source (semilla 0), 20 ventanas de
+  mantenimiento (t > 600 s) de 12 celdas por caso -> 40 000 ventanas
+  (n_real=8 800, n_synth=31 200). Features: 14 fracciones de máscara + 56 stats.
+
+  balanced accuracy real vs sintético (GroupKFold por caso, 5-fold):
+    (a) solo fracción de máscara                : 0.5878
+    (b) solo media/std/min/max (máscara completa): 0.9898
+    (c) todo                                    : 0.9932
+
+  (b) ranking de los 15 coeficientes de mayor |coef|:
+     1. BIS/EMG__mean        -4.1325   [BIS/EMG]
+     2. BIS/EMG__min         +3.4985   [BIS/EMG]
+     3. BIS/EMG__std         -3.3051   [BIS/EMG]
+     4. Primus/RR_CO2__min   +2.7273   [Primus/RR_CO2]
+     5. BIS/BIS__std         +2.4773   [BIS/BIS]
+     6. Primus/PIP_MBAR__min +2.4284   [Primus/PIP_MBAR]
+     7. Primus/MV__min       +2.3186   [Primus/MV]
+     8. Primus/MV__max       -1.9723   [Primus/MV]
+     9. BIS/BIS__max         +1.8555   [BIS/BIS]
+    10. Primus/TV__max       +1.8507   [Primus/TV]
+    11. Primus/TV__mean      -1.6718   [Primus/TV]
+    12. Primus/RR_CO2__mean  -1.6631   [Primus/RR_CO2]
+    13. BIS/BIS__min         -1.5627   [BIS/BIS]
+    14. Primus/ETCO2__mean   +1.5175   [Primus/ETCO2]
+    15. Primus/RR_CO2__max   -1.3382   [Primus/RR_CO2]
+
+  (b) ablación (balanced accuracy):
+    sin variable top-1 (BIS/EMG)                  : 0.9771
+    sin top-3 (BIS/EMG, Primus/RR_CO2, BIS/BIS)  : 0.9633
+
+  (c) por pares de cohortes (balanced accuracy):
+    real vs synthetic_v5   : 0.9929  (n=8 800 vs 13 460)
+    real vs cf_v5          : 0.9955  (n=8 800 vs 17 060)
+    real vs vaso_reinf_v5  : 0.9879  (n=8 800 vs 680)
+    synthetic_v5 vs cf_v5  : 0.6482  (n=13 460 vs 17 060)
+
+  Lectura: el patrón de ausencias en mantenimiento casi no delata (a) 0.5878;
+  los VALORES sí (b) 0.9898, dominados por BIS/EMG (seguido de RR_CO2, BIS y
+  ventilación). Los pares CF son distinguibles de la base solo en 0.6482.
+
+  5.4 Cobertura v1 por eje x cohorte (fracción emitida)
+eje           | real  | synthetic_v5 | cf_v5 | vaso_reinf_v5
+--------------+-------+--------------+-------+--------------
+demografia    | 0.899 | 0.908        | 0.906 | 0.913        
+riesgo_global | 0.283 | 0.284        | 0.284 | 0.283        
+
+  5.5 Tokens por caso v1 (distribución por cohorte)
+source        | n_casos | min | p50 | p95 | max | casos_sin_token
+--------------+---------+-----+-----+-----+-----+----------------
+real          | 6388    | 5   | 6   | 7   | 7   | 0              
+synthetic_v5  | 9701    | 5   | 7   | 7   | 7   | 0              
+cf_v5         | 12324   | 5   | 7   | 7   | 7   | 0              
+vaso_reinf_v5 | 488     | 5   | 7   | 7   | 7   | 0              
+    todo caseid de cases.parquet con >= 1 token v1: True
+
+6. Discrepancias y supuestos
+----------------------------------------
+  1. El contrato en disco NO ha cambiado: su sha256 sigue siendo ae2e2298… (el enunciado da por hecha una 'decisión de contrato' de reducir el contexto a 7 item_id, pero el texto del contrato no la recoge). Se implementa igualmente la decisión descrita y se documenta la discrepancia.
+  2. caseid aparece como clave de fila en tokens.parquet y se lee como clave de join, nunca como feature; el gate 4 excluye solo a caseid de la intersección.
+  3. La deduplicación INSPIRE cuenta no nulos sobre las 37 columnas de contexto (no sobre las 82) para no leer columnas excluidas.
+  4. Desviación poblacional (ddof=0); std=0 -> 1.0.
+  5. top_diagnosis_chapter: '' (real) y 'None' (cf/vaso) -> no emitido (scope v2).
+  6. El emit_tokens conserva un parámetro scope para pruebas: None emite todo, 'v1' emite solo el inventario v1 (usado por run()).
+  7. Gate 6 v1: regresión logística estandarizada, 5-fold estratificado (semilla 0) sobre casos val; el sondeo por pares usa las mismas dos cohortes como clase positiva y negativa.
+  8. Diagnóstico 3: muestreo de 2 000 casos val estratificado por source (semilla 0); 20 ventanas de 12 celdas de mantenimiento (t > 600 s) por caso; estandarización + LR, GroupKFold por caso; std poblacional (ddof=0).
+
+7. Veredicto por gate
+----------------------------------------
+  Gate 1 (cobertura v1): PASA — tabla en sección 5.4.
+  Gate 4 (columnas excluidas): PASA — intersección vacía.
+  Gate 6 (sondeo de fuente v1): PASA — balanced accuracy 0.5662 (umbral <= 0.60).
+  Gate 7 (KS/TVD): INFORMATIVO — sin umbral (sección 5 del informe anterior; sin cambios al no depender del scope).
+  Gate 8 (categorías < 50 en train, v1): PASA.
+  Gate 9 (estadísticos solo train): PASA — verificable en vocab.json (v1 y v2).
+  Diagnóstico 3 (fisiología): sin veredicto; se reporta.

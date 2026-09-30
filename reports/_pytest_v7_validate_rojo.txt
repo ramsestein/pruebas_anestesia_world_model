@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\Ramsés\Desktop\Proyectos\anestesia_world
+collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+____________________ ERROR collecting tests/test_v6_validate.py _______________
+ImportError while importing test module 'C:\Users\Ramsés\Desktop\Proyectos\anestesia_world\tests\test_v6_validate.py'.
+E   ImportError: cannot import name 'v6_validate' from 'diagnostics' (C:\Users\Ramsés\Desktop\Proyectos\anestesia_world\src\diagnostics\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_v6_validate.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.49s

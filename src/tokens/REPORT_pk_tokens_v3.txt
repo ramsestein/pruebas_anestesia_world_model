@@ -1,0 +1,230 @@
+REPORT_pk_tokens_v3.txt
+=======================
+
+Tarea: iteración 3 (cierre) de src/tokens/pk_tokens.py y tests/test_pk_tokens.py
+Fecha: 2026-09-18
+Autor: GitHub Copilot
+
+NOTA DE CONTEXTO: el contrato de tokens v1 en disco (contrato_tokens_v1.md,
+sha ae2e2298…) SÍ incorpora ya los hallazgos de las iteraciones 1 y 2 como
+decisiones: gate 3 reformulado como "equivalencia del integrador", regla de
+forward-fill sin tope, sin inferencia de bolos desde VOL, Wierda con V2/k12/k21
+completos. Esta iteración cierra el módulo alineándolo con ese contrato v2.
+
+========================================================================
+0. CONTEXTO Y FICHEROS CREADOS / MODIFICADOS (sha256)
+========================================================================
+
+Ficheros modificados:
+  - src/tokens/pk_tokens.py          sha256 1e3f695b3935dd85faf458f502fb400b1c5d494db2142e7d98812c6cae45a329
+  - tests/test_pk_tokens.py          sha256 690e80f48faaab37cac553b0405237e0b31eed8d98c6b31babc1bd00aa8a9179
+  - data/pk_v1/ (regenerado) + data/pk_v1/manifest_pk.json
+
+Ficheros leídos (no modificados):
+  - contrato_tokens_v1.md            sha256 ae2e229857dcbbdc82006d44df0a03f66e4bdf49ee0f83cdae4f9a8d19a02cc6
+    (contrato v2 en disco; sin discrepancia con la tarea, ver sección 5.1)
+  - src/anessim/pk/base.py y src/anessim/pk/{propofol,remifentanil}.py
+    (solo lectura: evidencia del solapamiento de intervalos en Infusion.rate_at)
+
+========================================================================
+1. TESTS ESCRITOS / MODIFICADOS + SALIDA DE pytest EN ROJO
+========================================================================
+
+Modificaciones de tests (tests primero):
+
+  - test_rate_unit_conversions: rocuronio ahora 120.0 mL/h -> 20.0 mg/min
+    (antes 30.0 -> 0.5; la conversión pasa de raw/60 a raw*10/60).
+  - ELIMINADO test_infer_bolus_from_volume (la inferencia desde VOL desaparece).
+  - NUEVO test_rocuronium_rate_spike_equals_equivalent_bolus: un pico de
+    ROC_RATE de 1200 mL/h durante 10 s sobre tasa 0 produce en Ce el mismo
+    efecto que un bolo de la dosis equivalente (pico y cola, tolerancia 5 %).
+  - test_m_gate3_integrator_equivalence REESCRITO (gate 3 del contrato v2):
+    equivalencia del integrador (< 1 %) + diagnóstico IIV sin aserción.
+  - test_n_real_no_vol_and_bolus_zero REESCRITO: no se lee ninguna columna
+    *_VOL; bolus_*=0 y bolus_obs_*=0 para todos los fármacos en real;
+    m_ce_efedrina=1.
+
+Salida pytest ROJO (antes de implementar el código):
+
+  2 failed, 11 passed, 3 deselected
+
+  1) test_rate_unit_conversions
+     assert 2.0 == 20.0 ± 0.0001   (rocuronio: el módulo aún devolvía raw/60)
+
+  2) test_rocuronium_rate_spike_equals_equivalent_bolus
+     assert ce_rate.max() > 0      (la rama rocuronio aún no integraba la tasa
+     en mg/min; el Ce del pico era todo ceros)
+
+========================================================================
+2. IMPLEMENTACIÓN (qué cambió)
+========================================================================
+
+CAMBIO 1 — Sin inferencia de bolos desde VOL (contrato v2).
+  Eliminados infer_bolus_from_volume, VOL_COLS, INFER_FROM_VOL y
+  ROC_BOLUS_THRESHOLD_ML. CASE_COLS ya no incluye columnas *_VOL ni EPH_RATE:
+  ["Orchestra/PPF20_RATE", "Orchestra/RFTN20_RATE", "Orchestra/PHEN_RATE",
+   "Orchestra/NEPI_RATE", "Orchestra/ROC_RATE", "Primus/MAC"].
+  En real bolus_*=0 y bolus_obs_*=0 para los 7 fármacos; los bolos por bomba
+  quedan en RATE como picos de tasa y la integración los captura. El rocuronio
+  real se integra desde ROC_RATE con la concentración estándar 10 mg/mL
+  (ROC_CONC_MG_PER_ML = 10.0, SUPUESTO documentado; conversión raw*10/60 a
+  mg/min). En sintéticos el rocuronio sigue siendo solo-bolo (roc_bolus) y la
+  efedrina solo-bolo (eph_bolus, inobservable en real: m_ce=1).
+
+CAMBIO 2 — Gate 3 reformulado como equivalencia del integrador (contrato v2).
+  El test m compara la Ce del módulo (RK4 de orden 4 en forma cerrada, sistema
+  lineal) frente al integrador de anessim (ThreeCompartmentModel.simulate, RK4
+  iterativo, SIN IIV) con los mismos parámetros poblacionales y la misma serie
+  de tasa y bolos, para propofol y remifentanilo en 20 casos. El diagnóstico
+  frente al PPF20_CE / RFTN20_CE guardado se reporta sin aserción (se espera
+  ~20-25 % por IIV). Detalle del arnés en la sección 4.
+
+CAMBIO 3 — Manifest limpio.
+  build_manifest añade bolus_source_by_cohort (7 fármacos) e iiv_note
+  (sigma_k 0.20, sigma_v 0.15, sigma_ke0 0.15, registrada_en_metadata false);
+  elimina bolus_inference_real. ASSUMPTIONS actualizado a 11 ítems (v3).
+
+========================================================================
+3. SALIDA DE pytest EN VERDE (tests que pasan)
+========================================================================
+
+Unitarios:
+
+$ pytest tests/test_pk_tokens.py -q -m "not integration"
+............                                                             [100%]
+12 passed, 4 deselected in 0.70s
+
+Gate 3 (integración):
+
+$ pytest tests/test_pk_tokens.py::test_m_gate3_integrator_equivalence -q -s
+[gate3] equivalencia integrador: propofol err=0.00085 (n=49117) | remi err=0.00090 (n=49032)
+[gate3] diag IIV propofol(schnider): n=16120 media=0.2431 mediana=0.1882 p90=0.4883
+[gate3] diag IIV remifentanilo: n=17117 media=0.2395 mediana=0.1792 p90=0.5211
+.                                                                        [100%]
+1 passed in 106.25s
+
+Suite completa final:
+
+$ pytest tests/test_pk_tokens.py -q
+................                                                         [100%]
+16 passed in 110.67s
+
+========================================================================
+4. RESULTADOS DE INTEGRACIÓN
+========================================================================
+
+Gate 2 (test l): PASA. 5 pares CF (70001-70010, palanca propofol_bolus):
+prefijo bit a bit idéntico hasta split_t y divergencia exacta en propofol.
+
+Gate 4 (test n): PASA. real/train (10 primeros casos): ninguna columna *_VOL
+solicitada (CASE_COLS sin *_VOL); bolus_*=0 y bolus_obs_*=0 para los 7 fármacos;
+m_ce_efedrina=1 en toda la cohorte real.
+
+Gate 3 (test m): PASA. Equivalencia del integrador < 1 %:
+  propofol err medio 0.085 % (n=49 117), remifentanilo 0.090 % (n=49 032).
+
+  4.1 Detalle del arnés (hallazgo documentado): la primera versión del arnés
+      construía las infusiones de anessim con intervalos cerrados
+      (Infusion.rate_at usa `start_s <= t <= end_s`), de modo que dos segmentos
+      consecutivos comparten el límite cuando el cambio de tasa cae exactamente
+      sobre un punto de la rejilla de 5 s; el _ode suma entonces las dos tasas
+      en el substep RK4 que evalúa en ese punto (doble conteo). Medido: con
+      intervalos cerrados err medio = 0.0107 (propofol) / 0.0102 (remi), justo
+      por encima del 1 %. Restando un épsilon al final de cada segmento
+      (end_s = grid[j] - 1e-9, la MISMA serie de tasa sin solapamiento) el error
+      cae a 0.00085 / 0.00090. No es un ajuste del umbral: es representar la
+      misma serie piecewise-constante que integra el módulo. La evidencia
+      numérica (mitad abierto vs cerrado) queda en la sección 4.2.
+
+  4.2 Diagnóstico IIV (sin aserción, esperado ~20-25 % por IIV del generador
+      no registrada):
+      - propofol (schnider, 200 casos): n=16 120 celdas de mantenimiento,
+        media 0.2431, mediana 0.1882, p90 0.4883.
+      - remifentanilo (200 casos): n=17 117, media 0.2395, mediana 0.1792,
+        p90 0.5211.
+      Coherente con el cociente Ce_módulo/Ce_generador ~ lognormal(0,0.25) en
+      estado estacionario (Ce = R/(k10·v1)). Es suelo de ruido realista, no
+      criterio de aceptación.
+
+========================================================================
+5. DISCREPANCIAS, SUPUESTOS Y COSAS NO VERIFICADAS
+========================================================================
+
+5.1 Sin discrepancia de contrato: el fichero en disco (sha ae2e2298…) ya
+    contiene las decisiones de las iteraciones 1 y 2. Esta iteración solo
+    alinea el código y los tests con ese contrato v2.
+
+5.2 Concentración de rocuronio 10 mg/mL (ROC_CONC_MG_PER_ML): SUPUESTO para
+    convertir ROC_RATE de mL/h a mg/min en real; no está en el contrato v2.
+    Documentado en ASSUMPTIONS.
+
+5.3 El bolo se aplica al inicio de la celda de 5 s en la que cae (la columna
+    *_bolus de windows_v2 suma en (t-5, t]). El pico de tasa de 10 s se
+    distribuye en 2 celdas; por eso el transitorio inmediato difiere del bolo
+    instantáneo, pero el pico de Ce coincide (test c: ratio 0.99999) y la cola
+    converge dentro del 5 %.
+
+5.4 IIV del generador no registrada (ya documentada en v2): los parámetros PK
+    de propofol y remifentanilo se perturban con lognormal(0, 0.20/0.15/0.15)
+    y no se guardan; el módulo usa parámetros poblacionales. El gate 3 del
+    contrato v2 lo acepta como suelo de ruido.
+
+5.5 No verificado: (a) contigüidad de la rejilla (dt=5 s uniforme, como genera
+    window.py); (b) la equivalencia bit a bit del RK4 cerrado frente al
+    iterativo se verifica en la parte 1 del gate 3 solo sobre celdas con
+    Ce_anessim > 0.1 (las celdas de Ce muy bajo pueden amplificar el error
+    relativo por redondeo float32).
+
+========================================================================
+6. CAMBIOS RESPECTO A v2
+========================================================================
+
+| Qué | v2 | v3 |
+|-----|----|----|
+| Bolos de rocuronio en real | inferidos desde ROC_VOL (ΔVOL − RATE·dt)·10, umbral 0.5 mL | eliminado: no se lee *_VOL; bolus=0; la tasa ROC_RATE se integra (10 mg/mL) |
+| Conversión rocuronio | raw/60 (sin concentración) | raw·10/60 (10 mg/mL) |
+| Gate 3 | error relativo estacionario < 3 % (NO PASA por IIV) | equivalencia del integrador < 1 % (PASA: 0.085 % / 0.090 %) + diagnóstico IIV sin aserción |
+| test de rocuronio | test_infer_bolus_from_volume | test_rocuronium_rate_spike_equals_equivalent_bolus (pico/cola 5 %) |
+| Manifest | bolus_inference_real | bolus_source_by_cohort + iiv_note; ASSUMPTIONS a 11 ítems |
+
+Números que cambiaron:
+  - Iteración 2: gate 3 estacionario NO PASABA (IIV ~24 %; condición de 10 min
+    no satisfacible con 2 celdas).
+  - Iteración 3: equivalencia del integrador 0.085 % (propofol) y 0.090 %
+    (remifentanilo); el diagnóstico IIV frente al Ce guardado da media 0.2431
+    (propofol) y 0.2395 (remifentanilo), mediana 0.1882 / 0.1792, p90 0.4883 /
+    0.5211. El artefacto de doble conteo del arnés (intervalos cerrados de
+    Infusion.rate_at) explicaba el ~1.07 % / 1.02 % previo a la corrección.
+
+========================================================================
+7. RESULTADO FINAL
+========================================================================
+
+Ejecución completa sobre data/windows_v2 (regenerado con el contrato v2):
+
+  - particiones procesadas: 363
+  - filas totales:          72 404 726  (esperado 72 404 726)  OK
+  - duplicados (caseid, t): 0                              OK
+  - conteos por fuente/split: idénticos al manifest de windows_v2  OK
+  - tiempo: 1196.3 s (~19.9 min)
+  - salida: data/pk_v1/windows/source=*/split=*/part-*.parquet +
+            data/pk_v1/manifest_pk.json (sha pk_tokens.py 1e3f695b…,
+            sha contrato ae2e2298…, Wierda completo, bolus_source_by_cohort,
+            iiv_note, ASSUMPTIONS v3 con 11 ítems).
+
+Veredicto por gate (contrato v2):
+  1. Cobertura por tipo/token ......... NO APLICA (módulo PK).
+  2. Prefijo CF + divergencia exacta ... PASA (5/5 pares).
+  3. Equivalencia del integrador < 1 % . PASA (propofol 0.085 %, remi 0.090 %;
+     diagnóstico IIV reportado: media ~24 %, mediana ~18 %, p90 ~49-52 %).
+  4. Sin columnas con fuga ............. NO APLICA (módulo PK; el test n
+     verifica que no se lee ninguna columna *_VOL).
+  5. Split idéntico a windows_v2 ........ PASA (conteos idénticos).
+  6-10. ................................. NO APLICA (tokenizador/autoencoder).
+
+RESULTADO GLOBAL: módulo PK CERRADO. Los 16 tests pasan (12 unitarios + 4 de
+integración k/l/m/n) y la regeneración completa coincide fila a fila con
+windows_v2 (72 404 726 filas, 0 duplicados, conteos idénticos). El gate 3 del
+contrato v2 (equivalencia del integrador < 1 %) PASA con 0.085 % / 0.090 %, y
+el diagnóstico IIV queda documentado como suelo de ruido realista aceptado por
+el contrato.

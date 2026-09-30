@@ -1,0 +1,14 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 10 items / 5 deselected / 5 selected
+
+tests/test_v7_transfer_probe.py::test_f_finetuning_starts_from_d1_weights PASSED [ 20%]
+tests/test_v7_transfer_probe.py::test_g_epoch0_loss_matches_d1 PASSED    [ 40%]
+tests/test_v7_transfer_probe.py::test_h_sanity_and_report PASSED         [ 60%]
+tests/test_v7_transfer_probe.py::test_i_v9_conditions_present PASSED     [ 80%]
+tests/test_v7_transfer_probe.py::test_j_v9_report_has_transfer_verdict PASSED [100%]
+
+======================= 5 passed, 5 deselected in 2.60s =======================

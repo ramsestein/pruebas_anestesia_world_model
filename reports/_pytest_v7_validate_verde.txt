@@ -1,0 +1,42 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 6 items
+
+tests/test_v6_validate.py::test_a_split_real_caseids_deterministic FAILED [ 16%]
+tests/test_v6_validate.py::test_b_nn_overlap_range PASSED                [ 33%]
+tests/test_v6_validate.py::test_c_nn_overlap_identical_high PASSED       [ 50%]
+tests/test_v6_validate.py::test_d_dose_effect_curve PASSED               [ 66%]
+tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 FAILED      [ 83%]
+tests/test_v6_validate.py::test_f_report_written SKIPPED (REPORT_gen...) [100%]
+
+================================== FAILURES ===================================
+___________________ test_a_split_real_caseids_deterministic ___________________
+
+    def test_a_split_real_caseids_deterministic():
+        excluded = frozenset()
+        # No toca disco: comprobamos que la funci¾n es determinista sobre un
+        # conjunto sintÚtico de caseids (monkeypatch de iter_partitions).
+        fake = Path("__nonexistent__")
+        parts = vv.cg.iter_partitions(["real"], "val")
+>       assert parts  # el split val existe
+        ^^^^^^^^^^^^
+E       assert []
+
+tests\test_v6_validate.py:28: AssertionError
+______________________ test_e_load_cells_from_windows_v2 ______________________
+
+    @pytest.mark.integration
+    def test_e_load_cells_from_windows_v2():
+        excluded = vv.cg.load_excluded_caseids()
+        cells = vv.load_cells_from(vv.WINDOWS_V2, ["real"], "val", excluded)
+>       assert cells["values"].shape[0] > 0
+E       assert 0 > 0
+
+tests\test_v6_validate.py:66: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_v6_validate.py::test_a_split_real_caseids_deterministic - a...
+FAILED tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 - assert ...
+=================== 2 failed, 3 passed, 1 skipped in 2.33s ====================

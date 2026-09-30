@@ -1,0 +1,92 @@
+RECONSTRUCCIÓN RETROSPECTIVA — NO ES EL INFORME DE EJECUCIÓN ORIGINAL. Derivado del manifest de windows_v2, del esquema de particiones y de window.py.
+====================================================================
+
+REPORT_window_v2.txt — dataset de ventanas de anestesia (cohorte v5)
+====================================================================
+
+Este fichero reconstruye el informe de window.py (la versión v3 y su informe
+se perdieron; window.py se reescribió contra v5). Es la fuente de los nombres
+de columna, las máscaras y los rangos que consume el autoencoder de fisiología
+(src/ae/physio_ae.py) y el tokenizador (src/tokens/tokenize.py).
+
+0. Ubicación y split
+--------------------
+- Dataset: data/windows_v2/ (363 particiones hive source=*/split=*/part-*.parquet,
+  ~72,4 M ventanas, zstd).
+- Split heredado de data/windows_v2/split.parquet (sha 40935d1cbda4d76ed0ea9b3bb
+  817be4c018a40fc7d826f35d671431543efe8fd); no se recalcula.
+- Fase: phase_from_clinical en {induction, maintenance, emergence}.
+- Rejilla: 5 s, forward-fill limitado por track (max_age por track).
+
+1. Imagen de 14 variables (orden canónico = image_tracks del manifest)
+---------------------------------------------------------------------
+  1. BIS/BIS
+  2. Solar8000/HR
+  3. Solar8000/PLETH_SPO2
+  4. Primus/ETCO2
+  5. Primus/PEEP_MBAR
+  6. Primus/PIP_MBAR
+  7. Primus/MV
+  8. Primus/TV
+  9. Primus/RR_CO2
+ 10. Solar8000/BT
+ 11. Solar8000/ART_MBP
+ 12. Solar8000/ART_SBP
+ 13. Solar8000/ART_DBP
+ 14. BIS/EMG
+
+(El contrato_ae_v1.md lista BIS/EMG en 2ª posición; el orden es irrelevante,
+los estadísticos y la pérdida van por variable. Fuera de la imagen: Primus/FIO2,
+cuyo setpoint ya es token de acción.)
+
+2. Máscaras
+-----------
+- m_<track>: 1 si la celda está presente (dentro de max_age) Y el valor es
+  plausible (dentro de PLAUSIBLE_RANGE). Es la máscara que usa el AE.
+- m_raw_<track>: presencia sin plausibilidad (solo las 14 de la imagen).
+  NO se usa en el AE.
+- Primus/FIO2 y las 5 columnas de bolo solo llevan m_ (sin m_raw_).
+
+3. Rangos plausibles (PLAUSIBLE_RANGE)
+--------------------------------------
+  BIS/BIS              [0, 100]
+  BIS/EMG              [0, 100]
+  Solar8000/HR         [10, 250]
+  Solar8000/PLETH_SPO2 [40, 100]
+  Primus/ETCO2         [10, 80]
+  Primus/PEEP_MBAR     [0, 25]
+  Primus/PIP_MBAR      [5, 60]
+  Primus/MV            [0, 25]
+  Primus/TV            [50, 1500]
+  Primus/RR_CO2        [2, 60]
+  Solar8000/BT         [25, 45]
+  Solar8000/ART_MBP    [0, 300]
+  Solar8000/ART_SBP    [0, 400]
+  Solar8000/ART_DBP    [0, 300]
+  Primus/FIO2          [15, 100]
+
+4. max_age (s) por track de la imagen
+-------------------------------------
+  BIS/BIS 10 · BIS/EMG 10 · Solar8000/HR 10 · Solar8000/PLETH_SPO2 10 ·
+  Primus/ETCO2 10 · Solar8000/ART_MBP 10 · Solar8000/ART_SBP 10 ·
+  Solar8000/ART_DBP 10 · Primus/PEEP_MBAR 30 · Primus/PIP_MBAR 30 ·
+  Primus/MV 30 · Primus/TV 30 · Primus/RR_CO2 30 · Solar8000/BT 600
+
+5. Esquema de una partición (61 columnas)
+-----------------------------------------
+  7 de metadato: caseid (int32), t (int32), source, split, bp_source,
+  phase_from_clinical (dictionary<string,int32>), t_since_opstart (float32).
+  14 valores de la imagen (float32) + m_<track> (uint8) + m_raw_<track> (uint8)
+  = 42 columnas.
+  Primus/FIO2 (float32) + m_Primus/FIO2 (uint8) = 2 columnas.
+  5 bolos (ppf_bolus, remi_bolus, roc_bolus, phen_bolus, eph_bolus; float32)
+  + m_<bolo> (uint8) = 10 columnas.
+  Total = 7 + 42 + 2 + 10 = 61.
+
+6. Casos y ventanas por source/split (manifest.json)
+----------------------------------------------------
+  real          train 5437 / val 951       (12 061 757 / 2 063 800 ventanas)
+  synthetic_v5  train 8246 / val 1455      (21 056 838 / 3 825 527)
+  vaso_reinf_v5 train 415  / val 73        (1 092 529 / 193 879)
+  cf_v5         train 10476 / val 1848     (27 287 214 / 4 823 182)
+  total procesado: 28 901 casos, 0 errores.

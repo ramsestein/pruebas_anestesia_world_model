@@ -1,0 +1,112 @@
+REPORT_integridad_casos_reales.txt — auditoría de completitud y nulls/placeholders
+==============================================================================
+Generado: 2026-09-30
+
+Objeto: los 6 388 casos reales (data/real/cases/*.parquet, caseid 1..6388).
+
+------------------------------------------------------------------------------
+VEREDICTO GLOBAL
+------------------------------------------------------------------------------
+
+Los casos reales están COMPLETOS (6388/6388, contiguos, ninguno vacío, 100 %
+con fila clínica). Los NaN de las pistas son ESTRUCTURALES (muestreo disperso
+de cada dispositivo sobre una rejilla temporal irregular fusionada), no
+corrupción. NO hay columnas-placeholder globales (ninguna columna es constante
+en todos los casos). SÍ existen (1) artefactos fisiológicos heredados de
+VitalDB, (2) algunos casos con una pista "todo-cero" (sin señal útil) y (3)
+esquemas heterogéneos, todo ello natural del dataset y ya contemplado por el
+proceso de ventanas.
+
+------------------------------------------------------------------------------
+1. COMPLETITUD
+------------------------------------------------------------------------------
+
+  - 6 388 archivos de caso, caseids contiguos 1..6388 (sin huecos).
+  - Ningún archivo vacío: tamaño 12 KB .. 3.6 MB (mediana 417 KB).
+  - Cobertura clínica: 6 388/6 388 casos con fila en
+    clinical_data_enriched.parquet (0 huérfanos).
+
+------------------------------------------------------------------------------
+2. ESQUEMA (heterogéneo, natural de VitalDB)
+------------------------------------------------------------------------------
+
+  - 184 columnas distintas en total; cada caso tiene de 3 a 96 columnas.
+  - Distribución típica: la mayoría tiene 56-84 columnas; 52 casos tienen
+    <30 (casos con pocos monitores conectados).
+  - Caso extremo: caseid 3066 tiene SOLO 3 columnas (time, Primus/SET_FIO2,
+    Solar8000/BT): un caso sin monitorización fisiológica útil (solo setpoint
+    de FIO2 y temperatura). 52 casos en total con <30 columnas.
+  - Cobertura de las columnas fisiológicas críticas (fracción de casos donde
+    la columna existe):
+        Solar8000/HR          100.0 %
+        Solar8000/PLETH_SPO2  100.0 %
+        Primus/ETCO2           99.2 %
+        Primus/RR_CO2          99.1 %
+        Solar8000/BT           92.6 %
+        BIS/BIS                91.8 %
+        Primus/PIP_MBAR        94.0 %
+        Primus/TV              94.2 %
+        Solar8000/ART_MBP      58.3 %   (sin línea arterial en el resto)
+        BIS/EMG                87.3 %
+        Orchestra/PPF20_RATE   55.0 %   (sin bomba Orchestra en el resto)
+        Orchestra/RFTN20_RATE  74.7 %
+
+------------------------------------------------------------------------------
+3. NULLS (NaN) — ESTRUCTURALES, no corrupción
+------------------------------------------------------------------------------
+
+  Las pistas tienen %finito bajo (p. ej. HR 13 %, BIS 27 %) porque el parquet
+  crudo fusiona en UNA columna time los instantes de muestreo de TODOS los
+  dispositivos. Cada dispositivo solo tiene valor en sus propios instantes.
+
+  Verificación (case 0001): rejilla time con dt mediana 0.35 s (unión de
+  dispositivos); HR muestreado cada 2.0 s de mediana -> HR finito solo en el
+  18.5 % de las filas, exactamente lo esperado. El NaN NO es dato perdido: es
+  "este dispositivo no muestreó en este instante".
+
+  El proceso de ventanas (window.py) ya resuelve esto: rejilla 5 s +
+  forward-fill + máscara de plausibilidad (m=1 presente, m=0 ausente). La
+  fracción de máscara m=1 de mantenimiento real (v10 1.1) es HR 0.988,
+  BIS 0.925, ART_MBP 0.987.
+
+------------------------------------------------------------------------------
+4. PLACEHOLDERS Y ARTEFACTOS
+------------------------------------------------------------------------------
+
+  4a. Columnas constantes "legítimas" (setpoints/alarmas/canales no usados;
+      NO son corrupción):
+        Primus/FEN2O / FIN2O / FLOW_N2O  = 0.0   (sin N2O)
+        Primus/SET_INSP_PAUSE            = 0.0   (sin pausa inspiratoria)
+        Primus/SET_PIP                   = 12.0  (alarma, no medida)
+        Solar8000/VENT_SET_PCP           = 12.0  (setpoint)
+
+  4b. Pistas "todo-cero" en algunos casos (dispositivo conectado sin señal
+      útil; placeholder real de la grabación):
+        BIS/BIS   todo-cero en 276 casos  (4.7 % de los 5 867 que tienen BIS)
+        Orchestra/PPF20_RATE todo-cero en 17 casos
+        Orchestra/RFTN20_RATE todo-cero en 49 casos
+        ART_MBP/SBP/DBP todo-cero en 4-5 casos
+
+  4c. Artefactos fisiológicos (valores no plausibles, heredados de VitalDB;
+      el generador y el AE ya los conocen y los manejan por máscara/plausibilidad):
+        BIS/BIS    min -1332.6   (artefacto de electrobisturí)
+        ART_MBP    min -98       (lavado de línea arterial)
+        HR         max 306, min 0
+        ART_*      max 350
+        Estos valores no son placeholders: son el ruido real del monitor que
+        el proyecto reproduce (artefactos de línea, electrocauterio, etc.).
+
+------------------------------------------------------------------------------
+5. CONCLUSIÓN
+------------------------------------------------------------------------------
+
+  - Completitud: OK (6388/6388, contiguos, no vacíos, clínica 100 %).
+  - Información: presente en las columnas críticas (HR/SpO2 100 %, BIS 92 %,
+    ART 58 % por ausencia real de línea arterial).
+  - Nulls: estructurales (muestreo disperso), resueltos por el windowing.
+  - Placeholders: solo canales no usados (N2O=0), setpoints constantes
+    (legítimos) y pistas todo-cero en casos aislados (BIS en 276 casos).
+  - No hay evidencia de corrupción ni de datos falsificados/reemplazados.
+
+  Artefactos: data/diagnostics/v10_real_null_placeholder_audit.json
+  (auditoría completa por columna) y v10_real_cases_audit.json.

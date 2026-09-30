@@ -1,0 +1,123 @@
+REPORT_v9.txt — confirmar la transferencia y recuperar la integridad de datos
+==============================================================================
+Generado: 2026-09-28
+
+------------------------------------------------------------------------------
+PARTE 1 — INTEGRIDAD DE DATOS
+------------------------------------------------------------------------------
+
+1.1  VEREDICTO: la cohorte REAL de windows_v4 es EQUIVALENTE a la de
+     windows_v2.
+
+     - Celdas reales (todas las fases): train 12 061 757 / val 2 063 800
+       (= 14 125 557). IDÉNTICO al registro de windows_v2 en
+       manifest_tokens.json.
+     - Casos reales: 6 388, caseids contiguos 1..6388.
+     - Sujetos reales (split.parquet, por subjectid): train 5 177 / val 914
+       = 6 091 (coincide con el historial).
+     - Exclusiones: 35 sin marcas de fase + [4476] sin celdas (misma lista).
+     - Fracción de máscara m=1: HR 0.9878, ART_MBP 0.9874, BIS 0.9247, etc.
+     - split.parquet sha256 ACTUAL 6d952d03… ≠ referencia 40935d1c…, por la
+       única razón esperada: el fichero ahora cubre las cohortes sintéticas
+       v7 (no v5); la porción real es idéntica.
+     - Detalle completo: REPORT_v9_datos.txt y data/diagnostics/
+       v9_real_equivalence.json.
+
+     => El decoder congelado del AE y los tokens SÍ son consistentes con los
+        datos actuales. NO hay que reventanear la real ni reentrenar el AE.
+
+1.2  INVENTARIO (presente / perdido / reconstruido): detalle en
+     REPORT_v9_datos.txt. Resumen: real y v7 presentes; v5 y v6 perdidos;
+     windows_v2/v3 perdidos, windows_v4 presente; tokens_v1 y ae_v1
+     presentes. Scripts cerrados presentes, salvo v6_validate.py
+     (reconstruido en v8).
+
+1.3  RECONSTRUCCIÓN DE v6_validate.py VALIDADA numéricamente.
+     Re-ejecutando V1-V4 sobre la cohorte real de windows_v4 y las cohortes
+     v7, los valores reproducen la cache v7_validate_results.json
+     EXACTAMENTE: V1 0.7654100018610026, V2 0.9766680224462633 /
+     0.9949771853302151, V3 0.146515/0.05, V4 (BT 0.9293464414733824, EMG
+     0.07831232760289113, PIP 0.09031213878005746). Tests en
+     tests/test_v9_reconstruction.py (2 passed). => los números V1-V7 de v7
+     NO quedan anulados.
+
+1.4  COPIA DE SEGURIDAD: manifiesto global data/diagnostics/
+     v9_manifest_global.json (sha256 de todos los artefactos); 13 scripts
+     cerrados copiados a D:/data/anestesia_world/backup_scripts_20260928/.
+
+------------------------------------------------------------------------------
+PARTE 2 — CONFUNDIDOR DE LA TRANSFERENCIA
+------------------------------------------------------------------------------
+
+2.1  CONTROL D2': TRANSFERENCIA CONFIRMADA.
+
+     D2' (inicialización aleatoria, lr=1e-4, tope 56 épocas, misma paciencia
+     y batch que el fine-tuning de D3) alcanza best_val_loss 1.117123.
+     SALVEDAD: D2' NO convergió (mejor época 55 de 56, tope agotado), así que
+     NO es el control limpio. El control CONVERGIDO es D2 (parada temprana en
+     la época 18, best_val_loss 1.110441), y D3 también bate a D2 en 14 de 15
+     comparaciones. D2' corrobora la transferencia CON ESA SALVEDAD.
+
+     D3 bate a D2' en 14 de 15 comparaciones (5 variables x 3 horizontes).
+     La ventaja de D3 NO es del optimizador: es transferencia. El generador
+     queda cerrado en v7.
+
+     (Mejora HR a 300 s: D3 7.548 vs D2 11.379 MAE; ratio 1.579 vs 2.380.)
+
+2.2  D3 con escalador de objetivo real_calib (D3'): NO mejora el MAE; la
+     pérdida sí se re-escala (best_val_loss 1.114606 vs 6.275611 de D3,
+     confirmando que D3 ajustaba en un espacio mal escalado por usar la std
+     sintética de deltas, 2.7-3x menor). El MAE de D3' queda ligeramente por
+     encima de D3 (h60 HR 7.948 vs 7.548), lo que REFUERZA 2.1: la ventaja de
+     D3 viene de los pesos de D1, no del escalado.
+
+2.3  MAGNITUD ABSOLUTA (que quede escrito): la transferencia existe, pero el
+     modelo TODAVÍA NO FUNCIONA. D3 sigue siendo 1.58x PEOR que la
+     persistencia en HR a 300 s (MAE 7.548 vs 4.780), y peor en todas las
+     variables móviles en todos los horizontes (todos los ratios vs
+     persistencia > 1). La transferencia reduce el error respecto de D2/D2',
+     pero ningún modelo bate a la referencia trivial.
+
+2.4  HALLAZGO PROPIO (empírico): la pérdida de validación a un paso NO ordena
+     los modelos como el error de rollout. D3 tiene la peor val_loss
+     (6.2756, por el escalado sintético) y el mejor rollout; D3' tiene
+     val_loss comparable a D2 (1.1146) y peor rollout que D3. Justificación
+     EMPÍRICA de la pérdida desplegada multi-paso del contrato del modelo de
+     transición; no estaba en la sonda.
+
+     tabla (val_loss a 1 paso vs ratio de rollout a 60 pasos en HR):
+
+         modelo   val_loss(1 paso)   ratio HR@300s vs persistencia
+         D2       1.1104             2.380
+         D2'      1.1171             2.209
+         D3       6.2756  (peor)     1.579  (mejor)
+         D3'      1.1146             1.663
+
+     Ordenar por val_loss daría D2 < D2' < D3' << D3; ordenar por rollout da
+     exactamente lo contrario (D3 < D3' < D2' < D2). El error a un paso es
+     métrica engañosa cuando el objetivo es el despliegue autoregresivo.
+
+2.5  HALLAZGO CUANTIFICADO (dinámica): los incrementos sintéticos tienen ~1/3
+     de la variabilidad de los reales. std de deltas: HR 1.540 (sint) vs
+     4.1192 (real) = ratio 0.37; BIS 0.8952 vs 2.7503 = ratio 0.33. Brecha de
+     dinámica real y medida; documentada, no corregida (ver 4 de
+     LIMITACIONES_GENERADOR_v7.md).
+
+------------------------------------------------------------------------------
+PARTE 3 — LIMITACIONES CONOCIDAS DEL GENERADOR v7
+------------------------------------------------------------------------------
+
+     Documentadas en LIMITACIONES_GENERADOR_v7.md: patrón de mantenimiento
+     descuadrado, identidad de presiones arteriales violada, soporte discreto
+     estrecho, varianza de incrementos 3x menor, acoplamiento PIP-TV, BT de
+     la v7 en disco sin revertir, y V1/V2/V3 registrados.
+
+------------------------------------------------------------------------------
+PROTOCOLO
+------------------------------------------------------------------------------
+
+     Las secciones de pytest en los informes embeben ahora salida literal
+     (rojo y verde). Los tests unitarios de la sonda y de la reconstrucción
+     pasan (7 passed). Los tests de test_v6_validate.py que requieren
+     windows_v2 quedan como FALLA de datos (no de código): windows_v2 está
+     perdido y su ausencia es un hallazgo, no un fallo a ocultar.

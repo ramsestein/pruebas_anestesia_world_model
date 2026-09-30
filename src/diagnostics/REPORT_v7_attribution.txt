@@ -1,0 +1,195 @@
+REPORT_v7_attribution.txt — atribución de la sonda no lineal (PASO A)
+==============================================================================
+
+0. Contexto
+----------------------------------------
+  v7_attribution.py sha256 41a3dd5e66de1717922945e7a66dbee2b05407d4e0b724eed2823595c0cdcaee
+  generado             2026-09-24T09:10:08.504047+00:00
+  holdout caseids      378
+  celdas real / v6     627296 / 8401783
+
+1. Supuestos numerados
+----------------------------------------
+  1. A1-A4 replican el protocolo del gate 6 con HistGradientBoostingClassifier(max_iter=300, learning_rate=0.1, max_leaf_nodes=31, random_state=0), GroupKFold 5 por caseid, StandardScaler por fold, 200 000 celdas (100 000 real_holdout + 100 000 v6) semilla 9876, imputación máscara=0 por la media.
+  2. real_holdout es la partición 40 % por caseid (semilla 20260922) del real de val; v6 es la unión de synthetic_v6, vaso_reinf_v6 y cf_v6 en windows_v3.
+  3. Los deltas son t - t_menos_1 dentro del mismo caso (rejilla contigua 5 s); la primera celda y los pares con máscara 0 se imputan con la media del delta.
+  4. A5 usa celdas con máscara 1 y valor finito, por cohorte (real_holdout vs unión v6). 'entero exacto' = |v - round(v)| <= 1e-6. 'frac_nochg' = fracción de celdas cuyo valor coincide con la celda anterior válida del mismo caso.
+  5. A6 correlación de Pearson sobre valores imputados (máscara=0 -> media). La información mutua se estima por histograma 2D con discretización en deciles (10 cuantiles) por variable, sobre las mismas 200 000 celdas.
+  6. Las exclusiones son las del manifest de tokens_v1 (35 sin marcas de fase + el caseid 4476 sin celdas, 36 en total); solo celdas phase_from_clinical=maintenance.
+
+2. Salida literal de pytest (ROJO)
+----------------------------------------
+
+=================================== ERRORS ====================================
+________________ ERROR collecting tests/test_v7_attribution.py ________________
+ImportError while importing test module 'C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\tests\test_v7_attribution.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_v7_attribution.py:19: in <module>
+    from diagnostics import v7_attribution as va  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ImportError: cannot import name 'v7_attribution' from 'diagnostics' (C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\src\diagnostics\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_v7_attribution.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.49s
+
+
+3. Salida literal de pytest (VERDE)
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 10 items
+
+tests/test_v7_attribution.py::test_a_pairwise_mutual_information_scale PASSED [ 10%]
+tests/test_v7_attribution.py::test_b_corr_matrix_difference_frobenius PASSED [ 20%]
+tests/test_v7_attribution.py::test_c_top_discrepancies_sorted PASSED     [ 30%]
+tests/test_v7_attribution.py::test_d_quantization_table_columns PASSED   [ 40%]
+tests/test_v7_attribution.py::test_e_hgb_ablation_drop_sorted PASSED     [ 50%]
+tests/test_v7_attribution.py::test_f_a1_a3_present PASSED                [ 60%]
+tests/test_v7_attribution.py::test_g_a4_deltas_present PASSED            [ 70%]
+tests/test_v7_attribution.py::test_h_a5_quantization_present PASSED      [ 80%]
+tests/test_v7_attribution.py::test_i_a6_corr_mi_present PASSED           [ 90%]
+tests/test_v7_attribution.py::test_j_report_written PASSED               [100%]
+
+============================= 10 passed in 0.53s ==============================
+
+
+4. A1 — Univariante HGB (14 valores)
+----------------------------------------
+   #  variable                    AUC
+   1  Solar8000/BT             0.7620
+   2  Primus/MV                0.7036
+   3  Solar8000/ART_DBP        0.6893
+   4  Primus/ETCO2             0.6695
+   5  BIS/BIS                  0.6465
+   6  Solar8000/ART_MBP        0.6439
+   7  Solar8000/PLETH_SPO2     0.6232
+   8  Primus/RR_CO2            0.6119
+   9  Solar8000/ART_SBP        0.6028
+  10  Solar8000/HR             0.5565
+  11  BIS/EMG                  0.5400
+  12  Primus/PIP_MBAR          0.5236
+  13  Primus/TV                0.5192
+  14  Primus/PEEP_MBAR         0.4910
+
+5. A2 — Acumulativo HGB (en el orden de A1)
+----------------------------------------
+   k       AUC  variables
+   1    0.7620  Solar8000/BT
+   2    0.8400  Solar8000/BT + Primus/MV
+   3    0.8889  Solar8000/BT + Primus/MV + Solar8000/ART_DBP
+   4    0.9092  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2
+   5    0.9326  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS
+   6    0.9436  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP
+   7    0.9486  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2
+   8    0.9489  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2
+   9    0.9668  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2 + Solar8000/ART_SBP
+  10    0.9686  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Solar8000/HR
+  11    0.9688  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Solar8000/HR + BIS/EMG
+  12    0.9718  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Solar8000/HR + BIS/EMG + Primus/PIP_MBAR
+  13    0.9705  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Solar8000/HR + BIS/EMG + Primus/PIP_MBAR + Primus/TV
+  14    0.9743  Solar8000/BT + Primus/MV + Solar8000/ART_DBP + Primus/ETCO2 + BIS/BIS + Solar8000/ART_MBP + Solar8000/PLETH_SPO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Solar8000/HR + BIS/EMG + Primus/PIP_MBAR + Primus/TV + Primus/PEEP_MBAR
+
+6. A3 — Ablación HGB (14 menos una)
+----------------------------------------
+  variable                    AUC    caida
+  Solar8000/ART_SBP        0.9612   0.0131
+  Solar8000/BT             0.9619   0.0124
+  Solar8000/ART_DBP        0.9671   0.0072
+  BIS/BIS                  0.9683   0.0059
+  Primus/MV                0.9690   0.0053
+  Primus/ETCO2             0.9693   0.0050
+  Primus/PEEP_MBAR         0.9705   0.0038
+  Primus/PIP_MBAR          0.9714   0.0029
+  Solar8000/PLETH_SPO2     0.9722   0.0021
+  Primus/RR_CO2            0.9725   0.0018
+  Solar8000/HR             0.9731   0.0012
+  Solar8000/ART_MBP        0.9735   0.0008
+  Primus/TV                0.9739   0.0004
+  BIS/EMG                  0.9744  -0.0001
+
+7. A4 — HGB 28 (valores+deltas)
+----------------------------------------
+  full 28 AUC =   0.9977  (full 14 =   0.9743)
+  Univariante HGB sobre los 14 deltas:
+    BIS/EMG                  0.8076
+    Primus/MV                0.7251
+    BIS/BIS                  0.7180
+    Primus/TV                0.7134
+    Solar8000/ART_SBP        0.6845
+    Solar8000/PLETH_SPO2     0.6805
+    Primus/RR_CO2            0.6437
+    Primus/ETCO2             0.6346
+    Solar8000/ART_MBP        0.6284
+    Solar8000/ART_DBP        0.6282
+    Primus/PIP_MBAR          0.6200
+    Solar8000/HR             0.5810
+    Solar8000/BT             0.5595
+    Primus/PEEP_MBAR         0.5449
+  Ablación del vector 28 (top caídas):
+    BIS/EMG_delta                0.9964   0.0013
+    BIS/BIS_delta                0.9969   0.0008
+    Solar8000/ART_SBP            0.9969   0.0008
+    Primus/MV_delta              0.9970   0.0007
+    Solar8000/BT                 0.9970   0.0007
+    Primus/TV_delta              0.9971   0.0006
+    BIS/BIS                      0.9971   0.0006
+    Solar8000/PLETH_SPO2_delta   0.9971   0.0006
+    Primus/RR_CO2_delta          0.9972   0.0005
+    Solar8000/ART_DBP            0.9973   0.0004
+    Solar8000/ART_SBP_delta      0.9973   0.0004
+    BIS/EMG                      0.9974   0.0003
+    Primus/MV                    0.9974   0.0003
+    Primus/PEEP_MBAR             0.9975   0.0002
+
+8. A5 — Cuantización lado a lado (real_holdout vs v6)
+----------------------------------------
+  variable                r_ndist  r_int  r_mininc  r_nochg |  s_ndist  s_int  s_mininc  s_nochg
+  BIS/BIS                     869 0.1183    0.1000   0.1191 |      660 0.0997    0.1000   0.0504
+  Solar8000/HR                181 1.0000    1.0000   0.5260 |      142 1.0000    1.0000   0.6389
+  Solar8000/PLETH_SPO2         42 1.0000    1.0000   0.9350 |       28 1.0000    1.0000   0.6121
+  Primus/ETCO2                 65 1.0000    1.0000   0.7358 |       71 1.0000    1.0000   0.6165
+  Primus/PEEP_MBAR             20 1.0000    1.0000   0.9176 |       16 1.0000    1.0000   0.9873
+  Primus/PIP_MBAR              51 1.0000    1.0000   0.7499 |       43 1.0000    1.0000   0.5575
+  Primus/MV                   173 0.1149    0.1000   0.8208 |      149 0.1001    0.1000   0.4497
+  Primus/TV                  1046 1.0000    1.0000   0.3213 |      999 1.0000    1.0000   0.3986
+  Primus/RR_CO2                48 1.0000    1.0000   0.9779 |       41 1.0000    1.0000   0.7050
+  Solar8000/BT                142 0.1025    0.1000   0.9747 |      108 0.0990    0.1000   0.8862
+  Solar8000/ART_MBP           297 1.0000    1.0000   0.5484 |      166 1.0000    1.0000   0.5489
+  Solar8000/ART_SBP           308 1.0000    1.0000   0.4441 |      171 1.0000    1.0000   0.5470
+  Solar8000/ART_DBP           277 1.0000    1.0000   0.5331 |      170 1.0000    1.0000   0.5473
+  BIS/EMG                    4408 0.0103    0.0100   0.0854 |     7074 0.0101    0.0100   0.0200
+
+9. A6 — D7: correlación e información mutua
+----------------------------------------
+  Frobenius ||corr_real - corr_v6|| =   1.7638
+  Top 10 pares con mayor discrepancia de correlación:
+    Primus/PIP_MBAR|Primus/TV                  -0.3939
+    Primus/PIP_MBAR|Primus/RR_CO2              +0.3194
+    BIS/BIS|Solar8000/ART_DBP                  -0.2887
+    Solar8000/HR|Solar8000/ART_SBP             -0.2665
+    Primus/PEEP_MBAR|Primus/TV                 +0.2631
+    BIS/BIS|Solar8000/ART_MBP                  -0.2584
+    Primus/PIP_MBAR|Solar8000/ART_DBP          +0.2453
+    Solar8000/HR|Solar8000/ART_MBP             -0.2379
+    Solar8000/ART_SBP|Solar8000/ART_DBP        -0.2374
+    Solar8000/HR|Solar8000/ART_DBP             -0.2181
+  Top 10 pares con mayor discrepancia de información mutua:
+    Solar8000/ART_SBP|Solar8000/ART_DBP        +0.7676
+    Solar8000/ART_MBP|Solar8000/ART_SBP        +0.4970
+    Solar8000/ART_MBP|Solar8000/ART_DBP        +0.3437
+    Primus/PIP_MBAR|Primus/TV                  +0.1915
+    Primus/PIP_MBAR|Primus/MV                  +0.0982
+    BIS/BIS|Solar8000/ART_MBP                  +0.0852
+    BIS/BIS|Solar8000/ART_DBP                  +0.0842
+    BIS/BIS|Solar8000/ART_SBP                  +0.0813
+    Primus/MV|Primus/TV                        -0.0636
+    Primus/PIP_MBAR|Primus/RR_CO2              +0.0544
+

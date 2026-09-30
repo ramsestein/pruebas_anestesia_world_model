@@ -1,0 +1,15 @@
+﻿[v7_transfer_probe] v7: cargando real (val) con t
+[v7_transfer_probe] v7: real 945 caseids (567 calib / 378 holdout)
+[v7_transfer_probe] v7: cargando sintÚtico (val)
+[v7_transfer_probe] v7: construyendo secuencias por caso
+[v7_transfer_probe] v7: pares synth=8506509 calib=885210 holdout_casos=378
+[v7_transfer_probe] v7: entrenando D1/D2/D3
+{
+  "sanity_passed": false,
+  "d1_beats_persistence_h1": false,
+  "d3_beats_d2_h60": true,
+  "d3_wins_vs_d2prime": 14,
+  "n_comparisons": 15,
+  "transfer_confirmed": true,
+  "continue": true
+}

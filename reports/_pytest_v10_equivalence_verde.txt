@@ -1,0 +1,13 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 4 items
+
+tests/test_v10_equivalence.py::test_a_gate2_real_matches_manifest PASSED [ 25%]
+tests/test_v10_equivalence.py::test_b_gate3_matches_manifest PASSED      [ 50%]
+tests/test_v10_equivalence.py::test_c_marginales_val_match_d4 PASSED     [ 75%]
+tests/test_v10_equivalence.py::test_d_exclusiones_son_36 PASSED          [100%]
+
+============================== 4 passed in 0.03s ==============================

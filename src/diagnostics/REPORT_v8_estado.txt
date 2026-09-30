@@ -1,0 +1,72 @@
+REPORT_v8_estado.txt — estado del código y de los datos (PASO 3.1)
+==============================================================================
+
+Generado: 2026-09-28. Este documento resuelve el PASO 3 (estado y procedencia)
+del enunciado v8, antes de cualquier interpretación.
+
+------------------------------------------------------------------------------
+3.1  CÓDIGO vs DATOS — C3 (BT)
+------------------------------------------------------------------------------
+
+Estado del CÓDIGO (`src/anessim/simulate.py`, sha256 23fe6080c9c3b519…):
+
+  La corrección C3 (ensanchar el inicio de BT a normal(36.0, 0.9)) está
+  REVERTIDA en el código. La línea actual es:
+
+      _bt_start = self.rng_sensor.uniform(36.5, 37.4)   # comportamiento v6
+
+  con el comentario explícito "NOTA v7 (C3 REVERTIDO): ensanchar _bt_start a
+  normal(36.0, 0.9) empeoró la W1 de BT (0.30 -> 0.93) y reabrió V1
+  (0.664 -> 0.765). Se restaura el unif(36.5, 37.4) de v6".
+
+Estado de los DATOS (cohorte v7 en disco, `data/windows_v4` +
+`data/synthetic_v7`):
+
+  La W1 normalizada de BT reportada para la cohorte v7 en
+  `data/diagnostics/v7_validate_results.json` (v4.w1_norm.Solar8000/BT) es
+  0.9293464…, es decir, el valor MALO (la versión ensanchada normal(36.0, 0.9)).
+  Además synth_stats de BT: mean 34.92 / std 1.26 frente a real 35.77 / 0.95
+  (la cohorte en disco deriva ~0.85 °C hacia abajo).
+
+Conclusión: EL CÓDIGO Y LOS DATOS NO SE CORRESPONDEN.
+  - `simulate.py` actual: BT v6 (uniform 36.5-37.4), C3 revertido.
+  - `synthetic_v7`/`windows_v4` en disco: BT generado con el código ensanchado
+    (normal(36.0, 0.9)) que ya no existe.
+
+DECISIÓN: se DOCUMENTA que la cohorte v7 en disco corresponde a un código que
+  ya no existe (no se regenera). Regenerar la base v7 (10000 casos) + CF
+  (6345 pares) no es factible en esta sesión y no es necesario para reparar la
+  sonda (PASO 1). La próxima regeneración con el código revertido dejará los
+  datos y el código coherentes; hasta entonces, cualquier W1/AUC de BT sobre la
+  v7 en disco refleja la versión ensanchada.
+
+------------------------------------------------------------------------------
+3.1bis  DISPONIBILIDAD DE DATOS POR COHORTE (descubierto al correr la sonda)
+------------------------------------------------------------------------------
+
+  Solo la cohorte v7 está disponible en el workspace, en forma windowed:
+
+      data/windows_v4/windows/source=real|synthetic_v7|cf_v7|vaso_reinf_v7
+      data/synthetic_v7, data/cf_v7, data/synthetic_vaso_reinf_v7, data/real
+
+  Cohorte v5: el windowed `data/windows_v2` NO existe en el repo (en D: solo
+  hay shards .npz crudos bajo `windows_v5`, no el formato `windows/source=*`).
+  Cohorte v6: `data/windows_v3` NO existe en ninguna parte.
+
+  Por tanto, la sonda reparada (PASO 1.8) solo pudo ejecutarse sobre v7.
+  Las cohortes v5 y v6 no se pueden sondear con los datos presentes.
+
+------------------------------------------------------------------------------
+3.2  RECONSTRUCCIÓN DE v6_validate.py (procedencia)
+------------------------------------------------------------------------------
+
+  `src/diagnostics/v6_validate.py` se había PERDIDO (solo quedaba el .pyc en
+  __pycache__; Python no importa pyc huérfanos). Sin él, `v7_transfer_probe`,
+  `v7_validate` y `v7_attribution` no importaban: esta era la causa raíz del
+  "(no disponible)" en los informes.
+
+  Se RECONSTRUYÓ el módulo desde el bytecode (desensamblado función a función)
+  con el comportamiento de cómputo V1-V7 idéntico al original, y con
+  `write_report` PARAMETRIZADO (cohort + conclusión generada a partir de los
+  números, no de texto fijo). sha256 nuevo: 1cf8afb86e6160f3… (distinto del
+  6b7c4175… de la cache v7_validate, que referencia el .py perdido).

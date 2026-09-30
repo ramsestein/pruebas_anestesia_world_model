@@ -1,0 +1,114 @@
+DIAGNOSTICO DE EJES (20 casos por cohorte)
+cohorte | caseid | len(crudo) | paso_med_crudo | len(rejilla) | origen_ok | paso_ok
+real | 1 | 29531 | 0.3500000000003638 | 2170 | False | False
+real | 2 | 42928 | 0.2999999999992724 | 2984 | False | False
+real | 3 | 16369 | 0.1895996856687816 | 842 | False | False
+real | 4 | 74010 | 0.24200010299682617 | 4044 | False | False
+real | 5 | 88353 | 0.19399995803905767 | 4307 | False | False
+real | 6 | 11188 | 0.39600008010847887 | 950 | False | False
+real | 7 | 57322 | 0.16299995422377833 | 2868 | False | False
+real | 8 | 16942 | 0.2740002822874885 | 1147 | False | False
+real | 9 | 18487 | 0.19009977340701312 | 896 | False | False
+real | 10 | 84409 | 0.19900012016296387 | 4198 | False | False
+real | 11 | 8068 | 0.5969999504088719 | 1023 | False | False
+real | 12 | 110540 | 0.19310001373287378 | 6241 | False | False
+real | 13 | 48891 | 0.14200004577628533 | 2140 | False | False
+real | 14 | 15032 | 0.161000003814479 | 823 | False | False
+real | 15 | 2992 | 1.0990000000000464 | 641 | False | False
+real | 16 | 53725 | 0.1670000648500718 | 2573 | False | False
+real | 17 | 85571 | 0.19000000000050932 | 4068 | False | False
+real | 18 | 11901 | 0.2300000000000182 | 796 | False | False
+real | 19 | 131994 | 0.15899991989135742 | 5514 | False | False
+real | 20 | 124748 | 0.15500030517614505 | 5278 | False | False
+synthetic_v5 | 40001 | 16397 | 0.5 | 1616 | False | False
+synthetic_v5 | 40002 | 21851 | 0.5 | 2161 | False | False
+synthetic_v5 | 40003 | 12084 | 0.5 | 1185 | False | False
+synthetic_v5 | 40004 | 15054 | 0.5 | 1482 | False | False
+synthetic_v5 | 40005 | 16986 | 0.5 | 1675 | False | False
+synthetic_v5 | 40006 | 15361 | 0.5 | 1512 | False | False
+synthetic_v5 | 40007 | 9374 | 0.5 | 914 | False | False
+synthetic_v5 | 40009 | 29724 | 0.5 | 2949 | False | False
+synthetic_v5 | 40010 | 39390 | 0.5 | 3915 | False | False
+synthetic_v5 | 40011 | 57601 | 0.5 | 5736 | False | False
+synthetic_v5 | 40012 | 40625 | 0.5 | 4039 | False | False
+synthetic_v5 | 40013 | 18277 | 0.5 | 1804 | False | False
+synthetic_v5 | 40014 | 37170 | 0.5 | 3693 | False | False
+synthetic_v5 | 40015 | 15004 | 0.5 | 1477 | False | False
+synthetic_v5 | 40016 | 45972 | 0.5 | 4573 | False | False
+synthetic_v5 | 40017 | 29135 | 0.5 | 2890 | False | False
+synthetic_v5 | 40018 | 31063 | 0.5 | 3082 | False | False
+synthetic_v5 | 40019 | 23940 | 0.5 | 2370 | False | False
+synthetic_v5 | 40020 | 15096 | 0.5 | 1486 | False | False
+synthetic_v5 | 40021 | 7421 | 0.5 | 718 | False | False
+cf_v5 | 70001 | 27404 | 0.5 | 2717 | False | False
+cf_v5 | 70002 | 27404 | 0.5 | 2717 | False | False
+cf_v5 | 70003 | 18364 | 0.5 | 1813 | False | False
+cf_v5 | 70004 | 18364 | 0.5 | 1813 | False | False
+cf_v5 | 70005 | 30340 | 0.5 | 3010 | False | False
+cf_v5 | 70006 | 30340 | 0.5 | 3010 | False | False
+cf_v5 | 70007 | 39893 | 0.5 | 3965 | False | False
+cf_v5 | 70008 | 39893 | 0.5 | 3965 | False | False
+cf_v5 | 70009 | 21218 | 0.5 | 2098 | False | False
+cf_v5 | 70010 | 21218 | 0.5 | 2098 | False | False
+cf_v5 | 70011 | 19518 | 0.5 | 1928 | False | False
+cf_v5 | 70012 | 19518 | 0.5 | 1928 | False | False
+cf_v5 | 70013 | 20666 | 0.5 | 2043 | False | False
+cf_v5 | 70014 | 20666 | 0.5 | 2043 | False | False
+cf_v5 | 70015 | 38921 | 0.5 | 3868 | False | False
+cf_v5 | 70016 | 38921 | 0.5 | 3868 | False | False
+cf_v5 | 70017 | 16644 | 0.5 | 1641 | False | False
+cf_v5 | 70018 | 16644 | 0.5 | 1641 | False | False
+cf_v5 | 70019 | 57601 | 0.5 | 5736 | False | False
+cf_v5 | 70020 | 57601 | 0.5 | 5736 | False | False
+vaso_reinf_v5 | 61001 | 30379 | 0.5 | 3014 | False | False
+vaso_reinf_v5 | 61003 | 23215 | 0.5 | 2298 | False | False
+vaso_reinf_v5 | 61004 | 32047 | 0.5 | 3181 | False | False
+vaso_reinf_v5 | 61005 | 28965 | 0.5 | 2873 | False | False
+vaso_reinf_v5 | 61006 | 19711 | 0.5 | 1947 | False | False
+vaso_reinf_v5 | 61007 | 31282 | 0.5 | 3104 | False | False
+vaso_reinf_v5 | 61008 | 7734 | 0.5 | 750 | False | False
+vaso_reinf_v5 | 61009 | 31263 | 0.5 | 3102 | False | False
+vaso_reinf_v5 | 61010 | 28587 | 0.5 | 2835 | False | False
+vaso_reinf_v5 | 61011 | 19571 | 0.5 | 1933 | False | False
+vaso_reinf_v5 | 61012 | 34596 | 0.5 | 3436 | False | False
+vaso_reinf_v5 | 61013 | 8655 | 0.5 | 842 | False | False
+vaso_reinf_v5 | 61014 | 29060 | 0.5 | 2882 | False | False
+vaso_reinf_v5 | 61015 | 15082 | 0.5 | 1484 | False | False
+vaso_reinf_v5 | 61016 | 45219 | 0.5 | 4498 | False | False
+vaso_reinf_v5 | 61017 | 42163 | 0.5 | 4192 | False | False
+vaso_reinf_v5 | 61018 | 48310 | 0.5 | 4807 | False | False
+vaso_reinf_v5 | 61019 | 55942 | 0.5 | 5570 | False | False
+vaso_reinf_v5 | 61020 | 23063 | 0.5 | 2282 | False | False
+vaso_reinf_v5 | 61021 | 23534 | 0.5 | 2330 | False | False
+
+NUMEROS ANTES (data/tokens_v1 iteracion 1)
+conteos: {"source=cf_v5/split=train": 2163342, "source=cf_v5/split=val": 4579246, "source=real/split=train": 737422, "source=real/split=val": 1509325, "source=synthetic_v5/split=train": 1667633, "source=synthetic_v5/split=val": 3633467, "source=vaso_reinf_v5/split=train": 86666, "source=vaso_reinf_v5/split=val": 184243}
+
+Fracción proxy=0/1 y mask=2 por item x cohorte (train+val agregado):
+  vent fio2   real           setpoint=0.830 proxy=0.166 mask2=0.004
+  vent fio2   synthetic_v5   setpoint=0.684 proxy=0.291 mask2=0.025
+  vent fio2   cf_v5          setpoint=0.685 proxy=0.292 mask2=0.023
+  vent fio2   vaso_reinf_v5  setpoint=0.685 proxy=0.292 mask2=0.023
+  vent tv     real           setpoint=0.445 proxy=0.531 mask2=0.025
+  vent tv     synthetic_v5   setpoint=0.684 proxy=0.275 mask2=0.040
+  vent tv     cf_v5          setpoint=0.685 proxy=0.292 mask2=0.023
+  vent tv     vaso_reinf_v5  setpoint=0.685 proxy=0.292 mask2=0.023
+  vent rr     real           setpoint=0.446 proxy=0.547 mask2=0.007
+  vent rr     synthetic_v5   setpoint=0.684 proxy=0.291 mask2=0.025
+  vent rr     cf_v5          setpoint=0.685 proxy=0.292 mask2=0.023
+  vent rr     vaso_reinf_v5  setpoint=0.685 proxy=0.291 mask2=0.023
+  vent pip    real           setpoint=0.444 proxy=0.529 mask2=0.027
+  vent pip    synthetic_v5   setpoint=0.684 proxy=0.275 mask2=0.041
+  vent pip    cf_v5          setpoint=0.685 proxy=0.292 mask2=0.023
+  vent pip    vaso_reinf_v5  setpoint=0.685 proxy=0.292 mask2=0.023
+  vent peep   real           setpoint=0.446 proxy=0.526 mask2=0.028
+  vent peep   synthetic_v5   setpoint=0.684 proxy=0.275 mask2=0.041
+  vent peep   cf_v5          setpoint=0.685 proxy=0.292 mask2=0.023
+  vent peep   vaso_reinf_v5  setpoint=0.685 proxy=0.292 mask2=0.023
+
+KS ventilación train real vs synthetic_v5 (antes):
+  vent fio2   KS=0.496043 n_real=732552 n_synth=1623238
+  vent tv     KS=0.261476 n_real=718506 n_synth=1595729
+  vent rr     KS=0.417088 n_real=730043 n_synth=1622634
+  vent pip    KS=0.292257 n_real=718194 n_synth=1595167
+  vent peep   KS=0.500587 n_real=716833 n_synth=1595186

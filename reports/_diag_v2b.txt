@@ -1,0 +1,28 @@
+ABLACION GATE 6 (sondeo de fuente, val, 5-fold, real vs resto)
+  completo (12 items)          : 0.5662
+  sin emop:0 + emop:1 (10 items): 0.5000
+  sin grupo asa (7 items)       : 0.5662
+  n_val=4327 n_real=951 n_synth=3376
+
+POBLADO POR COHORTE (setpoint x cohorte, por CASOS)
+setpoint | cohorte | n_casos | fraccion_col_existe | fraccion_con_valor
+  fio2  | real           | 6388 | 0.947 | 0.947
+  fio2  | synthetic_v5   | 10000 | 1.000 | 1.000
+  fio2  | vaso_reinf_v5  | 500 | 1.000 | 1.000
+  fio2  | cf_v5          | 12690 | 1.000 | 1.000
+  tv    | real           | 6388 | 0.933 | 0.933
+  tv    | synthetic_v5   | 10000 | 1.000 | 1.000
+  tv    | vaso_reinf_v5  | 500 | 1.000 | 1.000
+  tv    | cf_v5          | 12690 | 1.000 | 1.000
+  rr    | real           | 6388 | 0.936 | 0.936
+  rr    | synthetic_v5   | 10000 | 1.000 | 1.000
+  rr    | vaso_reinf_v5  | 500 | 1.000 | 1.000
+  rr    | cf_v5          | 12690 | 1.000 | 1.000
+  pip   | real           | 6388 | 0.933 | 0.933
+  pip   | synthetic_v5   | 10000 | 1.000 | 1.000
+  pip   | vaso_reinf_v5  | 500 | 1.000 | 1.000
+  pip   | cf_v5          | 12690 | 1.000 | 1.000
+  peep  | real           | 6388 | 0.936 | 0.936
+  peep  | synthetic_v5   | 10000 | 1.000 | 1.000
+  peep  | vaso_reinf_v5  | 500 | 1.000 | 1.000
+  peep  | cf_v5          | 12690 | 1.000 | 1.000

@@ -1,0 +1,257 @@
+TABLA GATE 1 - cobertura (fraccion de ventanas por estado de mascara)
+drug propofol:
+    real           train  0=0.542 1=0.000 2=0.458
+    real           val    0=0.565 1=0.000 2=0.435
+    synthetic_v5   train  0=1.000 1=0.000 2=0.000
+    synthetic_v5   val    0=1.000 1=0.000 2=0.000
+    cf_v5          train  0=1.000 1=0.000 2=0.000
+    cf_v5          val    0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  train  0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  val    0=1.000 1=0.000 2=0.000
+drug remifentanilo:
+    real           train  0=0.795 1=0.000 2=0.205
+    real           val    0=0.821 1=0.000 2=0.179
+    synthetic_v5   train  0=1.000 1=0.000 2=0.000
+    synthetic_v5   val    0=1.000 1=0.000 2=0.000
+    cf_v5          train  0=1.000 1=0.000 2=0.000
+    cf_v5          val    0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  train  0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  val    0=1.000 1=0.000 2=0.000
+drug sevoflurano:
+    real           train  0=0.990 1=0.000 2=0.010
+    real           val    0=0.995 1=0.000 2=0.005
+    synthetic_v5   train  0=0.961 1=0.000 2=0.039
+    synthetic_v5   val    0=0.963 1=0.000 2=0.037
+    cf_v5          train  0=0.966 1=0.000 2=0.034
+    cf_v5          val    0=0.969 1=0.000 2=0.031
+    vaso_reinf_v5  train  0=0.966 1=0.000 2=0.034
+    vaso_reinf_v5  val    0=0.970 1=0.000 2=0.030
+drug fenilefrina:
+    real           train  0=0.020 1=0.000 2=0.980
+    real           val    0=0.020 1=0.000 2=0.980
+    synthetic_v5   train  0=1.000 1=0.000 2=0.000
+    synthetic_v5   val    0=1.000 1=0.000 2=0.000
+    cf_v5          train  0=1.000 1=0.000 2=0.000
+    cf_v5          val    0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  train  0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  val    0=1.000 1=0.000 2=0.000
+drug noradrenalina:
+    real           train  0=0.015 1=0.000 2=0.985
+    real           val    0=0.011 1=0.000 2=0.989
+    synthetic_v5   train  0=1.000 1=0.000 2=0.000
+    synthetic_v5   val    0=1.000 1=0.000 2=0.000
+    cf_v5          train  0=1.000 1=0.000 2=0.000
+    cf_v5          val    0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  train  0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  val    0=1.000 1=0.000 2=0.000
+drug efedrina:
+    real           train  0=0.000 1=1.000 2=0.000
+    real           val    0=0.000 1=1.000 2=0.000
+    synthetic_v5   train  0=1.000 1=0.000 2=0.000
+    synthetic_v5   val    0=1.000 1=0.000 2=0.000
+    cf_v5          train  0=1.000 1=0.000 2=0.000
+    cf_v5          val    0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  train  0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  val    0=1.000 1=0.000 2=0.000
+drug rocuronio:
+    real           train  0=0.087 1=0.000 2=0.913
+    real           val    0=0.081 1=0.000 2=0.919
+    synthetic_v5   train  0=1.000 1=0.000 2=0.000
+    synthetic_v5   val    0=1.000 1=0.000 2=0.000
+    cf_v5          train  0=1.000 1=0.000 2=0.000
+    cf_v5          val    0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  train  0=1.000 1=0.000 2=0.000
+    vaso_reinf_v5  val    0=1.000 1=0.000 2=0.000
+vent fio2:
+    real           train  0=0.993 1=0.000 2=0.007
+    real           val    0=0.998 1=0.000 2=0.002
+    synthetic_v5   train  0=0.973 1=0.000 2=0.027
+    synthetic_v5   val    0=0.976 1=0.000 2=0.024
+    cf_v5          train  0=0.975 1=0.000 2=0.025
+    cf_v5          val    0=0.978 1=0.000 2=0.022
+    vaso_reinf_v5  train  0=0.975 1=0.000 2=0.025
+    vaso_reinf_v5  val    0=0.978 1=0.000 2=0.022
+vent tv:
+    real           train  0=0.974 1=0.000 2=0.026
+    real           val    0=0.976 1=0.000 2=0.024
+    synthetic_v5   train  0=0.957 1=0.000 2=0.043
+    synthetic_v5   val    0=0.961 1=0.000 2=0.039
+    cf_v5          train  0=0.975 1=0.000 2=0.025
+    cf_v5          val    0=0.978 1=0.000 2=0.022
+    vaso_reinf_v5  train  0=0.975 1=0.000 2=0.025
+    vaso_reinf_v5  val    0=0.978 1=0.000 2=0.022
+vent rr:
+    real           train  0=0.990 1=0.000 2=0.010
+    real           val    0=0.995 1=0.000 2=0.005
+    synthetic_v5   train  0=0.973 1=0.000 2=0.027
+    synthetic_v5   val    0=0.976 1=0.000 2=0.024
+    cf_v5          train  0=0.975 1=0.000 2=0.025
+    cf_v5          val    0=0.978 1=0.000 2=0.022
+    vaso_reinf_v5  train  0=0.975 1=0.000 2=0.025
+    vaso_reinf_v5  val    0=0.978 1=0.000 2=0.022
+vent pip:
+    real           train  0=0.974 1=0.000 2=0.026
+    real           val    0=0.973 1=0.000 2=0.027
+    synthetic_v5   train  0=0.957 1=0.000 2=0.043
+    synthetic_v5   val    0=0.961 1=0.000 2=0.039
+    cf_v5          train  0=0.975 1=0.000 2=0.025
+    cf_v5          val    0=0.978 1=0.000 2=0.022
+    vaso_reinf_v5  train  0=0.975 1=0.000 2=0.025
+    vaso_reinf_v5  val    0=0.978 1=0.000 2=0.022
+vent peep:
+    real           train  0=0.972 1=0.000 2=0.028
+    real           val    0=0.972 1=0.000 2=0.028
+    synthetic_v5   train  0=0.957 1=0.000 2=0.043
+    synthetic_v5   val    0=0.961 1=0.000 2=0.039
+    cf_v5          train  0=0.975 1=0.000 2=0.025
+    cf_v5          val    0=0.978 1=0.000 2=0.022
+    vaso_reinf_v5  train  0=0.975 1=0.000 2=0.025
+    vaso_reinf_v5  val    0=0.978 1=0.000 2=0.022
+ctx age:
+    real           train  emitido=1.000
+    real           val    emitido=1.000
+    synthetic_v5   train  emitido=1.000
+    synthetic_v5   val    emitido=1.000
+    cf_v5          train  emitido=1.000
+    cf_v5          val    emitido=1.000
+    vaso_reinf_v5  train  emitido=1.000
+    vaso_reinf_v5  val    emitido=1.000
+ctx height:
+    real           train  emitido=1.000
+    real           val    emitido=1.000
+    synthetic_v5   train  emitido=1.000
+    synthetic_v5   val    emitido=1.000
+    cf_v5          train  emitido=1.000
+    cf_v5          val    emitido=1.000
+    vaso_reinf_v5  train  emitido=1.000
+    vaso_reinf_v5  val    emitido=1.000
+ctx weight:
+    real           train  emitido=1.000
+    real           val    emitido=1.000
+    synthetic_v5   train  emitido=1.000
+    synthetic_v5   val    emitido=1.000
+    cf_v5          train  emitido=1.000
+    cf_v5          val    emitido=1.000
+    vaso_reinf_v5  train  emitido=1.000
+    vaso_reinf_v5  val    emitido=1.000
+ctx bmi:
+    real           train  emitido=1.000
+    real           val    emitido=1.000
+    synthetic_v5   train  emitido=1.000
+    synthetic_v5   val    emitido=1.000
+    cf_v5          train  emitido=1.000
+    cf_v5          val    emitido=1.000
+    vaso_reinf_v5  train  emitido=1.000
+    vaso_reinf_v5  val    emitido=1.000
+ctx sex:F:
+    real           train  emitido=0.434
+    real           val    emitido=0.463
+    synthetic_v5   train  emitido=0.547
+    synthetic_v5   val    emitido=0.538
+    cf_v5          train  emitido=0.545
+    cf_v5          val    emitido=0.509
+    vaso_reinf_v5  train  emitido=0.493
+    vaso_reinf_v5  val    emitido=0.626
+ctx asa:1:
+    real           train  emitido=0.247
+    real           val    emitido=0.257
+    synthetic_v5   train  emitido=0.288
+    synthetic_v5   val    emitido=0.283
+    cf_v5          train  emitido=0.274
+    cf_v5          val    emitido=0.299
+    vaso_reinf_v5  train  emitido=0.243
+    vaso_reinf_v5  val    emitido=0.276
+ctx asa:2:
+    real           train  emitido=0.586
+    real           val    emitido=0.576
+    synthetic_v5   train  emitido=0.562
+    synthetic_v5   val    emitido=0.564
+    cf_v5          train  emitido=0.576
+    cf_v5          val    emitido=0.546
+    vaso_reinf_v5  train  emitido=0.627
+    vaso_reinf_v5  val    emitido=0.555
+ctx asa:3:
+    real           train  emitido=0.130
+    real           val    emitido=0.139
+    synthetic_v5   train  emitido=0.118
+    synthetic_v5   val    emitido=0.118
+    cf_v5          train  emitido=0.116
+    cf_v5          val    emitido=0.122
+    vaso_reinf_v5  train  emitido=0.111
+    vaso_reinf_v5  val    emitido=0.124
+ctx asa:4:
+    real           train  emitido=0.012
+    real           val    emitido=0.007
+    synthetic_v5   train  emitido=0.021
+    synthetic_v5   val    emitido=0.018
+    cf_v5          train  emitido=0.024
+    cf_v5          val    emitido=0.021
+    vaso_reinf_v5  train  emitido=0.011
+    vaso_reinf_v5  val    emitido=0.000
+ctx asa:otros:
+    real           train  emitido=0.002
+    real           val    emitido=0.000
+    synthetic_v5   train  emitido=0.001
+    synthetic_v5   val    emitido=0.002
+    cf_v5          train  emitido=0.001
+    cf_v5          val    emitido=0.003
+    vaso_reinf_v5  train  emitido=0.000
+    vaso_reinf_v5  val    emitido=0.000
+ctx emop:0:
+    real           train  emitido=0.883
+    real           val    emitido=0.863
+    synthetic_v5   train  emitido=1.000
+    synthetic_v5   val    emitido=1.000
+    cf_v5          train  emitido=1.000
+    cf_v5          val    emitido=1.000
+    vaso_reinf_v5  train  emitido=1.000
+    vaso_reinf_v5  val    emitido=1.000
+ctx emop:1:
+    real           train  emitido=0.117
+    real           val    emitido=0.137
+    synthetic_v5   train  emitido=0.000
+    synthetic_v5   val    emitido=0.000
+    cf_v5          train  emitido=0.000
+    cf_v5          val    emitido=0.000
+    vaso_reinf_v5  train  emitido=0.000
+    vaso_reinf_v5  val    emitido=0.000
+
+TABLA GATE 7 - KS real vs synthetic_v5 (train, ventanas, mascara 0)
+clave | KS | n_real | n_synth
+drug.noradrenalina | 0.871946 | 10847 | 1667633
+drug.rocuronio | 0.804479 | 64433 | 1667633
+drug.fenilefrina | 0.583115 | 14422 | 1667633
+vent.peep      | 0.500587 | 716833 | 1595186
+vent.fio2      | 0.496043 | 732552 | 1623238
+vent.rr        | 0.417088 | 730043 | 1622634
+drug.sevoflurano | 0.360479 | 730029 | 1603162
+vent.pip       | 0.292257 | 718194 | 1595167
+vent.tv        | 0.261476 | 718506 | 1595729
+drug.remifentanilo | 0.245878 | 586478 | 1667633
+drug.propofol  | 0.101244 | 399587 | 1667633
+drug.efedrina  | None | 0 | 1667633
+
+GATE 2 - 20 pares CF (farmaco de la palanca)
+pair_id | lever | split_t | primer_t0_divergente | n_cols_divergentes
+70001 | propofol_bolus | 6767.8 | 6720 | 4
+70501 | noradrenaline | 11932.4 | 11940 | 3
+71001 | remi_up | 7029.4 | 7020 | 3
+71501 | ephedrine | 6771.7 | 6720 | 2
+80901 | sevo_up | 14358.4 | 14340 | 2
+90001 | ppf20_rate | 5262.9 | 5225 | 3
+90751 | rftn20_rate | 4638.7 | 4620 | 3
+91501 | ppf_bolus | 9232.4 | 9240 | 4
+92251 | remi_bolus | 4819.4 | 4800 | 4
+93001 | nepi_rate | 5528.6 | 5520 | 3
+93751 | phen_rate | 12224.1 | 12180 | 4
+94501 | phen_bolus | 7012.4 | 6960 | 2
+95251 | eph_bolus | 6389.9 | 6360 | 4
+99001 | sevo_mac | 1866.1 | 1860 | 2
+70003 | propofol_bolus | 4517.4 | 4500 | 4
+70005 | propofol_bolus | 7539.6 | 7500 | 4
+70007 | propofol_bolus | 9870.2 | 9840 | 4
+70009 | propofol_bolus | 5232.1 | 5220 | 4
+70011 | propofol_bolus | 4826.4 | 4800 | 4
+70013 | propofol_bolus | 5092.7 | 5100 | 4
+
+Tamano en disco de data/tokens_v1/windows: 1.214 GB

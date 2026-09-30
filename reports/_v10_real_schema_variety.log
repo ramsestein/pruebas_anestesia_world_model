@@ -1,0 +1,298 @@
+﻿  1000/6388
+  2000/6388
+  3000/6388
+  4000/6388
+  5000/6388
+  6000/6388
+
+distribuci¾n de n║ de columnas por caso:
+  3 columnas: 1 casos
+  13 columnas: 1 casos
+  14 columnas: 1 casos
+  16 columnas: 2 casos
+  17 columnas: 1 casos
+  18 columnas: 3 casos
+  19 columnas: 3 casos
+  20 columnas: 1 casos
+  21 columnas: 7 casos
+  23 columnas: 3 casos
+  25 columnas: 1 casos
+  26 columnas: 3 casos
+  27 columnas: 3 casos
+  28 columnas: 10 casos
+  29 columnas: 12 casos
+  30 columnas: 13 casos
+  31 columnas: 35 casos
+  32 columnas: 30 casos
+  33 columnas: 42 casos
+  34 columnas: 29 casos
+  35 columnas: 17 casos
+  36 columnas: 15 casos
+  37 columnas: 15 casos
+  38 columnas: 17 casos
+  39 columnas: 19 casos
+  40 columnas: 5 casos
+  41 columnas: 17 casos
+  42 columnas: 9 casos
+  43 columnas: 6 casos
+  44 columnas: 8 casos
+  45 columnas: 9 casos
+  46 columnas: 4 casos
+  47 columnas: 16 casos
+  48 columnas: 5 casos
+  49 columnas: 4 casos
+  50 columnas: 5 casos
+  51 columnas: 8 casos
+  52 columnas: 5 casos
+  53 columnas: 3 casos
+  54 columnas: 2 casos
+  55 columnas: 12 casos
+  56 columnas: 74 casos
+  57 columnas: 11 casos
+  58 columnas: 63 casos
+  59 columnas: 25 casos
+  60 columnas: 47 casos
+  61 columnas: 51 casos
+  62 columnas: 256 casos
+  63 columnas: 85 casos
+  64 columnas: 254 casos
+  65 columnas: 130 casos
+  66 columnas: 142 casos
+  67 columnas: 164 casos
+  68 columnas: 252 casos
+  69 columnas: 452 casos
+  70 columnas: 421 casos
+  71 columnas: 358 casos
+  72 columnas: 340 casos
+  73 columnas: 416 casos
+  74 columnas: 459 casos
+  75 columnas: 189 casos
+  76 columnas: 643 casos
+  77 columnas: 193 casos
+  78 columnas: 182 casos
+  79 columnas: 98 casos
+  80 columnas: 80 casos
+  81 columnas: 98 casos
+  82 columnas: 79 casos
+  83 columnas: 62 casos
+  84 columnas: 105 casos
+  85 columnas: 40 casos
+  86 columnas: 66 casos
+  87 columnas: 14 casos
+  88 columnas: 28 casos
+  89 columnas: 6 casos
+  90 columnas: 8 casos
+  91 columnas: 8 casos
+  92 columnas: 9 casos
+  93 columnas: 8 casos
+  94 columnas: 3 casos
+  95 columnas: 1 casos
+  96 columnas: 3 casos
+  97 columnas: 4 casos
+  98 columnas: 8 casos
+  99 columnas: 3 casos
+  100 columnas: 7 casos
+  101 columnas: 3 casos
+  102 columnas: 2 casos
+  103 columnas: 4 casos
+  104 columnas: 1 casos
+  105 columnas: 3 casos
+  106 columnas: 6 casos
+  107 columnas: 4 casos
+  109 columnas: 3 casos
+  110 columnas: 1 casos
+  112 columnas: 2 casos
+  114 columnas: 5 casos
+  115 columnas: 1 casos
+  116 columnas: 3 casos
+  117 columnas: 1 casos
+  118 columnas: 1 casos
+  121 columnas: 1 casos
+
+columnas presentes en menos de 6388 casos:
+  Orchestra/VASO_RATE          1 casos
+  Orchestra/VASO_VOL           1 casos
+  Orchestra/NPS_RATE           1 casos
+  Orchestra/NPS_VOL            1 casos
+  Orchestra/VEC_RATE           1 casos
+  Orchestra/VEC_VOL            1 casos
+  Solar8000/ST_V5              1 casos
+  Orchestra/AMD_RATE           1 casos
+  Orchestra/AMD_VOL            1 casos
+  Orchestra/DTZ_RATE           2 casos
+  Orchestra/DTZ_VOL            2 casos
+  Orchestra/OXY_RATE           3 casos
+  Orchestra/OXY_VOL            3 casos
+  Orchestra/DOBU_RATE          3 casos
+  Orchestra/DOBU_VOL           3 casos
+  Orchestra/DEX4_RATE          4 casos
+  Orchestra/DEX4_VOL           4 casos
+  Orchestra/MRN_RATE           5 casos
+  Orchestra/MRN_VOL            5 casos
+  Orchestra/DEX2_RATE          6 casos
+  Orchestra/DEX2_VOL           6 casos
+  Orchestra/EPI_RATE           9 casos
+  Orchestra/EPI_VOL            9 casos
+  FMS/FLOW_RATE                15 casos
+  FMS/INPUT_AMB_TEMP           15 casos
+  FMS/INPUT_TEMP               15 casos
+  FMS/OUTPUT_AMB_TEMP          15 casos
+  FMS/OUTPUT_TEMP              15 casos
+  FMS/PRESSURE                 15 casos
+  FMS/TOTAL_VOL                15 casos
+  CardioQ/CI                   28 casos
+  CardioQ/FTp                  28 casos
+  CardioQ/MA                   28 casos
+  CardioQ/PV                   28 casos
+  CardioQ/SVI                  28 casos
+  CardioQ/CO                   29 casos
+  CardioQ/FTc                  29 casos
+  CardioQ/HR                   29 casos
+  CardioQ/MD                   29 casos
+  CardioQ/SD                   29 casos
+  CardioQ/SV                   29 casos
+  Orchestra/NTG_RATE           32 casos
+  Orchestra/NTG_VOL            32 casos
+  Orchestra/DOPA_RATE          33 casos
+  Orchestra/DOPA_VOL           33 casos
+  Invos/SCO2_L                 33 casos
+  Invos/SCO2_R                 33 casos
+  Vigilance/RVEF               48 casos
+  Vigilance/EDV                49 casos
+  Vigilance/EDVI               49 casos
+  Vigilance/ESV                49 casos
+  Vigilance/ESVI               49 casos
+  Vigilance/HR_AVG             53 casos
+  Vigilance/SV                 55 casos
+  Vigilance/SVI                55 casos
+  Vigilance/SNR                59 casos
+  Vigilance/SQI                63 casos
+  Vigilance/SVO2               63 casos
+  Vigilance/BT_PA              64 casos
+  Vigilance/CI                 65 casos
+  Vigilance/CO                 65 casos
+  Orchestra/RFTN50_CE          68 casos
+  Orchestra/RFTN50_CP          68 casos
+  Orchestra/RFTN50_CT          68 casos
+  Orchestra/RFTN50_RATE        68 casos
+  Orchestra/RFTN50_VOL         68 casos
+  Solar8000/PA_DBP             81 casos
+  Solar8000/PA_MBP             81 casos
+  Solar8000/PA_SBP             81 casos
+  Orchestra/NEPI_RATE          88 casos
+  Orchestra/NEPI_VOL           88 casos
+  Orchestra/PGE1_RATE          90 casos
+  Orchestra/PGE1_VOL           90 casos
+  Orchestra/FUT_RATE           94 casos
+  Orchestra/FUT_VOL            94 casos
+  Solar8000/VENT_MEAS_PEEP     98 casos
+  Solar8000/VENT_COMPL         114 casos
+  Orchestra/PHEN_RATE          127 casos
+  Orchestra/PHEN_VOL           127 casos
+  Solar8000/FEM_DBP            142 casos
+  Solar8000/FEM_MBP            142 casos
+  Solar8000/FEM_SBP            142 casos
+  Primus/SET_FLOW_TRIG         154 casos
+  EV1000/CVP                   235 casos
+  EV1000/SVR                   255 casos
+  EV1000/SVRI                  255 casos
+  Orchestra/ROC_RATE           281 casos
+  Orchestra/ROC_VOL            281 casos
+  Vigileo/CI                   323 casos
+  Vigileo/CO                   323 casos
+  Vigileo/SV                   323 casos
+  Vigileo/SVI                  323 casos
+  Vigileo/SVV                  323 casos
+  Primus/SET_INSP_PRES         381 casos
+  EV1000/ART_MBP               591 casos
+  EV1000/CI                    617 casos
+  EV1000/CO                    617 casos
+  EV1000/SV                    617 casos
+  EV1000/SVI                   617 casos
+  EV1000/SVV                   617 casos
+  Solar8000/RR                 1294 casos
+  Solar8000/CVP                1607 casos
+  Primus/INSP_DES              2045 casos
+  Primus/EXP_DES               2046 casos
+  Solar8000/VENT_SET_FIO2      2212 casos
+  Solar8000/VENT_SET_PCP       2745 casos
+  Solar8000/ST_AVF             3004 casos
+  Solar8000/ST_AVL             3004 casos
+  Solar8000/ST_AVR             3004 casos
+  Solar8000/ST_I               3024 casos
+  Solar8000/ST_III             3027 casos
+  Solar8000/GAS2_EXPIRED       3096 casos
+  Solar8000/GAS2_INSPIRED      3096 casos
+  Orchestra/PPF20_CE           3511 casos
+  Orchestra/PPF20_CP           3511 casos
+  Orchestra/PPF20_CT           3511 casos
+  Orchestra/PPF20_RATE         3512 casos
+  Orchestra/PPF20_VOL          3512 casos
+  Primus/EXP_SEVO              3687 casos
+  Primus/INSP_SEVO             3687 casos
+  Solar8000/ART_MBP            3724 casos
+  Solar8000/ART_DBP            3725 casos
+  Solar8000/ART_SBP            3725 casos
+  Solar8000/VENT_SET_TV        4253 casos
+  Orchestra/RFTN20_CP          4769 casos
+  Orchestra/RFTN20_CT          4769 casos
+  Orchestra/RFTN20_CE          4770 casos
+  Orchestra/RFTN20_RATE        4772 casos
+  Orchestra/RFTN20_VOL         4773 casos
+  BIS/TOTPOW                   5551 casos
+  BIS/SEF                      5569 casos
+  BIS/SR                       5569 casos
+  BIS/EMG                      5575 casos
+  Primus/FLOW_O2               5643 casos
+  Primus/FLOW_AIR              5644 casos
+  Primus/FLOW_N2O              5644 casos
+  Solar8000/NIBP_DBP           5751 casos
+  Solar8000/NIBP_SBP           5751 casos
+  Solar8000/NIBP_MBP           5763 casos
+  BIS/BIS                      5867 casos
+  BIS/SQI                      5867 casos
+  Solar8000/BT                 5917 casos
+  Solar8000/VENT_INSP_TM       5937 casos
+  Solar8000/VENT_PPLAT         5960 casos
+  Primus/SET_PIP               5963 casos
+  Primus/SET_TV_L              5963 casos
+  Primus/SET_INSP_PAUSE        5964 casos
+  Solar8000/VENT_PIP           5971 casos
+  Solar8000/ST_II              5977 casos
+  Primus/SET_INTER_PEEP        5979 casos
+  Primus/SET_INSP_TM           5980 casos
+  Primus/SET_RR_IPPV           5980 casos
+  Solar8000/VENT_TV            5980 casos
+  Solar8000/VENT_MV            5987 casos
+  Solar8000/VENT_RR            5987 casos
+  Primus/PEEP_MBAR             5999 casos
+  Primus/PPLAT_MBAR            5999 casos
+  Primus/PIP_MBAR              6007 casos
+  Primus/COMPLIANCE            6017 casos
+  Primus/TV                    6017 casos
+  Primus/MV                    6022 casos
+  Primus/SET_FRESH_FLOW        6042 casos
+  Primus/SET_FIO2              6047 casos
+  Solar8000/RR_CO2             6176 casos
+  Solar8000/FEO2               6238 casos
+  Solar8000/FIO2               6239 casos
+  Solar8000/ETCO2              6241 casos
+  Solar8000/INCO2              6242 casos
+  Solar8000/VENT_MAWP          6297 casos
+  Primus/RR_CO2                6328 casos
+  Primus/FIO2                  6333 casos
+  Primus/FEO2                  6335 casos
+  Primus/MAC                   6337 casos
+  Primus/FIN2O                 6338 casos
+  Primus/MAWP_MBAR             6338 casos
+  Primus/ETCO2                 6339 casos
+  Primus/FEN2O                 6339 casos
+  Primus/INCO2                 6339 casos
+  Primus/VENT_LEAK             6343 casos
+  Primus/PAMB_MBAR             6361 casos
+  Primus/SET_AGE               6361 casos
+  Solar8000/PLETH_HR           6386 casos
+  Solar8000/PLETH_SPO2         6386 casos
+  Solar8000/HR                 6387 casos
+
+total columnas distintas: 185

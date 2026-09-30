@@ -1,0 +1,11 @@
+n_cases: 10000
+random_seed: 42
+dt_seconds: 0.5
+policy_fraction: 0.75
+include_llm_text: false
+output_dir: data/synthetic_v5
+cases_dir: data/real/cases
+clinical_path: data/real/clinical_data_enriched.parquet
+labs_path: data/real/lab_data.parquet
+n_workers: 8
+resume: true

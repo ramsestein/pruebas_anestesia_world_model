@@ -1,0 +1,24 @@
+REPORT_v7_transfer_probe.txt — sonda de transferencia (v5)
+==============================================================================
+
+Regla de decisión: D1 supera a persistencia Y D3 supera a D2 -> continuar.
+
+  n_syn_train = 100000
+  n_cal_train = 50000
+  n_hold_eval = 50000
+  elapsed_s   = 117.2
+
+MAE (mmHg/lpm/BIS) — variables de decisión:
+  persistence_mae  Solar8000/HR: 1.356  Solar8000/ART_MBP: 1.244  BIS/BIS: 1.371  Primus/ETCO2: 0.383
+  d1_mae           Solar8000/HR: 7.642  Solar8000/ART_MBP: 4.996  BIS/BIS: 5.024  Primus/ETCO2: 2.806
+  d2_mae           Solar8000/HR: 1.618  Solar8000/ART_MBP: 1.582  BIS/BIS: 1.484  Primus/ETCO2: 0.527
+  d3_mae           Solar8000/HR: 10.424  Solar8000/ART_MBP: 7.802  BIS/BIS: 7.228  Primus/ETCO2: 5.573
+
+Ratios MAE_modelo / MAE_persistencia:
+  D1 mean ratio = 5.1603
+  D2 mean ratio = 1.2309
+  D3 mean ratio = 8.4450
+
+  D1 beats persistence = False
+  D3 beats D2           = False
+  DECISION              = VOLVER AL GENERADOR

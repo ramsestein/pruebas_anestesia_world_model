@@ -1,0 +1,20 @@
+﻿cargando real val (windows_v4) ...
+celdas real val (mascara mant): 1513073 casos: 945
+evaluando gates ...
+GATE 2 real (ae_bal congelado, windows_v4):
+  Solar8000/HR             0.3940
+  Solar8000/ART_MBP        0.2414
+  BIS/BIS                  0.1765
+  Primus/ETCO2             0.0912
+GATE 3: {"n_cases": 943, "n_cells": 1481996, "err_hr_with_art": 0.384256866682582, "err_hr_without_art": 0.7161398691631232, "hr_recon_diff": 0.6814360069506096, "ok": true}
+celdas: 1513073 casos: 945
+
+comparaci¾n:
+  Solar8000/HR             recalc=0.3940 manifest=0.3940 OK
+  Solar8000/ART_MBP        recalc=0.2414 manifest=0.2413 OK
+  BIS/BIS                  recalc=0.1765 manifest=0.1765 OK
+  Primus/ETCO2             recalc=0.0912 manifest=0.0912 OK
+  gate3.n_cases recalc=943 manifest=943 OK
+  gate3.n_cells recalc=1481996 manifest=1481996 OK
+  gate3.err_hr_with_art recalc=0.3843 manifest=0.3843 OK
+  gate3.err_hr_without_art recalc=0.7161 manifest=0.7161 OK

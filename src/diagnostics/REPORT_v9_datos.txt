@@ -1,0 +1,125 @@
+REPORT_v9_datos.txt — integridad de datos (PARTE 1 de v9)
+==============================================================================
+Generado: 2026-09-28
+
+------------------------------------------------------------------------------
+1.1  VEREDICTO DE EQUIVALENCIA DE LA COHORTE REAL (windows_v4 vs windows_v2)
+------------------------------------------------------------------------------
+
+VEREDICTO: EQUIVALENTE.
+
+La cohorte REAL de windows_v4 es equivalente a la de windows_v2. Los números:
+
+(1) Celdas reales (todas las fases), por split — EXACTO:
+
+    referencia windows_v2 (manifest_tokens.json):
+        source=real/split=train = 12 061 757
+        source=real/split=val   =  2 063 800
+        TOTAL                   = 14 125 557
+    windows_v4 (manifest.json):
+        source=real/split=train = 12 061 757   (idéntico)
+        source=real/split=val   =  2 063 800   (idéntico)
+        TOTAL                   = 14 125 557   (idéntico)
+
+(2) Celdas reales de MANTENIMIENTO: 10 432 207 (computado sobre windows_v4,
+    phase_from_clinical == 'maintenance', antes de exclusiones).
+
+(3) Casos reales: 6 388, caseids contiguos 1..6388 (cases.parquet).
+    Coincide con el recuento histórico (6 388 casos).
+
+(4) split.parquet: por SUBJECTID (no por caseid). Sujetos reales:
+    train 5 177 / val 914 = 6 091 sujetos (coincide con "6 091 sujetos,
+    236 con >1 caso" del historial).
+
+    sha256 del split.parquet ACTUAL: 6d952d0313e39401bb47c7389bd932fce5ace3a146a6a7647b41e56e13f3b5c3
+    sha256 de REFERENCIA (tokens): 40935d1cbda4d76ed0ea9b3bb817be4c018a40fc7d826f35d671431543efe8fd
+    -> DIFIEREN, pero por una razón esperada: el split.parquet actual cubre
+       las cohortes SINTÉTICAS v7 (synthetic_v7/cf_v7/vaso_reinf_v7, 22 936
+       sujetos en total), no las v5. La porción REAL (6 091 sujetos) coincide.
+
+(5) Exclusiones: 35 caseids sin marcas de fase + [4476] sin celdas. Misma
+    lista en el manifest de tokens_v1 y reutilizada por el probe/cohort_gap.
+    Son 35 + 1 = 36 caseids.
+
+(6) Fracción de máscara de plausibilidad m=1 (celdas de mantenimiento reales):
+
+    BIS/BIS 0.9247   Solar8000/HR 0.9878   PLETH_SPO2 0.9920
+    ETCO2 0.9875     PEEP 0.9695           PIP 0.9717
+    MV 0.9755        TV 0.9724             RR_CO2 0.9891
+    BT 0.9311        ART_MBP 0.9874        ART_SBP 0.9790
+    ART_DBP 0.9788   EMG 0.9052
+
+(7) Estadísticos reales (media ± std, celdas mantenimiento m=1) frente a
+    ae_v1/ae_bal/norm_stats.json (que es 50/50 real+sintético, por eso NO
+    tiene que coincidir numéricamente; se incluye para el registro):
+
+    variable            real_mean   ae_mean   real_std   ae_std
+    BIS/BIS                40.68     44.28     11.48      8.65
+    Solar8000/HR           73.46     72.11     15.83     15.86
+    PLETH_SPO2             99.49     99.44      1.43      1.65
+    Primus/ETCO2           34.83     35.42      3.69      5.89
+    PEEP_MBAR               2.65      5.12      2.55      2.66
+    PIP_MBAR               17.52     14.48      5.15      4.43
+    MV                      5.72      5.59      1.42      1.23
+    TV                    397.26    397.27     89.42     87.47
+    RR_CO2                 14.54     14.09      2.77      1.25
+    BT                     35.78     35.88      0.98      0.95
+    ART_MBP                83.90     80.47     18.53     18.07
+    ART_SBP               116.48    114.63     20.61     18.43
+    ART_DBP                64.48     60.87     13.51     17.35
+    BIS/EMG                27.29     36.75      3.43      7.29
+
+    Las diferencias real vs ae_bal son las conocidas (el ae_bal mezcla el
+    sintético: PEEP y EMG sintéticos más altos). No indican inconsistencia.
+
+CONCLUSIÓN: el decoder congelado del AE y los tokens SON consistentes con la
+cohorte real de windows_v4. NO hay que reventanear la real ni reentrenar el AE.
+La pérdida de windows_v2 afecta a las cohortes SINTÉTICAS v5 (no reproducibles
+ya), no a la real.
+
+------------------------------------------------------------------------------
+1.2  INVENTARIO DE ARTEFACTOS (presente / perdido / reconstruido)
+------------------------------------------------------------------------------
+
+Cohortes (directorios de casos):
+  real               presente    (6 388 cases)
+  synthetic_v5       PERDIDO
+  vaso_reinf_v5      PERDIDO
+  cf_v5              PERDIDO
+  synthetic_v6       PERDIDO
+  vaso_reinf_v6      PERDIDO
+  cf_v6              PERDIDO
+  synthetic_v7       presente    (10 000 cases)
+  vaso_reinf_v7      presente    (500 cases)
+  cf_v7              presente    (12 690 cases)
+
+Ventanas:
+  windows_v2         PERDIDO
+  windows_v3         PERDIDO
+  windows_v4         presente
+
+Conjuntos:
+  tokens_v1          presente    (manifest_tokens.json conservado)
+  ae_v1 (ae_bal)     presente    (norm_stats.json + manifest_ae.json)
+
+Scripts cerrados (con sha256 en v9_manifest_global.json):
+  src/autoencoder/window.py          presente (reconstruido en v5, nota histórica)
+  src/tokens/pk_tokens.py            presente
+  src/tokens/context_vocab.py        presente
+  src/tokens/tokenize.py             presente
+  src/ae/physio_ae.py                presente
+  src/diagnostics/v6_validate.py     RECONSTRUIDO (desde .pyc, v8)
+  src/diagnostics/v7_validate.py     presente
+  src/diagnostics/v7_attribution.py  presente
+  src/diagnostics/v7_transfer_probe.py  presente (reescrito, v8)
+  src/diagnostics/cohort_gap.py      presente
+  src/diagnostics/gap_addendum.py    presente
+  src/anessim/simulate.py            presente
+  src/anessim/respiratory.py         presente
+
+------------------------------------------------------------------------------
+1.4  COPIA DE SEGURIDAD
+------------------------------------------------------------------------------
+
+Manifiesto global con sha256: data/diagnostics/v9_manifest_global.json.
+Copia de 13 scripts cerrados: D:/data/anestesia_world/backup_scripts_20260928/

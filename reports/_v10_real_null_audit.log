@@ -1,0 +1,30 @@
+﻿columnas distintas (sin 'time'): 184
+  1000/6388
+  2000/6388
+  3000/6388
+  4000/6388
+  5000/6388
+  6000/6388
+
+=== Columnas de interÚs (pipeline) ===
+columna                       %casos  %finito       min       max  const  allzero
+BIS/BIS                        91.8%   26.86% -1332.600    97.700    276      276
+Solar8000/HR                  100.0%   13.04%     0.000   306.000      0        0
+Solar8000/PLETH_SPO2          100.0%   13.21%    23.000   100.000     17        0
+Primus/ETCO2                   99.2%    3.75%     0.000    98.000      1        1
+Primus/PEEP_MBAR               93.9%    3.49%   -12.000    88.000      4        4
+Primus/PIP_MBAR                94.0%    3.53%    -5.000    81.000      0        0
+Primus/MV                      94.3%    3.60%     0.000    27.400      0        0
+Primus/TV                      94.2%    3.59%     3.000  3323.000      0        0
+Primus/RR_CO2                  99.1%    3.60%     0.000    75.000      0        0
+Solar8000/BT                   92.6%   11.08%     0.000    46.000      0        0
+Solar8000/ART_MBP              58.3%   12.28%   -98.000   350.000      5        5
+Solar8000/ART_SBP              58.3%   12.00%   -98.000   350.000      4        4
+Solar8000/ART_DBP              58.3%   12.00%   -98.000   350.000      4        4
+BIS/EMG                        87.3%   25.03%  -309.660    86.500      0        0
+Orchestra/PPF20_RATE           55.0%   26.33%     0.000 1162693.000     17       17
+Orchestra/RFTN20_RATE          74.7%   26.26%     0.000 538976.250     49       49
+
+=== Columnas 100% constantes (placeholder) en sus casos ===
+
+audit guardado: data/diagnostics/v10_real_null_placeholder_audit.json

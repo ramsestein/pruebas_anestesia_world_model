@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anessim"
+version = "0.1.0"
+description = "Procedural anesthesia simulator aligned with the VitalDB format"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "polars>=1.0.0",
+    "requests>=2.31.0",
+    "tqdm>=4.66.0",
+    "pyarrow>=16.0.0",
+    "scipy>=1.13.0",
+    "pyyaml>=6.0.1",
+    "joblib>=1.4.0",
+    "numpy>=1.26.0",
+    "torch>=2.0.0",
+    "scikit-learn>=1.4.0",
+    "nvidia-ml-py>=12.0.0",
+]
+
+[project.scripts]
+anessim = "anessim.cli:main"
+anessim-fidelity = "anessim.fidelity:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+anessim = ["configs/*.yaml"]

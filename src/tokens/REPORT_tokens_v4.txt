@@ -1,0 +1,403 @@
+REPORT_tokens_v4.txt — tokenizador v1, iteración 4 (cierre real)
+==============================================================================
+
+0. Contexto y ficheros
+----------------------------------------
+  contrato_tokens_v1.md             sha256 64a386a63193414a808d9d0f35bcbd1f63447c8675267fec74f0955a282cb70e
+  tokenize.py                       sha256 8055bd5dd6ff3f303db01a1c9e037d3da97c97096241aeffd5dfa2628eb83063
+  windows_v2/manifest.json          sha256 c9e8ee173d2ce646a31bd3be80976162cac36047a694de5794d835c7f29f9d7c
+  pk_v1/manifest_pk.json            sha256 1db873b51f8537c008e7f40fdae1475392f6513dce280e73f84bb6d2d7b6a8b2
+  context_v1/vocab.json             sha256 945b78842e0a5fdc916e8ca0ee64e6b01ac48ada45a57a0590d0dfcd3b521a59
+  windows_v2/split.parquet          sha256 40935d1cbda4d76ed0ea9b3bb817be4c018a40fc7d826f35d671431543efe8fd
+  fecha                             2026-09-19T19:44:16.623396
+  n feature_columns                 65
+  n mask_columns                    12
+  n metadata_columns                17
+
+1. Tests y salida en ROJO (literal)
+----------------------------------------
+...................F.F.......F                                           [100%]
+================================== FAILURES ===================================
+__________________ test_q_no_phase_marks_real_cases_excluded __________________
+
+    def test_q_no_phase_marks_real_cases_excluded():
+        parts = _require_output()
+        excluded = set(tk.load_cases_without_phase_marks())
+        # contrato v5: 100 % maintenance en windows_v2 -> 35 caseids (los 24 de la
+        # regresi¾n de la iteraci¾n 3 vuelven a quedar fuera).
+        assert len(excluded) == 35
+        found: set[int] = set()
+        for part in parts:
+            if "source=real" not in str(part):
+                continue
+            df = pq.ParquetFile(part).read(columns=["caseid"]).to_pandas()
+            found.update(int(c) for c in df.caseid.unique())
+>       assert excluded.isdisjoint(found), \
+            f"casos sin marcas de fase en la salida: {sorted(excluded & found)}"
+E       AssertionError: casos sin marcas de fase en la salida: [813, 875, 1258, 1390, 1609, 1845, 2096, 2464, 2514, 2990, 3206, 3217, 3282, 3509, 3698, 3772, 4340, 4423, 4485, 4979, 5567, 5636, 5931, 6222]
+E       assert False
+E        +  where False = <built-in method isdisjoint of set object at 0x0000020677203E60>({1, 2, 3, 4, 5, 6, ...})
+E        +    where <built-in method isdisjoint of set object at 0x0000020677203E60> = {732, 813, 875, 1186, 1220, 1258, ...}.isdisjoint
+
+tests\test_tokenize.py:615: AssertionError
+_____________________________ test_pairs_parquet ______________________________
+
+    def test_pairs_parquet():
+        """Correcci¾n 2: data/tokens_v1/pairs.parquet, una fila por par CF."""
+        path = ROOT / "data" / "tokens_v1" / "pairs.parquet"
+        assert path.exists(), "pairs.parquet no existe"
+        df = pq.read_table(path).to_pandas()
+>       assert list(df.columns) == [
+            "pair_id", "caseid_base", "caseid_intervencion", "split_t", "lever",
+            "lever_group", "n_windows_pre", "n_windows_post", "n_windows_total",
+            "n_windows_base", "n_windows_intervencion", "usable"]
+E       AssertionError: assert ['pair_id', '...ows_pre', ...] == ['pair_id', '...r_group', ...]
+E         
+E         At index 5 diff: 'n_windows_pre' != 'lever_group'
+E         Right contains 4 more items, first extra item: 'n_windows_total'
+E         Use -v to get more diff
+
+tests\test_tokenize.py:660: AssertionError
+_________________________ test_v_sin_celdas_case_4476 _________________________
+
+    def test_v_sin_celdas_case_4476():
+        """Correcci¾n 2: el caseid real 4476 (n_windows=0 en cases.parquet) no estß
+        en ninguna partici¾n y se registra como causa de descarte sin_celdas."""
+        cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet",
+                              columns=["caseid", "n_windows"]).to_pandas()
+        zero = {int(c) for c in cases[cases.n_windows == 0].caseid}
+        assert zero == {4476}
+        mf = json.loads(MANIFEST.read_text(encoding="utf-8"))
+>       assert set(mf["sin_celdas_caseids"]) == zero
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'sin_celdas_caseids'
+
+tests\test_tokenize.py:832: KeyError
+=========================== short test summary info ===========================
+FAILED tests/test_tokenize.py::test_q_no_phase_marks_real_cases_excluded - As...
+FAILED tests/test_tokenize.py::test_pairs_parquet - AssertionError: assert ['...
+FAILED tests/test_tokenize.py::test_v_sin_celdas_case_4476 - KeyError: 'sin_c...
+3 failed, 27 passed in 623.50s (0:10:23)
+
+2. Implementación / cambios (v5)
+----------------------------------------
+  - Corrección 1: criterio de exclusión por fase. Se excluye todo caso real
+    con 100 % de celdas 'maintenance' en windows_v2 (35 caseids).
+    load_cases_without_phase_marks() lee la fase ya escrita por window.py;
+    no se deduce de opend ni de la regla de deduplicación de context_vocab.
+    Causa de descarte: sin_marcas_fase.
+  - Corrección 2: caseid real 4476 con n_windows=0 en cases.parquet; no está
+    en ninguna partición. Causa de descarte propia: sin_celdas.
+  - Corrección 3: IMPLEMENTATION_NOTES/ASSUMPTIONS sincronizados (post_split =
+    t1 > split_t, criterio de fase, es_proxy metadato, tres listas de columnas,
+    pairs.parquet). Eliminadas las entradas obsoletas.
+  - Corrección 4: emparejamiento completo por groupby sobre las 6 345 parejas;
+    pairs.parquet añade n_windows_base, n_windows_intervencion y usable.
+  - Corrección 5: pairs.parquet añade lever_group (7 objetivos, 21 palancas).
+
+3. Salida en VERDE (literal)
+----------------------------------------
+..............................                                           [100%]
+30 passed in 556.99s (0:09:16)
+
+4. Diagnóstico 1 — fase de los 24 caseids reincorporados en v3
+----------------------------------------
+  lista 35 (regla 82 col, v2): [732, 813, 875, 1186, 1220, 1258, 1390, 1609, 1845, 2096, 2328, 2464, 2514, 2990, 3206, 3217, 3257, 3282, 3509, 3650, 3698, 3772, 3970, 4141, 4340, 4423, 4485, 4508, 4638, 4669, 4979, 5567, 5636, 5931, 6222]
+  lista 11 (regla 37 ctx, v3): [732, 1186, 1220, 2328, 3257, 3650, 3970, 4141, 4508, 4638, 4669]
+  casos reales en windows_v2: 6387
+  casos 100 % maintenance: 35
+  100 % maintenance == lista 35: True
+
+  caseid | n_celdas | fases (value:count) | % maintenance
+  813 | 2922 | {'maintenance': 2922} | 100.00%
+  875 | 1149 | {'maintenance': 1149} | 100.00%
+  1258 | 1598 | {'maintenance': 1598} | 100.00%
+  1390 | 802 | {'maintenance': 802} | 100.00%
+  1609 | 942 | {'maintenance': 942} | 100.00%
+  1845 | 1043 | {'maintenance': 1043} | 100.00%
+  2096 | 2324 | {'maintenance': 2324} | 100.00%
+  2464 | 933 | {'maintenance': 933} | 100.00%
+  2514 | 1252 | {'maintenance': 1252} | 100.00%
+  2990 | 1363 | {'maintenance': 1363} | 100.00%
+  3206 | 1171 | {'maintenance': 1171} | 100.00%
+  3217 | 665 | {'maintenance': 665} | 100.00%
+  3282 | 930 | {'maintenance': 930} | 100.00%
+  3509 | 1149 | {'maintenance': 1149} | 100.00%
+  3698 | 920 | {'maintenance': 920} | 100.00%
+  3772 | 2406 | {'maintenance': 2406} | 100.00%
+  4340 | 1240 | {'maintenance': 1240} | 100.00%
+  4423 | 1154 | {'maintenance': 1154} | 100.00%
+  4485 | 1506 | {'maintenance': 1506} | 100.00%
+  4979 | 1086 | {'maintenance': 1086} | 100.00%
+  5567 | 697 | {'maintenance': 697} | 100.00%
+  5636 | 1335 | {'maintenance': 1335} | 100.00%
+  5931 | 1462 | {'maintenance': 1462} | 100.00%
+  6222 | 769 | {'maintenance': 769} | 100.00%
+
+5. Corrección 2 — caseid que falta en las particiones
+----------------------------------------
+  caseid 4476 (source=real, split=train): n_windows=0
+  -> n_windows=0: window.py no produjo celdas; no puede estar en ninguna
+     partición. Se registra como causa de descarte sin_celdas (no es fallo
+     de windows_v2).
+
+6. Cambios respecto a v3
+----------------------------------------
+  n filas totales: 14,559,904 -> 14,550,993
+      source=cf_v5/split=train            2,163,342 ->  2,163,342
+      source=cf_v5/split=val              4,579,246 ->  4,579,246
+      source=real/split=train               736,639 ->    734,663
+      source=real/split=val               1,508,668 ->  1,501,733
+      source=synthetic_v5/split=train     1,667,633 ->  1,667,633
+      source=synthetic_v5/split=val       3,633,467 ->  3,633,467
+      source=vaso_reinf_v5/split=train       86,666 ->     86,666
+      source=vaso_reinf_v5/split=val        184,243 ->    184,243
+
+  descartes por causa:
+      emergencia          3,638,967 ->    3,638,967
+      emitido            14,559,904 ->   14,550,993
+      hueco                 346,668 ->      346,380
+      induccion           2,755,943 ->    2,755,943
+      n_grid             72,394,597 ->   72,363,779
+      sin_celdas                  0 ->            1
+      sin_marcas_fase             0 ->           35
+      sin_opend                  11 ->            0
+      valido             65,653,019 ->   65,622,489
+
+7. Pares CF
+----------------------------------------
+  n pares totales: 6345
+  n pares usable=False: 183
+  tabla de pares con usable=False:
+   pair_id  caseid_base  caseid_intervencion          lever  n_windows_base  n_windows_intervencion  n_windows_total
+     70165        70166                70165 propofol_bolus               0                       0                0
+     70207        70208                70207 propofol_bolus               0                       0                0
+     70337        70338                70337 propofol_bolus               0                       0                0
+     70357        70358                70357 propofol_bolus               0                       0                0
+     70385        70386                70385 propofol_bolus               0                       0                0
+     70401        70402                70401 propofol_bolus               0                       0                0
+     70503        70504                70503  noradrenaline               0                       0                0
+     70715        70716                70715  noradrenaline               0                       0                0
+     70725        70726                70725  noradrenaline               0                       0                0
+     70767        70768                70767  noradrenaline               0                       0                0
+     71065        71066                71065        remi_up               0                       0                0
+     71079        71080                71079        remi_up               0                       0                0
+     71191        71192                71191        remi_up               0                       0                0
+     71243        71244                71243        remi_up               0                       0                0
+     71321        71322                71321        remi_up               0                       0                0
+     71443        71444                71443        remi_up               0                       0                0
+     71451        71452                71451        remi_up               0                       0                0
+     71529        71530                71529      ephedrine               0                       0                0
+     71533        71534                71533      ephedrine               0                       0                0
+     71569        71570                71569      ephedrine               0                       0                0
+     71597        71598                71597      ephedrine               0                       0                0
+     71637        71638                71637      ephedrine               0                       0                0
+     71675        71676                71675      ephedrine               0                       0                0
+     80293        80294                80293        peep_up               0                       0                0
+     80343        80344                80343      peep_down               0                       0                0
+     80411        80412                80411      peep_down               0                       0                0
+     80691        80692                80691      fio2_down               0                       0                0
+     80769        80770                80769      fio2_down               0                       0                0
+     80791        80792                80791      fio2_down               0                       0                0
+     80843        80844                80843      fio2_down               0                       0                0
+     80855        80856                80855      fio2_down               0                       0                0
+     80905        80906                80905        sevo_up               0                       0                0
+     80987        80988                80987        sevo_up               0                       0                0
+     81035        81036                81035        sevo_up               0                       0                0
+     81047        81048                81047        sevo_up               0                       0                0
+     81081        81082                81081        sevo_up               0                       0                0
+     81115        81116                81115        sevo_up               0                       0                0
+     81155        81156                81155        sevo_up               0                       0                0
+     81165        81166                81165        sevo_up               0                       0                0
+     90099        90100                90099     ppf20_rate               0                       0                0
+     90129        90130                90129     ppf20_rate               0                       0                0
+     90295        90296                90295     ppf20_rate               0                       0                0
+     90335        90336                90335     ppf20_rate               0                       0                0
+     90351        90352                90351     ppf20_rate               0                       0                0
+     90359        90360                90359     ppf20_rate               0                       0                0
+     90409        90410                90409     ppf20_rate               0                       0                0
+     90419        90420                90419     ppf20_rate               0                       0                0
+     90423        90424                90423     ppf20_rate               0                       0                0
+     90561        90562                90561     ppf20_rate               0                       0                0
+     90603        90604                90603     ppf20_rate               0                       0                0
+     90801        90802                90801    rftn20_rate               0                       0                0
+     90867        90868                90867    rftn20_rate               0                       0                0
+     90913        90914                90913    rftn20_rate               0                       0                0
+     90925        90926                90925    rftn20_rate               0                       0                0
+     91005        91006                91005    rftn20_rate               0                       0                0
+     91101        91102                91101    rftn20_rate               0                       0                0
+     91145        91146                91145    rftn20_rate               0                       0                0
+     91147        91148                91147    rftn20_rate               0                       0                0
+     91337        91338                91337    rftn20_rate               0                       0                0
+     91353        91354                91353    rftn20_rate               0                       0                0
+     91363        91364                91363    rftn20_rate               0                       0                0
+     91373        91374                91373    rftn20_rate               0                       0                0
+     91415        91416                91415    rftn20_rate               0                       0                0
+     91455        91456                91455    rftn20_rate               0                       0                0
+     91663        91664                91663      ppf_bolus               0                       0                0
+     91797        91798                91797      ppf_bolus               0                       0                0
+     91813        91814                91813      ppf_bolus               0                       0                0
+     91887        91888                91887      ppf_bolus               0                       0                0
+     91937        91938                91937      ppf_bolus               0                       0                0
+     92005        92006                92005      ppf_bolus               0                       0                0
+     92105        92106                92105      ppf_bolus               0                       0                0
+     92199        92200                92199      ppf_bolus               0                       0                0
+     92217        92218                92217      ppf_bolus               0                       0                0
+     92245        92246                92245      ppf_bolus               0                       0                0
+     92291        92292                92291     remi_bolus               0                       0                0
+     92323        92324                92323     remi_bolus               0                       0                0
+     92373        92374                92373     remi_bolus               0                       0                0
+     92417        92418                92417     remi_bolus               0                       0                0
+     92457        92458                92457     remi_bolus               0                       0                0
+     92543        92544                92543     remi_bolus               0                       0                0
+     92553        92554                92553     remi_bolus               0                       0                0
+     92575        92576                92575     remi_bolus               0                       0                0
+     92579        92580                92579     remi_bolus               0                       0                0
+     92593        92594                92593     remi_bolus               0                       0                0
+     92623        92624                92623     remi_bolus               0                       0                0
+     92883        92884                92883     remi_bolus               0                       0                0
+     92897        92898                92897     remi_bolus               0                       0                0
+     92961        92962                92961     remi_bolus               0                       0                0
+     92979        92980                92979     remi_bolus               0                       0                0
+     93065        93066                93065      nepi_rate               0                       0                0
+     93087        93088                93087      nepi_rate               0                       0                0
+     93095        93096                93095      nepi_rate               0                       0                0
+     93119        93120                93119      nepi_rate               0                       0                0
+     93155        93156                93155      nepi_rate               0                       0                0
+     93177        93178                93177      nepi_rate               0                       0                0
+     93195        93196                93195      nepi_rate               0                       0                0
+     93221        93222                93221      nepi_rate               0                       0                0
+     93277        93278                93277      nepi_rate               0                       0                0
+     93309        93310                93309      nepi_rate               0                       0                0
+     93391        93392                93391      nepi_rate               0                       0                0
+     93505        93506                93505      nepi_rate               0                       0                0
+     93575        93576                93575      nepi_rate               0                       0                0
+     93635        93636                93635      nepi_rate               0                       0                0
+     93643        93644                93643      nepi_rate               0                       0                0
+     93803        93804                93803      phen_rate               0                       0                0
+     94009        94010                94009      phen_rate               0                       0                0
+     94011        94012                94011      phen_rate               0                       0                0
+     94031        94032                94031      phen_rate               0                       0                0
+     94107        94108                94107      phen_rate               0                       0                0
+     94119        94120                94119      phen_rate               0                       0                0
+     94143        94144                94143      phen_rate               0                       0                0
+     94165        94166                94165      phen_rate               0                       0                0
+     94237        94238                94237      phen_rate               0                       0                0
+     94279        94280                94279      phen_rate               0                       0                0
+     94321        94322                94321      phen_rate               0                       0                0
+     94347        94348                94347      phen_rate               0                       0                0
+     94353        94354                94353      phen_rate               0                       0                0
+     94395        94396                94395      phen_rate               0                       0                0
+     94481        94482                94481      phen_rate               0                       0                0
+     94493        94494                94493      phen_rate               0                       0                0
+     94497        94498                94497      phen_rate               0                       0                0
+     94559        94560                94559     phen_bolus               0                       0                0
+     94595        94596                94595     phen_bolus               0                       0                0
+     94609        94610                94609     phen_bolus               0                       0                0
+     94673        94674                94673     phen_bolus               0                       0                0
+     94779        94780                94779     phen_bolus               0                       0                0
+     94805        94806                94805     phen_bolus               0                       0                0
+     94843        94844                94843     phen_bolus               0                       0                0
+     94867        94868                94867     phen_bolus               0                       0                0
+     95047        95048                95047     phen_bolus               0                       0                0
+     95107        95108                95107     phen_bolus               0                       0                0
+     95277        95278                95277      eph_bolus               0                       0                0
+     95297        95298                95297      eph_bolus               0                       0                0
+     95309        95310                95309      eph_bolus               0                       0                0
+     95347        95348                95347      eph_bolus               0                       0                0
+     95413        95414                95413      eph_bolus               0                       0                0
+     95427        95428                95427      eph_bolus               0                       0                0
+     95851        95852                95851      eph_bolus               0                       0                0
+     95891        95892                95891      eph_bolus               0                       0                0
+     95955        95956                95955      eph_bolus               0                       0                0
+     96089        96090                96089       set_fio2               0                       0                0
+     96097        96098                96097       set_fio2               0                       0                0
+     96117        96118                96117       set_fio2               0                       0                0
+     96575        96576                96575       set_fio2               0                       0                0
+     96691        96692                96691       set_fio2               0                       0                0
+     96755        96756                96755         set_rr               0                       0                0
+     96827        96828                96827         set_rr               0                       0                0
+     96923        96924                96923         set_rr               0                       0                0
+     97051        97052                97051         set_rr               0                       0                0
+     97299        97300                97299         set_rr               0                       0                0
+     97349        97350                97349         set_rr               0                       0                0
+     97399        97400                97399         set_rr               0                       0                0
+     97465        97466                97465         set_rr               0                       0                0
+     97561        97562                97561         set_tv               0                       0                0
+     97625        97626                97625         set_tv               0                       0                0
+     97643        97644                97643         set_tv               0                       0                0
+     97773        97774                97773         set_tv               0                       0                0
+     97801        97802                97801         set_tv               0                       0                0
+     97911        97912                97911         set_tv               0                       0                0
+     97933        97934                97933         set_tv               0                       0                0
+     98007        98008                98007         set_tv               0                       0                0
+     98011        98012                98011         set_tv               0                       0                0
+     98087        98088                98087         set_tv               0                       0                0
+     98099        98100                98099         set_tv               0                       0                0
+     98211        98212                98211         set_tv               0                       0                0
+     98323        98324                98323       set_peep               0                       0                0
+     98585        98586                98585       set_peep               0                       0                0
+     98703        98704                98703       set_peep               0                       0                0
+     98867        98868                98867       set_peep               0                       0                0
+     98979        98980                98979       set_peep               0                       0                0
+     99125        99126                99125       sevo_mac               0                       0                0
+     99151        99152                99151       sevo_mac               0                       0                0
+     99161        99162                99161       sevo_mac               0                       0                0
+     99229        99230                99229       sevo_mac               0                       0                0
+     99347        99348                99347       sevo_mac               0                       0                0
+     99397        99398                99397       sevo_mac               0                       0                0
+     99471        99472                99471       sevo_mac               0                       0                0
+     99495        99496                99495       sevo_mac               0                       0                0
+     99503        99504                99503       sevo_mac               0                       0                0
+     99507        99508                99507       sevo_mac               0                       0                0
+     99557        99558                99557       sevo_mac               0                       0                0
+     99671        99672                99671       sevo_mac               0                       0                0
+     99713        99714                99713       sevo_mac               0                       0                0
+  de ellos, con n_windows_total=0 (ausentes de windows_v2): 183
+  con n_windows_total>0 y t0 distintos: 0
+
+  n_pares y n_windows_post por lever_group (dense=False):
+      efedrina       n_pares=  495  n_windows_post=   48,823
+      fenilefrina    n_pares=  750  n_windows_post=   73,792
+      noradrenalina  n_pares=  625  n_windows_post=   59,925
+      propofol       n_pares=1,000  n_windows_post=  101,964
+      remifentanilo  n_pares=1,000  n_windows_post=   95,187
+      sevoflurano    n_pares=  525  n_windows_post=   50,826
+      ventilacion    n_pares=1,950  n_windows_post=  190,388
+
+8. Resultados
+----------------------------------------
+  n filas                            14,550,993
+  n particiones                      363
+  n_duplicados (caseid, t0)          0
+  pares CF en pairs.parquet          6345
+  excluidos sin marcas de fase       35 [732, 813, 875, 1186, 1220, 1258, 1390, 1609, 1845, 2096, 2328, 2464, 2514, 2990, 3206, 3217, 3257, 3282, 3509, 3650, 3698, 3772, 3970, 4141, 4340, 4423, 4485, 4508, 4638, 4669, 4979, 5567, 5636, 5931, 6222]
+  sin_celdas (n_windows=0)           [4476]
+
+9. Discrepancias y supuestos
+----------------------------------------
+  1. El contrato v3 decía '35 casos sin opend' y la iteración 3 lo redujo a 11
+     unificando con context_vocab. El contrato v5 lo revierte: el criterio es
+     la fase de windows_v2 (100 % maintenance), que da exactamente los 35. Los
+     24 reincorporados eran casos stub marcados enteros como maintenance.
+  2. La métrica dense=True (~91 % de val) se conserva en el parquet pero no entra
+     en métricas ni en pairs.parquet (todo dense=False).
+  3. es_proxy viaja como metadato (contrato v4/v5).
+  4. post_split = t1 > split_t es metadato puro: la primera ventana post_split
+     puede no divergir aún si la intervención cae al final de la ventana.
+  5. 183 pares quedan con n_windows_total=0 (excluidos a nivel windows_v2);
+     usable=False para ellos es esperado.
+
+10. Veredicto por gate
+----------------------------------------
+  Gate 1 (cobertura): PASA.
+  Gate 2 (prefijo CF): PASA — post_split=t1>split_t; prefijo bit a bit idéntico.
+  Gate 3 (integrador): heredado de pk_tokens.
+  Gate 4 (columnas excluidas): PASA — test mecánico de lecturas.
+  Gate 5 (split idéntico): PASA.
+  Gate 6 (sondeo de fuente): heredado de context_vocab.
+  Gate 7 (KS): INFORMATIVO.
+  Gate 8 (categorías < 50): PASA — heredado de context_vocab.
+  Gate 9 (stats solo train): PASA.
+  Gate 10 (tokens de estado): PENDIENTE.
+

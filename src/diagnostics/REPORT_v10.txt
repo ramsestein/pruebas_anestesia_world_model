@@ -1,0 +1,91 @@
+REPORT_v10.txt — cierre de integridad (v10)
+==============================================================================
+Generado: 2026-09-28
+
+------------------------------------------------------------------------------
+1. PRUEBA DE EQUIVALENCIA POR CONTENIDO
+------------------------------------------------------------------------------
+
+1a. Marginales de la real recalculados SOLO sobre split=val CON exclusiones
+    (población exacta de la tabla D4 de cohort_gap: split val, excluidos los
+    36 caseids, máscara m=1). Resultado lado a lado contra la cache
+    cohort_gap_results.json (d4.per_source.real):
+
+    Todas las 14 variables coinciden EXACTO (n idéntico, mean y std idénticos
+    a 3-4 decimales; máx |Δstd|/std_D4 = 0.0000, máx |Δmean| = 0.0000).
+    Detalle: data/diagnostics/v10_marginales_val.json y
+    scripts/v10_marginales_val.py.
+
+    La discrepancia previa (EMG std 3.69 vs 3.43, ~7 %) era por mezclar
+    train+val SIN exclusiones en la tabla v9. Con la población correcta
+    (val + exclusiones) se reproduce D4. Causa benigna confirmada.
+
+1b. PRUEBA DECISIVA: gates 2 y 3 del ae_bal CONGELADO reejecutados sobre la
+    cohorte real de windows_v4 (split val). Resultado:
+
+    GATE 2 (mediana per-caso, unidades físicas):
+        Solar8000/HR      0.3940   (manifest 0.3940)  OK
+        Solar8000/ART_MBP 0.2414   (manifest 0.2413)  OK
+        BIS/BIS           0.1765   (manifest 0.1765)  OK
+        Primus/ETCO2      0.0912   (manifest 0.0912)  OK
+
+    GATE 3:
+        n_cases = 943             (manifest 943)      OK
+        n_cells = 1 481 996       (manifest 1481996)  OK
+        err_hr_with_art = 0.3843  (manifest 0.3843)   OK
+        err_hr_without_art = 0.7161 (manifest 0.7161) OK
+
+    => REPRODUCEN. Las celdas reales son equivalentes en todo lo que el AE
+       ve. El veredicto de 1.1 queda CERRADO; no se revienta la real ni se
+       reentrena el AE. Detalle: data/diagnostics/v10_gate_recheck.json y
+       reports/_v10_gate_recheck.log.
+
+------------------------------------------------------------------------------
+2. EXCLUSIONES: son 36, no 4511
+------------------------------------------------------------------------------
+
+    manifest_tokens.json: sin_celdas_caseids = [4476] (longitud 1, un ÚNICO
+    caseid, el 4476). excluded_no_phase_marks_caseids = 35 caseids.
+    Total = 35 + 1 = 36 caseids excluidos.
+
+    El número "4476" se había descrito ambiguamente como "4476 sin celdas"
+    (legible como "4476 casos"). Corregido a "el caseid 4476 sin celdas, 36 en
+    total" en: src/ae/physio_ae.py, src/diagnostics/cohort_gap.py (2),
+    src/diagnostics/gap_addendum.py, src/diagnostics/v7_attribution.py, y
+    regenerado REPORT_v7_attribution.txt. Los informes v9 ya usaban "[4476]".
+
+    Ningún diagnóstico usó 4511 en un denominador de CÓMPUTO: el código
+    (excluded_caseids / load_excluded_caseids) siempre expandió la lista
+    [4476] a UN caseid, y el manifest registra discards_by_cause con
+    sin_marcas_fase=35 y sin_celdas=1. El error era solo de PROSA, no de
+    cálculo.
+
+------------------------------------------------------------------------------
+3. COPIA DE SEGURIDAD DE LO IRREEMPLAZABLE
+------------------------------------------------------------------------------
+
+    Copiados a D:/data/anestesia_world/backup_v7_20260928/ con manifiesto
+    sha256 por fichero y verificación por relectura desde el destino:
+        data/windows_v4                0.73 GB   (373 ficheros)
+        data/synthetic_v7             20.89 GB   (60 003)
+        data/synthetic_vaso_reinf_v7   1.29 GB   (3 000)
+        data/cf_v7                    31.84 GB   (82 487; 6 345 pares)
+        TOTAL                         ~54.75 GB  (145 863 ficheros)
+    VERIFICACIÓN (relectura sha256 desde el destino): 145 863 OK, 0 MAL,
+    54 755 251 963 bytes, 5619 s. (verification.json en el destino;
+    script scripts/v10_backup.py.)
+
+------------------------------------------------------------------------------
+4. CORRECCIONES DE REGISTRO en REPORT_v9.txt
+------------------------------------------------------------------------------
+
+    4a. D2' NO convergió (mejor época 55 de 56, tope agotado); ya no se
+        presenta como control limpio. El control convergido es D2, también
+        batido por D3; D2' corrobora con esa salvedad.
+    4b. Magnitud absoluta registrada: D3 sigue 1.58x PEOR que la persistencia
+        en HR a 300 s (7.548 vs 4.780). La transferencia existe; el modelo
+        todavía no funciona.
+    4c. Hallazgo propio con tabla: la val_loss a un paso NO ordena los modelos
+        como el error de rollout (D3 peor val_loss 6.2756 / mejor rollout;
+        D3' val_loss 1.1146 / peor rollout). Justificación empírica de la
+        pérdida multi-paso desplegada del contrato de transición.

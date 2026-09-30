@@ -1,0 +1,11 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 3 items / 1 deselected / 2 selected
+
+tests/test_v9_reconstruction.py::test_a_split_holdout_sha_matches_cache PASSED [ 50%]
+tests/test_v9_reconstruction.py::test_b_reconstruction_numeric_check_all_match PASSED [100%]
+
+======================= 2 passed, 1 deselected in 0.95s =======================
