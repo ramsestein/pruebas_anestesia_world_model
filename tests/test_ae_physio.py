@@ -14,11 +14,13 @@ import pyarrow.parquet as pq
 import pytest
 import torch
 
+import paths
+
 from ae import physio_ae as pae
 
 ROOT = Path(__file__).resolve().parents[1]
-WINDOWS_DIR = ROOT / "data" / "windows_v2" / "windows"
-AE_DIR = ROOT / "data" / "ae_v1"
+WINDOWS_DIR = paths.WINDOWS_DIR / "windows"
+AE_DIR = paths.AE_DIR
 
 
 # --------------------------------------------------------------------------

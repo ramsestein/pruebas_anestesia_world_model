@@ -19,6 +19,10 @@ if str(SRC) not in sys.path:
 from diagnostics import v7_attribution as va  # noqa: E402
 from diagnostics import cohort_gap as cg  # noqa: E402
 
+LOST_V6 = pytest.mark.skip(reason=(
+    "requiere la cohorte v6 (synthetic_v6/vaso_reinf_v6/cf_v6 en windows_v3), "
+    "perdida — paths.LOST_COHORTS"))
+
 
 # --------------------------------------------------------------------------
 # Unitarios (sin disco)
@@ -80,6 +84,8 @@ def results():
 
 
 @pytest.mark.integration
+@pytest.mark.requires_lost_data
+@LOST_V6
 def test_f_a1_a3_present(results):
     r = results
     assert "a1" in r and "a2" in r and "a3" in r
@@ -89,6 +95,8 @@ def test_f_a1_a3_present(results):
 
 
 @pytest.mark.integration
+@pytest.mark.requires_lost_data
+@LOST_V6
 def test_g_a4_deltas_present(results):
     a4 = results["a4"]
     assert "univariate_deltas" in a4
@@ -96,12 +104,16 @@ def test_g_a4_deltas_present(results):
 
 
 @pytest.mark.integration
+@pytest.mark.requires_lost_data
+@LOST_V6
 def test_h_a5_quantization_present(results):
     a5 = results["a5"]
     assert set(a5.keys()) >= {"real", "v6"}
 
 
 @pytest.mark.integration
+@pytest.mark.requires_lost_data
+@LOST_V6
 def test_i_a6_corr_mi_present(results):
     a6 = results["a6"]
     assert "corr_frobenius" in a6 or "corr" in a6
@@ -109,6 +121,8 @@ def test_i_a6_corr_mi_present(results):
 
 
 @pytest.mark.integration
+@pytest.mark.requires_lost_data
+@LOST_V6
 def test_j_report_written(results):
     assert va.REPORT_PATH.exists()
     txt = va.REPORT_PATH.read_text(encoding="utf-8")

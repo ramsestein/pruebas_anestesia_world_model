@@ -16,11 +16,22 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
 
+import paths
+
 from tokens import tokenize as tk
 
 ROOT = Path(__file__).resolve().parents[1]
-TOKENS_DIR = ROOT / "data" / "tokens_v1" / "windows"
-MANIFEST = ROOT / "data" / "tokens_v1" / "manifest_tokens.json"
+TOKENS_DIR = paths.TOKENS_DIR / "windows"
+MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
+
+# Artefactos generados desde las cohortes v5 (windows_v2): la salida tokens_v1
+# en disco es de v5 y su regeneración con v7 es el paso siguiente a esta tarea.
+LOST_V5_OUTPUT = pytest.mark.skip(reason=(
+    "requiere artefactos generados desde las cohortes v5 (cf_v5/synthetic_v5 en "
+    "windows_v2 y su salida tokens_v1) — paths.LOST_COHORTS"))
+LOST_PK_V7 = pytest.mark.skip(reason=(
+    "requiere pk_v1 de las cohortes v7 (no regenerado; data/pk_v1 en disco es "
+    "de windows_v2/v5) — regeneración prevista en el paso siguiente"))
 
 
 # --------------------------------------------------------------------------
@@ -303,10 +314,12 @@ def _load_case_tokens_from_map(caseid: int, case_to_part: dict) -> pd.DataFrame:
     return tbl[tbl.caseid == caseid].sort_values("t0", kind="stable").reset_index(drop=True)
 
 
+@pytest.mark.requires_lost_data
+@LOST_V5_OUTPUT
 def test_i_gate5_split_matches():
     parts = _require_output()
-    cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet").to_pandas()
-    split_map = pq.read_table(ROOT / "data" / "windows_v2" / "split.parquet").to_pandas()
+    cases = pq.read_table(paths.WINDOWS_DIR / "cases.parquet").to_pandas()
+    split_map = pq.read_table(paths.WINDOWS_DIR / "split.parquet").to_pandas()
     subj_split = dict(zip(split_map.subjectid.astype(str), split_map.split.astype(str)))
     case_expected = {int(r.caseid): subj_split[str(r.subjectid)] for _, r in cases.iterrows()}
 
@@ -323,6 +336,8 @@ def test_i_gate5_split_matches():
             assert case_expected.get(cid) == split, f"split incorrecto para {cid}"
 
 
+@pytest.mark.requires_lost_data
+@LOST_V5_OUTPUT
 def test_j_gate2_cf_prefix():
     parts = _require_output()
     cf_meta = tk.load_cf_meta()
@@ -577,6 +592,8 @@ def test_o_gate1_coverage():
             print(f"  ctx  {i:12s} {src:14s} {key:24s} emitido={frac:.3f}")
 
 
+@pytest.mark.requires_lost_data
+@LOST_V5_OUTPUT
 def test_p_cf_metadata():
     parts = _require_output()
     cf_meta = tk.load_cf_meta()
@@ -616,6 +633,8 @@ def test_q_no_phase_marks_real_cases_excluded():
         f"casos sin marcas de fase en la salida: {sorted(excluded & found)}"
 
 
+@pytest.mark.requires_lost_data
+@LOST_V5_OUTPUT
 def test_cf_branch_pairing():
     """Corrección 2: las ramas base e intervención tienen el mismo conjunto de
     t0 dense=False (sin eso no se puede emparejar ventana a ventana)."""
@@ -652,6 +671,8 @@ def test_cf_branch_pairing():
         assert ta == tb, f"par {p}: t0 dense=False distintos ({len(ta)} vs {len(tb)})"
 
 
+@pytest.mark.requires_lost_data
+@LOST_V5_OUTPUT
 def test_pairs_parquet():
     """Corrección 2: data/tokens_v1/pairs.parquet, una fila por par CF."""
     path = ROOT / "data" / "tokens_v1" / "pairs.parquet"
@@ -686,6 +707,8 @@ def test_pairs_parquet():
     assert set(df.lever_group.unique()) == set(tk.LEVER_GROUP.values())
 
 
+@pytest.mark.requires_lost_data
+@LOST_PK_V7
 def test_gate4_mechanical_read_columns(tmp_path, monkeypatch):
     """Corrección 3: ninguna lectura de parquet omite columns= y la unión de
     columnas solicitadas no intersecta con la tabla Excluidas (salvo caseid,
@@ -750,8 +773,8 @@ def test_column_lists_disjoint_and_complete():
 
 
 def test_partition_invariant():
-    """Corrección 5: ningún caseid aparece en más de una partición windows_v2."""
-    parts = sorted((ROOT / "data" / "windows_v2" / "windows").glob(
+    """Corrección 5: ningún caseid aparece en más de una partición windows_v4."""
+    parts = sorted((paths.WINDOWS_DIR / "windows").glob(
         "source=*/split=*/part-*.parquet"))
     seen: set[int] = set()
     dup: set[int] = set()
@@ -765,7 +788,7 @@ def test_partition_invariant():
         seen.update(uniq)
         min_part = len(df) if min_part is None else min(min_part, len(df))
     assert not dup, f"caseids repartidos entre particiones: {sorted(dup)}"
-    cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet").to_pandas()
+    cases = pq.read_table(paths.WINDOWS_DIR / "cases.parquet").to_pandas()
     max_cells = int(cases.n_windows.max())
     print(f"max celdas/caso={max_cells}, min celdas/particion={min_part}, "
           f"n_caseids_total={len(seen)}")
@@ -783,9 +806,9 @@ def test_r_phase_mark_criterion():
 
 def test_s_phase_marks_match_windows_v2():
     """Corrección 1: load_cases_without_phase_marks() coincide con el conjunto
-    de casos reales 100 % maintenance de windows_v2 (diagnóstico 1)."""
+    de casos reales 100 % maintenance de windows_v4 (diagnóstico 1)."""
     agg: dict[int, tuple[int, int]] = {}
-    for part in sorted((ROOT / "data" / "windows_v2" / "windows").glob(
+    for part in sorted((paths.WINDOWS_DIR / "windows").glob(
             "source=real/split=*/part-*.parquet")):
         df = pq.read_table(part, columns=["caseid", "phase_from_clinical"]).to_pandas()
         for cid, grp in df.groupby("caseid"):
@@ -824,7 +847,7 @@ def test_u_report_no_obsolete_strings(tmp_path, monkeypatch):
 def test_v_sin_celdas_case_4476():
     """Corrección 2: el caseid real 4476 (n_windows=0 en cases.parquet) no está
     en ninguna partición y se registra como causa de descarte sin_celdas."""
-    cases = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet",
+    cases = pq.read_table(paths.WINDOWS_DIR / "cases.parquet",
                           columns=["caseid", "n_windows"]).to_pandas()
     zero = {int(c) for c in cases[cases.n_windows == 0].caseid}
     assert zero == {4476}

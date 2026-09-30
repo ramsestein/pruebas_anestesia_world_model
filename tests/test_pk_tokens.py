@@ -18,6 +18,8 @@ import pandas as pd
 import pyarrow.parquet as pq
 import pytest
 
+import paths
+
 from tokens import pk_tokens as pk
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -282,7 +284,7 @@ INTEGRATION = pytest.mark.integration
 
 
 def _first_partition(source: str, split: str) -> Path:
-    p = ROOT / "data" / "windows_v2" / "windows" / f"source={source}" / f"split={split}" / "part-00000.parquet"
+    p = paths.WINDOWS_DIR / "windows" / f"source={source}" / f"split={split}" / "part-00000.parquet"
     assert p.exists(), p
     return p
 
@@ -290,7 +292,7 @@ def _first_partition(source: str, split: str) -> Path:
 @INTEGRATION
 def test_k_determinism_same_partition_twice():
     """Dos ejecuciones sobre la misma partición dan bytes idénticos."""
-    part = _first_partition("synthetic_v5", "train")
+    part = _first_partition("synthetic_v7", "train")
     with tempfile.TemporaryDirectory() as td:
         out1 = Path(td) / "a" / "part-00000.parquet"
         out2 = Path(td) / "b" / "part-00000.parquet"
@@ -310,8 +312,8 @@ def test_l_gate2_cf_prefix_and_lever_divergence():
         a, b = pr["caseid_a"], pr["caseid_b"]
         lever = pr["lever"]
         split_t = pr["split_t"]
-        ta = pk.process_case_tokens(int(a), "cf_v5")
-        tb = pk.process_case_tokens(int(b), "cf_v5")
+        ta = pk.process_case_tokens(int(a), "cf_v7")
+        tb = pk.process_case_tokens(int(b), "cf_v7")
         assert set(ta.columns) == set(tb.columns)
         cols = [c for c in ta.columns if c not in ("caseid", "t", "source", "split")]
         # alinear por (caseid, t)
@@ -378,9 +380,9 @@ def test_m_gate3_integrator_equivalence():
     from anessim.pk.propofol import PropofolSchnider
     from anessim.pk.remifentanil import RemifentanilMinto
 
-    meta_dir = ROOT / "data" / "synthetic_v5" / "metadata"
-    cases = sorted((ROOT / "data" / "synthetic_v5" / "cases").glob("*.parquet"))
-    demo = pk.load_clinical_map()["synthetic_v5"]
+    meta_dir = paths.COHORTS["synthetic_v7"] / "metadata"
+    cases = sorted((paths.COHORTS["synthetic_v7"] / "cases").glob("*.parquet"))
+    demo = pk.load_clinical_map()["synthetic_v7"]
 
     def pk_model(cid: int) -> str:
         return json.loads((meta_dir / f"{cid}_meta.json").read_text(encoding="utf-8"))["pk_model"]
@@ -463,6 +465,10 @@ def test_m_gate3_integrator_equivalence():
             rate_col = "Orchestra/PPF20_RATE" if drug == "propofol" else "Orchestra/RFTN20_RATE"
             ce_col = "Orchestra/PPF20_CE" if drug == "propofol" else "Orchestra/RFTN20_CE"
             bol_col = "ppf_bolus_mg" if drug == "propofol" else "remi_bolus_ug"
+            # v7: esquemas heterogéneos — algunos casos no tienen el track CE
+            # del fármaco (sin administración); el diagnóstico los omite.
+            if ce_col not in pq.read_schema(case_path).names:
+                continue
             df = pq.read_table(case_path, columns=["time", rate_col, ce_col, bol_col]).to_pandas()
             t = df["time"].to_numpy(float)
             grid = np.arange(t[0], t[-1], DT_S)

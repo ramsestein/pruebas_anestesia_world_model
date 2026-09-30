@@ -118,9 +118,14 @@ def test_h_d3_controls_near_chance(results):
 
 @pytest.mark.integration
 def test_i_d1_full14_auc_high(results):
-    """La sonda de 14 valores sobre la entrada cruda debe separar (AUC > 0.90)."""
+    """La sonda de 14 valores sobre la entrada cruda debe separar (AUC > 0.60).
+
+    El umbral se re-calibró al repuntar a v7: en v5 el AUC era 0.9734; en v7 la
+    brecha LINEAL se cerró (objetivo de la recalibración) y el AUC queda ~0.765,
+    aún claramente por encima del azar (0.50) y de los controles de cordura (< 0.60).
+    """
     d1 = results["d1"]
-    assert d1["cumulative"][-1]["auc"] > 0.90
+    assert d1["cumulative"][-1]["auc"] > 0.60
 
 
 @pytest.mark.integration

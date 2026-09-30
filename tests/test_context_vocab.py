@@ -266,8 +266,8 @@ def test_m_gate6_source_probe(built):
     assert len(g6["top_coefs"]) == g6["n_items"]
     assert "top1" in g6["ablation"]
     assert set(g6["pairwise"].keys()) == {
-        "real_vs_synthetic_v5", "real_vs_cf_v5",
-        "real_vs_vaso_reinf_v5", "synthetic_v5_vs_cf_v5",
+        "real_vs_synthetic_v7", "real_vs_cf_v7",
+        "real_vs_vaso_reinf_v7", "synthetic_v7_vs_cf_v7",
     }
 
 

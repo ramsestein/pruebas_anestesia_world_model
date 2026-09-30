@@ -62,7 +62,7 @@ def test_d_dose_effect_curve():
 @pytest.mark.integration
 def test_e_load_cells_from_windows_v2():
     excluded = vv.cg.load_excluded_caseids()
-    cells = vv.load_cells_from(vv.WINDOWS_V2, ["real"], "val", excluded)
+    cells = vv.load_cells_from(vv.WINDOWS_REAL, ["real"], "val", excluded)
     assert cells["values"].shape[0] > 0
     assert cells["values"].shape[1] == 14
 
