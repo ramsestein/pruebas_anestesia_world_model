@@ -1,0 +1,164 @@
+{
+  "date": "2026-09-26T01:44:13.786499",
+  "seed": 42,
+  "grid_s": 5.0,
+  "max_age": {
+    "BIS/BIS": 10.0,
+    "BIS/EMG": 10.0,
+    "BIS/SEF": 10.0,
+    "BIS/SQI": 10.0,
+    "BIS/SR": 10.0,
+    "BIS/TOTPOW": 10.0,
+    "Solar8000/HR": 10.0,
+    "Solar8000/PLETH_HR": 10.0,
+    "Solar8000/PLETH_SPO2": 10.0,
+    "Primus/ETCO2": 10.0,
+    "Solar8000/ETCO2": 10.0,
+    "Solar8000/ART_MBP": 10.0,
+    "Solar8000/ART_SBP": 10.0,
+    "Solar8000/ART_DBP": 10.0,
+    "Primus/PEEP_MBAR": 30.0,
+    "Primus/PIP_MBAR": 30.0,
+    "Primus/MV": 30.0,
+    "Primus/TV": 30.0,
+    "Primus/RR_CO2": 30.0,
+    "Solar8000/BT": 600.0,
+    "Solar8000/NIBP_MBP": 600.0,
+    "Solar8000/NIBP_SBP": 600.0,
+    "Solar8000/NIBP_DBP": 600.0,
+    "Primus/FIO2": 30.0
+  },
+  "plausible_range": {
+    "BIS/BIS": [
+      0.0,
+      100.0
+    ],
+    "BIS/EMG": [
+      0.0,
+      100.0
+    ],
+    "Solar8000/HR": [
+      10.0,
+      250.0
+    ],
+    "Solar8000/PLETH_SPO2": [
+      40.0,
+      100.0
+    ],
+    "Primus/ETCO2": [
+      10.0,
+      80.0
+    ],
+    "Primus/PEEP_MBAR": [
+      0.0,
+      25.0
+    ],
+    "Primus/PIP_MBAR": [
+      5.0,
+      60.0
+    ],
+    "Primus/MV": [
+      0.0,
+      25.0
+    ],
+    "Primus/TV": [
+      50.0,
+      1500.0
+    ],
+    "Primus/RR_CO2": [
+      2.0,
+      60.0
+    ],
+    "Solar8000/BT": [
+      25.0,
+      45.0
+    ],
+    "Solar8000/ART_MBP": [
+      0.0,
+      300.0
+    ],
+    "Solar8000/ART_SBP": [
+      0.0,
+      400.0
+    ],
+    "Solar8000/ART_DBP": [
+      0.0,
+      300.0
+    ],
+    "Primus/FIO2": [
+      15.0,
+      100.0
+    ]
+  },
+  "image_tracks": [
+    "BIS/BIS",
+    "Solar8000/HR",
+    "Solar8000/PLETH_SPO2",
+    "Primus/ETCO2",
+    "Primus/PEEP_MBAR",
+    "Primus/PIP_MBAR",
+    "Primus/MV",
+    "Primus/TV",
+    "Primus/RR_CO2",
+    "Solar8000/BT",
+    "Solar8000/ART_MBP",
+    "Solar8000/ART_SBP",
+    "Solar8000/ART_DBP",
+    "BIS/EMG"
+  ],
+  "bolus_tracks": [
+    "ppf_bolus",
+    "remi_bolus",
+    "roc_bolus",
+    "phen_bolus",
+    "eph_bolus"
+  ],
+  "bolus_specs": {
+    "ppf_bolus": {
+      "source_col": "ppf_bolus_mg",
+      "unit": "mg"
+    },
+    "remi_bolus": {
+      "source_col": "remi_bolus_ug",
+      "unit": "ug"
+    },
+    "roc_bolus": {
+      "source_col": "roc_bolus_mg",
+      "unit": "mg"
+    },
+    "phen_bolus": {
+      "source_col": "phen_bolus_mcg",
+      "unit": "mcg"
+    },
+    "eph_bolus": {
+      "source_col": "eph_bolus_mg",
+      "unit": "mg"
+    }
+  },
+  "exclusions_path": "C:\\Users\\Rams\u00e9s\\Desktop\\Proyectos\\anestesia_world\\data\\audit\\_nonexistent_v7.csv",
+  "exclusions_sha256": null,
+  "n_cases_by_source_split": {
+    "cf_v7|train": 10786,
+    "cf_v7|val": 1904,
+    "real|train": 5437,
+    "real|val": 951,
+    "synthetic_v7|train": 8500,
+    "synthetic_v7|val": 1500,
+    "vaso_reinf_v7|train": 425,
+    "vaso_reinf_v7|val": 75
+  },
+  "n_windows_by_source_split": {
+    "source=cf_v7/split=train": 27863930,
+    "source=cf_v7/split=val": 4845942,
+    "source=real/split=train": 12061757,
+    "source=real/split=val": 2063800,
+    "source=synthetic_v7/split=train": 21728215,
+    "source=synthetic_v7/split=val": 3896864,
+    "source=vaso_reinf_v7/split=train": 1151944,
+    "source=vaso_reinf_v7/split=val": 184662
+  },
+  "total_bytes": 734388263,
+  "window_py_sha256": "9508ccd008b58fb2058e53f8e0ffef884e182341103970f9b52039c2d1a5ebae",
+  "n_cases_processed": 29578,
+  "n_errors": 0
+}

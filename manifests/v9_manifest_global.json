@@ -1,0 +1,150 @@
+{
+  "generated_at": "2026-09-28T07:22:45.596021+00:00",
+  "inventory": {
+    "cohorts": {
+      "real": {
+        "status": "presente",
+        "n_cases_parquet": 6388,
+        "sha256_dir_cases": "b6119f82ed73d47f57d2088cb14bcdbd42384ae46386543134f6aa4eb1fa80a9"
+      },
+      "synthetic_v5": {
+        "status": "perdido",
+        "n_cases_parquet": 0,
+        "sha256_dir_cases": "missing"
+      },
+      "vaso_reinf_v5": {
+        "status": "perdido",
+        "n_cases_parquet": 0,
+        "sha256_dir_cases": "missing"
+      },
+      "cf_v5": {
+        "status": "perdido",
+        "n_cases_parquet": 0,
+        "sha256_dir_cases": "missing"
+      },
+      "synthetic_v6": {
+        "status": "perdido",
+        "n_cases_parquet": 0,
+        "sha256_dir_cases": "missing"
+      },
+      "vaso_reinf_v6": {
+        "status": "perdido",
+        "n_cases_parquet": 0,
+        "sha256_dir_cases": "missing"
+      },
+      "cf_v6": {
+        "status": "perdido",
+        "n_cases_parquet": 0,
+        "sha256_dir_cases": "missing"
+      },
+      "synthetic_v7": {
+        "status": "presente",
+        "n_cases_parquet": 10000,
+        "sha256_dir_cases": "d23af44bf6d331decf12449ffe5411b892ebccf3b027e26b1613f70cb63b46fe"
+      },
+      "vaso_reinf_v7": {
+        "status": "presente",
+        "n_cases_parquet": 500,
+        "sha256_dir_cases": "0cc54443168bb82468af23052b451d52425b7e0cf45f3abb29474812d99cff78"
+      },
+      "cf_v7": {
+        "status": "presente",
+        "n_cases_parquet": 12690,
+        "sha256_dir_cases": "967559bd70ab803cd770b84bc4ea3e0d5ada499c0106344eb402475a407f5b8a"
+      }
+    },
+    "windows": {
+      "windows_v2": {
+        "status": "perdido",
+        "sha256_manifest": "missing"
+      },
+      "windows_v3": {
+        "status": "perdido",
+        "sha256_manifest": "missing"
+      },
+      "windows_v4": {
+        "status": "presente",
+        "sha256_manifest": "68097ce410f97320308a625867679c76ffd92afb786f47d1f9fa9f021b2a203f",
+        "n_partitions": 369
+      }
+    },
+    "tokens_v1": {
+      "status": "presente",
+      "sha256_manifest": "58d2923181bbdc53f74c9260861901bb245129caf76415621c8bd30f5b88942f"
+    },
+    "ae_v1_ae_bal": {
+      "status": "presente",
+      "sha256_norm_stats": "7e47212956f6ce95ebc281851d5453b58f260c5270f24588a08d160b3801ed16",
+      "sha256_manifest": "00cf3d58a987b5c15fade946c372a460b890a41a01d6aabf24526d3581110ae5"
+    },
+    "scripts": {
+      "autoencoder/window.py": {
+        "status": "presente",
+        "sha256": "9508ccd008b58fb2058e53f8e0ffef884e182341103970f9b52039c2d1a5ebae"
+      },
+      "tokens/pk_tokens.py": {
+        "status": "presente",
+        "sha256": "1e3f695b3935dd85faf458f502fb400b1c5d494db2142e7d98812c6cae45a329"
+      },
+      "tokens/context_vocab.py": {
+        "status": "presente",
+        "sha256": "527024b5749fb6a7a97d491d4bd79e249901feb9bc61c5abae25341239ccc6ab"
+      },
+      "tokens/tokenize.py": {
+        "status": "presente",
+        "sha256": "8055bd5dd6ff3f303db01a1c9e037d3da97c97096241aeffd5dfa2628eb83063"
+      },
+      "ae/physio_ae.py": {
+        "status": "presente",
+        "sha256": "88f31ed6e9c2bd64e9ee084c5f89462baa2402d2084b9c299ba6c57edb7cbe47"
+      },
+      "diagnostics/v6_validate.py": {
+        "status": "presente",
+        "sha256": "8a0c885caef7d1997109302ebd174dcb8a1175cd9d387d0ea345398999ad899e"
+      },
+      "diagnostics/v7_validate.py": {
+        "status": "presente",
+        "sha256": "a0be9a1e4d65264c32dbdb17cd5b6ef1ba1a3025cab6a3eb4d943c09909511ce"
+      },
+      "diagnostics/v7_attribution.py": {
+        "status": "presente",
+        "sha256": "41a3dd5e66de1717922945e7a66dbee2b05407d4e0b724eed2823595c0cdcaee"
+      },
+      "diagnostics/v7_transfer_probe.py": {
+        "status": "presente",
+        "sha256": "03dec95c5469c079a761b4ca0f9c79c49d98a078a40dbfa4b5407a90e27c1d7a"
+      },
+      "diagnostics/cohort_gap.py": {
+        "status": "presente",
+        "sha256": "3a3fc380f1e03b20363020cbad446b77552d14875b29bc3b46d9ca4b2d4abad4"
+      },
+      "diagnostics/gap_addendum.py": {
+        "status": "presente",
+        "sha256": "36f15c1242011a4b868d22b1559a5dbecfa0272c2402f35f21d6a873be49db1b"
+      },
+      "anessim/simulate.py": {
+        "status": "presente",
+        "sha256": "23fe6080c9c3b519f17503803dec100e6349972849db5ccad394e17c7c674dbd"
+      },
+      "anessim/respiratory.py": {
+        "status": "presente",
+        "sha256": "a30a8d87d6b9bff859760bc0ac01361933007fd9ac5407af8d0cfe6baf62db21"
+      }
+    }
+  },
+  "backup_copied": [
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\autoencoder__window.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\tokens__pk_tokens.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\tokens__context_vocab.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\tokens__tokenize.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\ae__physio_ae.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\diagnostics__v6_validate.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\diagnostics__v7_validate.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\diagnostics__v7_attribution.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\diagnostics__v7_transfer_probe.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\diagnostics__cohort_gap.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\diagnostics__gap_addendum.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\anessim__simulate.py",
+    "D:\\data\\anestesia_world\\backup_scripts_20260928\\anessim__respiratory.py"
+  ]
+}

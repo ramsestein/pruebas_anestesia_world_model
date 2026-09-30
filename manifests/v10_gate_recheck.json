@@ -1,0 +1,18 @@
+{
+  "gate2_real": {
+    "Solar8000/HR": 0.39396716959805667,
+    "Solar8000/ART_MBP": 0.24136031299680222,
+    "BIS/BIS": 0.17649774880244815,
+    "Primus/ETCO2": 0.09120584409055729
+  },
+  "gate3": {
+    "n_cases": 943,
+    "n_cells": 1481996,
+    "err_hr_with_art": 0.384256866682582,
+    "err_hr_without_art": 0.7161398691631232,
+    "hr_recon_diff": 0.6814360069506096,
+    "ok": true
+  },
+  "n_real_val_cells": 1513073,
+  "n_real_val_cases": 945
+}

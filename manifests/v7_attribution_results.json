@@ -1,0 +1,1215 @@
+{
+  "meta": {
+    "sha256_v7_attribution_py": "41a3dd5e66de1717922945e7a66dbee2b05407d4e0b724eed2823595c0cdcaee",
+    "sha256_cohort_gap_py": "3a3fc380f1e03b20363020cbad446b77552d14875b29bc3b46d9ca4b2d4abad4",
+    "sha256_gap_addendum_py": "36f15c1242011a4b868d22b1559a5dbecfa0272c2402f35f21d6a873be49db1b",
+    "sha256_v6_validate_py": "6b7c41755d6bad45c25370a3602a2754a9aef862ad5e599757697e5224c00464",
+    "generated_at": "2026-09-24T09:10:08.504047+00:00",
+    "n_holdout_caseids": 378,
+    "n_real_cells": 627296,
+    "n_v6_cells": 8401783
+  },
+  "a1": [
+    {
+      "track": "Solar8000/BT",
+      "auc": 0.7620349939077957
+    },
+    {
+      "track": "Primus/MV",
+      "auc": 0.703596327505591
+    },
+    {
+      "track": "Solar8000/ART_DBP",
+      "auc": 0.6892751567021893
+    },
+    {
+      "track": "Primus/ETCO2",
+      "auc": 0.6694578294689244
+    },
+    {
+      "track": "BIS/BIS",
+      "auc": 0.6465233823999715
+    },
+    {
+      "track": "Solar8000/ART_MBP",
+      "auc": 0.6439188446439624
+    },
+    {
+      "track": "Solar8000/PLETH_SPO2",
+      "auc": 0.6231531210274028
+    },
+    {
+      "track": "Primus/RR_CO2",
+      "auc": 0.6119078163582891
+    },
+    {
+      "track": "Solar8000/ART_SBP",
+      "auc": 0.6028149510544388
+    },
+    {
+      "track": "Solar8000/HR",
+      "auc": 0.5565057599256565
+    },
+    {
+      "track": "BIS/EMG",
+      "auc": 0.5399766703683138
+    },
+    {
+      "track": "Primus/PIP_MBAR",
+      "auc": 0.5236215149810486
+    },
+    {
+      "track": "Primus/TV",
+      "auc": 0.5192248419231741
+    },
+    {
+      "track": "Primus/PEEP_MBAR",
+      "auc": 0.49096333846125184
+    }
+  ],
+  "a2": [
+    {
+      "k": 1,
+      "tracks": [
+        "Solar8000/BT"
+      ],
+      "auc": 0.7620349939077957
+    },
+    {
+      "k": 2,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV"
+      ],
+      "auc": 0.8400228853119609
+    },
+    {
+      "k": 3,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP"
+      ],
+      "auc": 0.8888727208702804
+    },
+    {
+      "k": 4,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2"
+      ],
+      "auc": 0.9092125908139653
+    },
+    {
+      "k": 5,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS"
+      ],
+      "auc": 0.9326287421206386
+    },
+    {
+      "k": 6,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP"
+      ],
+      "auc": 0.9435705156289027
+    },
+    {
+      "k": 7,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2"
+      ],
+      "auc": 0.94858043012508
+    },
+    {
+      "k": 8,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2"
+      ],
+      "auc": 0.9489009005343295
+    },
+    {
+      "k": 9,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2",
+        "Solar8000/ART_SBP"
+      ],
+      "auc": 0.9668475289025709
+    },
+    {
+      "k": 10,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2",
+        "Solar8000/ART_SBP",
+        "Solar8000/HR"
+      ],
+      "auc": 0.9685602708675571
+    },
+    {
+      "k": 11,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2",
+        "Solar8000/ART_SBP",
+        "Solar8000/HR",
+        "BIS/EMG"
+      ],
+      "auc": 0.9687711642212911
+    },
+    {
+      "k": 12,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2",
+        "Solar8000/ART_SBP",
+        "Solar8000/HR",
+        "BIS/EMG",
+        "Primus/PIP_MBAR"
+      ],
+      "auc": 0.971825469933821
+    },
+    {
+      "k": 13,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2",
+        "Solar8000/ART_SBP",
+        "Solar8000/HR",
+        "BIS/EMG",
+        "Primus/PIP_MBAR",
+        "Primus/TV"
+      ],
+      "auc": 0.9704553888249624
+    },
+    {
+      "k": 14,
+      "tracks": [
+        "Solar8000/BT",
+        "Primus/MV",
+        "Solar8000/ART_DBP",
+        "Primus/ETCO2",
+        "BIS/BIS",
+        "Solar8000/ART_MBP",
+        "Solar8000/PLETH_SPO2",
+        "Primus/RR_CO2",
+        "Solar8000/ART_SBP",
+        "Solar8000/HR",
+        "BIS/EMG",
+        "Primus/PIP_MBAR",
+        "Primus/TV",
+        "Primus/PEEP_MBAR"
+      ],
+      "auc": 0.9742956628736634
+    }
+  ],
+  "a3": [
+    {
+      "track": "Solar8000/ART_SBP",
+      "auc": 0.9611877627297322,
+      "drop": 0.013107900143931261
+    },
+    {
+      "track": "Solar8000/BT",
+      "auc": 0.9619258553015401,
+      "drop": 0.012369807572123359
+    },
+    {
+      "track": "Solar8000/ART_DBP",
+      "auc": 0.9671307272202574,
+      "drop": 0.007164935653406035
+    },
+    {
+      "track": "BIS/BIS",
+      "auc": 0.9683460545605576,
+      "drop": 0.00594960831310587
+    },
+    {
+      "track": "Primus/MV",
+      "auc": 0.9689896454438355,
+      "drop": 0.005306017429827947
+    },
+    {
+      "track": "Primus/ETCO2",
+      "auc": 0.9693157353613042,
+      "drop": 0.004979927512359206
+    },
+    {
+      "track": "Primus/PEEP_MBAR",
+      "auc": 0.9704553888249624,
+      "drop": 0.00384027404870102
+    },
+    {
+      "track": "Primus/PIP_MBAR",
+      "auc": 0.9713869489159194,
+      "drop": 0.002908713957744058
+    },
+    {
+      "track": "Solar8000/PLETH_SPO2",
+      "auc": 0.9722387752941011,
+      "drop": 0.00205688757956235
+    },
+    {
+      "track": "Primus/RR_CO2",
+      "auc": 0.9725416843570708,
+      "drop": 0.001753978516592647
+    },
+    {
+      "track": "Solar8000/HR",
+      "auc": 0.9731014972615508,
+      "drop": 0.0011941656121126076
+    },
+    {
+      "track": "Solar8000/ART_MBP",
+      "auc": 0.9735328466490951,
+      "drop": 0.0007628162245683079
+    },
+    {
+      "track": "Primus/TV",
+      "auc": 0.9738801592284881,
+      "drop": 0.0004155036451752858
+    },
+    {
+      "track": "BIS/EMG",
+      "auc": 0.9744046563336497,
+      "drop": -0.00010899345998627297
+    }
+  ],
+  "a4": {
+    "univariate_deltas": [
+      {
+        "track": "BIS/EMG",
+        "auc": 0.8075679986465959
+      },
+      {
+        "track": "Primus/MV",
+        "auc": 0.7250619906459825
+      },
+      {
+        "track": "BIS/BIS",
+        "auc": 0.718046571118862
+      },
+      {
+        "track": "Primus/TV",
+        "auc": 0.7133862922496114
+      },
+      {
+        "track": "Solar8000/ART_SBP",
+        "auc": 0.6845407284262157
+      },
+      {
+        "track": "Solar8000/PLETH_SPO2",
+        "auc": 0.6805141496471576
+      },
+      {
+        "track": "Primus/RR_CO2",
+        "auc": 0.6436753110667267
+      },
+      {
+        "track": "Primus/ETCO2",
+        "auc": 0.6345747267556066
+      },
+      {
+        "track": "Solar8000/ART_MBP",
+        "auc": 0.6283722240878864
+      },
+      {
+        "track": "Solar8000/ART_DBP",
+        "auc": 0.6281669858689709
+      },
+      {
+        "track": "Primus/PIP_MBAR",
+        "auc": 0.6199731329822891
+      },
+      {
+        "track": "Solar8000/HR",
+        "auc": 0.5809716804745688
+      },
+      {
+        "track": "Solar8000/BT",
+        "auc": 0.5594714437048978
+      },
+      {
+        "track": "Primus/PEEP_MBAR",
+        "auc": 0.5448601989882071
+      }
+    ],
+    "full28_auc": 0.9977013933648984,
+    "ablation": [
+      {
+        "track": "BIS/EMG_delta",
+        "auc": 0.9963538335089934,
+        "drop": 0.0013475598559049562
+      },
+      {
+        "track": "BIS/BIS_delta",
+        "auc": 0.9968985629458326,
+        "drop": 0.0008028304190658142
+      },
+      {
+        "track": "Solar8000/ART_SBP",
+        "auc": 0.9969138936860207,
+        "drop": 0.0007874996788777011
+      },
+      {
+        "track": "Primus/MV_delta",
+        "auc": 0.9969711219354794,
+        "drop": 0.0007302714294189494
+      },
+      {
+        "track": "Solar8000/BT",
+        "auc": 0.9970121702454652,
+        "drop": 0.0006892231194332021
+      },
+      {
+        "track": "Primus/TV_delta",
+        "auc": 0.9970713745492578,
+        "drop": 0.0006300188156406206
+      },
+      {
+        "track": "BIS/BIS",
+        "auc": 0.9970976445203075,
+        "drop": 0.0006037488445909123
+      },
+      {
+        "track": "Solar8000/PLETH_SPO2_delta",
+        "auc": 0.9971466056873501,
+        "drop": 0.0005547876775482408
+      },
+      {
+        "track": "Primus/RR_CO2_delta",
+        "auc": 0.9972493308542381,
+        "drop": 0.00045206251066032266
+      },
+      {
+        "track": "Solar8000/ART_DBP",
+        "auc": 0.9972693428586326,
+        "drop": 0.0004320505062658242
+      },
+      {
+        "track": "Solar8000/ART_SBP_delta",
+        "auc": 0.9972920322933515,
+        "drop": 0.0004093610715468765
+      },
+      {
+        "track": "BIS/EMG",
+        "auc": 0.9973702647860122,
+        "drop": 0.0003311285788861751
+      },
+      {
+        "track": "Primus/MV",
+        "auc": 0.9973805676034704,
+        "drop": 0.0003208257614280008
+      },
+      {
+        "track": "Primus/PEEP_MBAR",
+        "auc": 0.9974714061196925,
+        "drop": 0.00022998724520584268
+      },
+      {
+        "track": "Primus/ETCO2",
+        "auc": 0.9974742288668261,
+        "drop": 0.00022716449807225203
+      },
+      {
+        "track": "Primus/PIP_MBAR",
+        "auc": 0.9974857978219269,
+        "drop": 0.00021559554297145844
+      },
+      {
+        "track": "Solar8000/BT_delta",
+        "auc": 0.9974978449853509,
+        "drop": 0.00020354837954750238
+      },
+      {
+        "track": "Primus/PIP_MBAR_delta",
+        "auc": 0.9975401878729844,
+        "drop": 0.00016120549191400713
+      },
+      {
+        "track": "Primus/ETCO2_delta",
+        "auc": 0.9975944529137198,
+        "drop": 0.00010694045117853879
+      },
+      {
+        "track": "Solar8000/ART_DBP_delta",
+        "auc": 0.9976081509781011,
+        "drop": 9.324238679730978e-05
+      },
+      {
+        "track": "Solar8000/HR",
+        "auc": 0.9976366826520497,
+        "drop": 6.471071284863683e-05
+      },
+      {
+        "track": "Primus/PEEP_MBAR_delta",
+        "auc": 0.9976465351859612,
+        "drop": 5.485817893713385e-05
+      },
+      {
+        "track": "Solar8000/PLETH_SPO2",
+        "auc": 0.9976518977923339,
+        "drop": 4.949557256450632e-05
+      },
+      {
+        "track": "Solar8000/ART_MBP",
+        "auc": 0.9976561477886452,
+        "drop": 4.524557625318337e-05
+      },
+      {
+        "track": "Primus/RR_CO2",
+        "auc": 0.9976566641441591,
+        "drop": 4.472922073928132e-05
+      },
+      {
+        "track": "Solar8000/HR_delta",
+        "auc": 0.997663975432026,
+        "drop": 3.741793287237449e-05
+      },
+      {
+        "track": "Primus/TV",
+        "auc": 0.9976648706786175,
+        "drop": 3.652268628084876e-05
+      },
+      {
+        "track": "Solar8000/ART_MBP_delta",
+        "auc": 0.99767904682349,
+        "drop": 2.2346541408424514e-05
+      }
+    ]
+  },
+  "a5": {
+    "real": {
+      "BIS/BIS": {
+        "n": 586748,
+        "n_distinct": 869,
+        "frac_integer": 0.11825178782032492,
+        "min_inc": 0.09999847412109375,
+        "frac_nochange": 0.119107360032477
+      },
+      "Solar8000/HR": {
+        "n": 618845,
+        "n_distinct": 181,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.5260315224518541
+      },
+      "Solar8000/PLETH_SPO2": {
+        "n": 623811,
+        "n_distinct": 42,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.9350157384385479
+      },
+      "Primus/ETCO2": {
+        "n": 622329,
+        "n_distinct": 65,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.7357627055889943
+      },
+      "Primus/PEEP_MBAR": {
+        "n": 611939,
+        "n_distinct": 20,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.9176157922281827
+      },
+      "Primus/PIP_MBAR": {
+        "n": 612542,
+        "n_distinct": 51,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.7499215783660853
+      },
+      "Primus/MV": {
+        "n": 616252,
+        "n_distinct": 173,
+        "frac_integer": 0.11490104697428974,
+        "min_inc": 0.09999942779541016,
+        "frac_nochange": 0.820823346778646
+      },
+      "Primus/TV": {
+        "n": 615338,
+        "n_distinct": 1046,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.32126738794435855
+      },
+      "Primus/RR_CO2": {
+        "n": 624379,
+        "n_distinct": 48,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.9778573832764341
+      },
+      "Solar8000/BT": {
+        "n": 567647,
+        "n_distinct": 142,
+        "frac_integer": 0.10248975155334213,
+        "min_inc": 0.09999847412109375,
+        "frac_nochange": 0.9746678795058386
+      },
+      "Solar8000/ART_MBP": {
+        "n": 623129,
+        "n_distinct": 297,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.5484177184692137
+      },
+      "Solar8000/ART_SBP": {
+        "n": 618963,
+        "n_distinct": 308,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.44405647045111285
+      },
+      "Solar8000/ART_DBP": {
+        "n": 618862,
+        "n_distinct": 277,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.533144108055945
+      },
+      "BIS/EMG": {
+        "n": 577492,
+        "n_distinct": 4408,
+        "frac_integer": 0.010330879042480243,
+        "min_inc": 0.0099945068359375,
+        "frac_nochange": 0.08542570743272283
+      }
+    },
+    "v6": {
+      "BIS/BIS": {
+        "n": 8060958,
+        "n_distinct": 660,
+        "frac_integer": 0.09971333432080902,
+        "min_inc": 0.09999847412109375,
+        "frac_nochange": 0.05040027695965527
+      },
+      "Solar8000/HR": {
+        "n": 8242691,
+        "n_distinct": 142,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.6388816980047424
+      },
+      "Solar8000/PLETH_SPO2": {
+        "n": 7884917,
+        "n_distinct": 28,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.6120503235046034
+      },
+      "Primus/ETCO2": {
+        "n": 7564813,
+        "n_distinct": 71,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.6164604007491182
+      },
+      "Primus/PEEP_MBAR": {
+        "n": 7975846,
+        "n_distinct": 16,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.9873319081468616
+      },
+      "Primus/PIP_MBAR": {
+        "n": 7973553,
+        "n_distinct": 43,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.5574517437033197
+      },
+      "Primus/MV": {
+        "n": 7979258,
+        "n_distinct": 149,
+        "frac_integer": 0.1001172038803608,
+        "min_inc": 0.09999942779541016,
+        "frac_nochange": 0.449705284783525
+      },
+      "Primus/TV": {
+        "n": 7979126,
+        "n_distinct": 999,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.39864073072261597
+      },
+      "Primus/RR_CO2": {
+        "n": 8185134,
+        "n_distinct": 41,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.7050275880365852
+      },
+      "Solar8000/BT": {
+        "n": 7935234,
+        "n_distinct": 108,
+        "frac_integer": 0.09904887492920814,
+        "min_inc": 0.09999847412109375,
+        "frac_nochange": 0.8862234546252031
+      },
+      "Solar8000/ART_MBP": {
+        "n": 7590055,
+        "n_distinct": 166,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.5488772966791702
+      },
+      "Solar8000/ART_SBP": {
+        "n": 7607111,
+        "n_distinct": 171,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.5469906150046198
+      },
+      "Solar8000/ART_DBP": {
+        "n": 7585541,
+        "n_distinct": 170,
+        "frac_integer": 1.0,
+        "min_inc": 1.0,
+        "frac_nochange": 0.5473333027118419
+      },
+      "BIS/EMG": {
+        "n": 7841500,
+        "n_distinct": 7074,
+        "frac_integer": 0.010123318242683161,
+        "min_inc": 0.009998321533203125,
+        "frac_nochange": 0.020001209634817885
+      }
+    },
+    "rows": [
+      {
+        "track": "BIS/BIS",
+        "real_n_distinct": 869,
+        "real_frac_int": 0.11825178782032492,
+        "real_min_inc": 0.09999847412109375,
+        "real_frac_nochg": 0.119107360032477,
+        "syn_n_distinct": 660,
+        "syn_frac_int": 0.09971333432080902,
+        "syn_min_inc": 0.09999847412109375,
+        "syn_frac_nochg": 0.05040027695965527
+      },
+      {
+        "track": "Solar8000/HR",
+        "real_n_distinct": 181,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.5260315224518541,
+        "syn_n_distinct": 142,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.6388816980047424
+      },
+      {
+        "track": "Solar8000/PLETH_SPO2",
+        "real_n_distinct": 42,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.9350157384385479,
+        "syn_n_distinct": 28,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.6120503235046034
+      },
+      {
+        "track": "Primus/ETCO2",
+        "real_n_distinct": 65,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.7357627055889943,
+        "syn_n_distinct": 71,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.6164604007491182
+      },
+      {
+        "track": "Primus/PEEP_MBAR",
+        "real_n_distinct": 20,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.9176157922281827,
+        "syn_n_distinct": 16,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.9873319081468616
+      },
+      {
+        "track": "Primus/PIP_MBAR",
+        "real_n_distinct": 51,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.7499215783660853,
+        "syn_n_distinct": 43,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.5574517437033197
+      },
+      {
+        "track": "Primus/MV",
+        "real_n_distinct": 173,
+        "real_frac_int": 0.11490104697428974,
+        "real_min_inc": 0.09999942779541016,
+        "real_frac_nochg": 0.820823346778646,
+        "syn_n_distinct": 149,
+        "syn_frac_int": 0.1001172038803608,
+        "syn_min_inc": 0.09999942779541016,
+        "syn_frac_nochg": 0.449705284783525
+      },
+      {
+        "track": "Primus/TV",
+        "real_n_distinct": 1046,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.32126738794435855,
+        "syn_n_distinct": 999,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.39864073072261597
+      },
+      {
+        "track": "Primus/RR_CO2",
+        "real_n_distinct": 48,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.9778573832764341,
+        "syn_n_distinct": 41,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.7050275880365852
+      },
+      {
+        "track": "Solar8000/BT",
+        "real_n_distinct": 142,
+        "real_frac_int": 0.10248975155334213,
+        "real_min_inc": 0.09999847412109375,
+        "real_frac_nochg": 0.9746678795058386,
+        "syn_n_distinct": 108,
+        "syn_frac_int": 0.09904887492920814,
+        "syn_min_inc": 0.09999847412109375,
+        "syn_frac_nochg": 0.8862234546252031
+      },
+      {
+        "track": "Solar8000/ART_MBP",
+        "real_n_distinct": 297,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.5484177184692137,
+        "syn_n_distinct": 166,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.5488772966791702
+      },
+      {
+        "track": "Solar8000/ART_SBP",
+        "real_n_distinct": 308,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.44405647045111285,
+        "syn_n_distinct": 171,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.5469906150046198
+      },
+      {
+        "track": "Solar8000/ART_DBP",
+        "real_n_distinct": 277,
+        "real_frac_int": 1.0,
+        "real_min_inc": 1.0,
+        "real_frac_nochg": 0.533144108055945,
+        "syn_n_distinct": 170,
+        "syn_frac_int": 1.0,
+        "syn_min_inc": 1.0,
+        "syn_frac_nochg": 0.5473333027118419
+      },
+      {
+        "track": "BIS/EMG",
+        "real_n_distinct": 4408,
+        "real_frac_int": 0.010330879042480243,
+        "real_min_inc": 0.0099945068359375,
+        "real_frac_nochg": 0.08542570743272283,
+        "syn_n_distinct": 7074,
+        "syn_frac_int": 0.010123318242683161,
+        "syn_min_inc": 0.009998321533203125,
+        "syn_frac_nochg": 0.020001209634817885
+      }
+    ]
+  },
+  "a6": {
+    "corr": {
+      "frobenius": 1.7637677634177147,
+      "top_pairs": [
+        [
+          "5|7",
+          -0.3938895463308144
+        ],
+        [
+          "5|8",
+          0.31935276426104686
+        ],
+        [
+          "0|12",
+          -0.28868693739162116
+        ],
+        [
+          "1|11",
+          -0.26646400499764744
+        ],
+        [
+          "4|7",
+          0.26306054354396263
+        ],
+        [
+          "0|10",
+          -0.25838388667412787
+        ],
+        [
+          "5|12",
+          0.24529975503690316
+        ],
+        [
+          "1|10",
+          -0.23786922061540824
+        ],
+        [
+          "11|12",
+          -0.23742282297942552
+        ],
+        [
+          "1|12",
+          -0.21812823343913396
+        ]
+      ],
+      "top_pairs_named": [
+        [
+          "Primus/PIP_MBAR|Primus/TV",
+          -0.3938895463308144
+        ],
+        [
+          "Primus/PIP_MBAR|Primus/RR_CO2",
+          0.31935276426104686
+        ],
+        [
+          "BIS/BIS|Solar8000/ART_DBP",
+          -0.28868693739162116
+        ],
+        [
+          "Solar8000/HR|Solar8000/ART_SBP",
+          -0.26646400499764744
+        ],
+        [
+          "Primus/PEEP_MBAR|Primus/TV",
+          0.26306054354396263
+        ],
+        [
+          "BIS/BIS|Solar8000/ART_MBP",
+          -0.25838388667412787
+        ],
+        [
+          "Primus/PIP_MBAR|Solar8000/ART_DBP",
+          0.24529975503690316
+        ],
+        [
+          "Solar8000/HR|Solar8000/ART_MBP",
+          -0.23786922061540824
+        ],
+        [
+          "Solar8000/ART_SBP|Solar8000/ART_DBP",
+          -0.23742282297942552
+        ],
+        [
+          "Solar8000/HR|Solar8000/ART_DBP",
+          -0.21812823343913396
+        ]
+      ]
+    },
+    "mi": {
+      "real": {
+        "BIS/BIS|Solar8000/HR": 0.009517348577202362,
+        "BIS/BIS|Solar8000/PLETH_SPO2": 0.001709404183168832,
+        "BIS/BIS|Primus/ETCO2": 0.014301392618264033,
+        "BIS/BIS|Primus/PEEP_MBAR": 0.006481533103172443,
+        "BIS/BIS|Primus/PIP_MBAR": 0.019363047285751077,
+        "BIS/BIS|Primus/MV": 0.01559835596491366,
+        "BIS/BIS|Primus/TV": 0.01394450153133985,
+        "BIS/BIS|Primus/RR_CO2": 0.018637428345924308,
+        "BIS/BIS|Solar8000/BT": 0.02046713067916224,
+        "BIS/BIS|Solar8000/ART_MBP": 0.006333882032727346,
+        "BIS/BIS|Solar8000/ART_SBP": 0.006041221164847068,
+        "BIS/BIS|Solar8000/ART_DBP": 0.006156651825780055,
+        "BIS/BIS|BIS/EMG": 0.09411105117641513,
+        "Solar8000/HR|Solar8000/PLETH_SPO2": 0.004297652501603213,
+        "Solar8000/HR|Primus/ETCO2": 0.019603876062271094,
+        "Solar8000/HR|Primus/PEEP_MBAR": 0.002178888200794714,
+        "Solar8000/HR|Primus/PIP_MBAR": 0.015704655579572867,
+        "Solar8000/HR|Primus/MV": 0.022503701230249282,
+        "Solar8000/HR|Primus/TV": 0.013025803804246712,
+        "Solar8000/HR|Primus/RR_CO2": 0.011795599344893368,
+        "Solar8000/HR|Solar8000/BT": 0.027508145816805066,
+        "Solar8000/HR|Solar8000/ART_MBP": 0.011366148117941571,
+        "Solar8000/HR|Solar8000/ART_SBP": 0.016052081182021574,
+        "Solar8000/HR|Solar8000/ART_DBP": 0.012318462846903768,
+        "Solar8000/HR|BIS/EMG": 0.018365689256801876,
+        "Solar8000/PLETH_SPO2|Primus/ETCO2": 0.0021791581127388387,
+        "Solar8000/PLETH_SPO2|Primus/PEEP_MBAR": 0.002781360281692775,
+        "Solar8000/PLETH_SPO2|Primus/PIP_MBAR": 0.013110089103192654,
+        "Solar8000/PLETH_SPO2|Primus/MV": 0.010205691957913751,
+        "Solar8000/PLETH_SPO2|Primus/TV": 0.009232563007579419,
+        "Solar8000/PLETH_SPO2|Primus/RR_CO2": 0.006465975829665982,
+        "Solar8000/PLETH_SPO2|Solar8000/BT": 0.004388080920476995,
+        "Solar8000/PLETH_SPO2|Solar8000/ART_MBP": 0.004791794677872038,
+        "Solar8000/PLETH_SPO2|Solar8000/ART_SBP": 0.0063073668822896225,
+        "Solar8000/PLETH_SPO2|Solar8000/ART_DBP": 0.0044536075389385275,
+        "Solar8000/PLETH_SPO2|BIS/EMG": 0.00417229923283509,
+        "Primus/ETCO2|Primus/PEEP_MBAR": 0.013785656648165182,
+        "Primus/ETCO2|Primus/PIP_MBAR": 0.021760068781229512,
+        "Primus/ETCO2|Primus/MV": 0.031979998417693216,
+        "Primus/ETCO2|Primus/TV": 0.03241765458078189,
+        "Primus/ETCO2|Primus/RR_CO2": 0.0854084653268039,
+        "Primus/ETCO2|Solar8000/BT": 0.030805175628812458,
+        "Primus/ETCO2|Solar8000/ART_MBP": 0.015282819864421347,
+        "Primus/ETCO2|Solar8000/ART_SBP": 0.02248864141226961,
+        "Primus/ETCO2|Solar8000/ART_DBP": 0.014318142549270867,
+        "Primus/ETCO2|BIS/EMG": 0.01000927839583711,
+        "Primus/PEEP_MBAR|Primus/PIP_MBAR": 0.18756908371491782,
+        "Primus/PEEP_MBAR|Primus/MV": 0.02488335306755279,
+        "Primus/PEEP_MBAR|Primus/TV": 0.0817367568176586,
+        "Primus/PEEP_MBAR|Primus/RR_CO2": 0.045687386561263046,
+        "Primus/PEEP_MBAR|Solar8000/BT": 0.009853012349980338,
+        "Primus/PEEP_MBAR|Solar8000/ART_MBP": 0.008594798112611813,
+        "Primus/PEEP_MBAR|Solar8000/ART_SBP": 0.0010648050400025788,
+        "Primus/PEEP_MBAR|Solar8000/ART_DBP": 0.015247695732627319,
+        "Primus/PEEP_MBAR|BIS/EMG": 0.004610035370606339,
+        "Primus/PIP_MBAR|Primus/MV": 0.0882683505560101,
+        "Primus/PIP_MBAR|Primus/TV": 0.08874769911706692,
+        "Primus/PIP_MBAR|Primus/RR_CO2": 0.04001595382461883,
+        "Primus/PIP_MBAR|Solar8000/BT": 0.03453888701432148,
+        "Primus/PIP_MBAR|Solar8000/ART_MBP": 0.03897432354967312,
+        "Primus/PIP_MBAR|Solar8000/ART_SBP": 0.02360433141769242,
+        "Primus/PIP_MBAR|Solar8000/ART_DBP": 0.042373181162981326,
+        "Primus/PIP_MBAR|BIS/EMG": 0.029673661894817127,
+        "Primus/MV|Primus/TV": 0.3189311199505728,
+        "Primus/MV|Primus/RR_CO2": 0.1951135565865187,
+        "Primus/MV|Solar8000/BT": 0.04643524132018281,
+        "Primus/MV|Solar8000/ART_MBP": 0.018422404118288292,
+        "Primus/MV|Solar8000/ART_SBP": 0.01802976716343606,
+        "Primus/MV|Solar8000/ART_DBP": 0.022016052887410233,
+        "Primus/MV|BIS/EMG": 0.020540779800244772,
+        "Primus/TV|Primus/RR_CO2": 0.04440130442780658,
+        "Primus/TV|Solar8000/BT": 0.03208150559473118,
+        "Primus/TV|Solar8000/ART_MBP": 0.013221791913835091,
+        "Primus/TV|Solar8000/ART_SBP": 0.01012848801022539,
+        "Primus/TV|Solar8000/ART_DBP": 0.01871266835886681,
+        "Primus/TV|BIS/EMG": 0.023143638144744495,
+        "Primus/RR_CO2|Solar8000/BT": 0.03261505810533413,
+        "Primus/RR_CO2|Solar8000/ART_MBP": 0.009204744615414371,
+        "Primus/RR_CO2|Solar8000/ART_SBP": 0.011355352708939233,
+        "Primus/RR_CO2|Solar8000/ART_DBP": 0.009533735016549378,
+        "Primus/RR_CO2|BIS/EMG": 0.01925050603233945,
+        "Solar8000/BT|Solar8000/ART_MBP": 0.021454332437845863,
+        "Solar8000/BT|Solar8000/ART_SBP": 0.020849250890379877,
+        "Solar8000/BT|Solar8000/ART_DBP": 0.020141012230017904,
+        "Solar8000/BT|BIS/EMG": 0.0261483539931179,
+        "Solar8000/ART_MBP|Solar8000/ART_SBP": 0.6331366453437317,
+        "Solar8000/ART_MBP|Solar8000/ART_DBP": 0.8121119105438609,
+        "Solar8000/ART_MBP|BIS/EMG": 0.008927234077162408,
+        "Solar8000/ART_SBP|Solar8000/ART_DBP": 0.3132372648229295,
+        "Solar8000/ART_SBP|BIS/EMG": 0.006542050793848805,
+        "Solar8000/ART_DBP|BIS/EMG": 0.010123529415275286
+      },
+      "v6": {
+        "BIS/BIS|Solar8000/HR": 0.04186544855029975,
+        "BIS/BIS|Solar8000/PLETH_SPO2": 0.002790359102341277,
+        "BIS/BIS|Primus/ETCO2": 0.003691082753205688,
+        "BIS/BIS|Primus/PEEP_MBAR": 0.021068954186959234,
+        "BIS/BIS|Primus/PIP_MBAR": 0.05348184994991408,
+        "BIS/BIS|Primus/MV": 0.037402494352303584,
+        "BIS/BIS|Primus/TV": 0.03961935924555453,
+        "BIS/BIS|Primus/RR_CO2": 0.010562653127219193,
+        "BIS/BIS|Solar8000/BT": 0.05456646059542972,
+        "BIS/BIS|Solar8000/ART_MBP": 0.0915176215430018,
+        "BIS/BIS|Solar8000/ART_SBP": 0.08736822163159469,
+        "BIS/BIS|Solar8000/ART_DBP": 0.0903880581955369,
+        "BIS/BIS|BIS/EMG": 0.04781990878661756,
+        "Solar8000/HR|Solar8000/PLETH_SPO2": 0.007453349950340682,
+        "Solar8000/HR|Primus/ETCO2": 0.003924819719629798,
+        "Solar8000/HR|Primus/PEEP_MBAR": 0.004173810699369785,
+        "Solar8000/HR|Primus/PIP_MBAR": 0.012788403774100593,
+        "Solar8000/HR|Primus/MV": 0.008549644161680272,
+        "Solar8000/HR|Primus/TV": 0.009840132547499186,
+        "Solar8000/HR|Primus/RR_CO2": 0.01523503178399649,
+        "Solar8000/HR|Solar8000/BT": 0.007360967303831581,
+        "Solar8000/HR|Solar8000/ART_MBP": 0.02687811894231609,
+        "Solar8000/HR|Solar8000/ART_SBP": 0.028567546017420432,
+        "Solar8000/HR|Solar8000/ART_DBP": 0.02799083855286317,
+        "Solar8000/HR|BIS/EMG": 0.0017327075641435851,
+        "Solar8000/PLETH_SPO2|Primus/ETCO2": 0.005262088581078744,
+        "Solar8000/PLETH_SPO2|Primus/PEEP_MBAR": 0.0059003457363615034,
+        "Solar8000/PLETH_SPO2|Primus/PIP_MBAR": 0.014724791121372677,
+        "Solar8000/PLETH_SPO2|Primus/MV": 0.008441636755161089,
+        "Solar8000/PLETH_SPO2|Primus/TV": 0.008134483649810694,
+        "Solar8000/PLETH_SPO2|Primus/RR_CO2": 0.024974186726615555,
+        "Solar8000/PLETH_SPO2|Solar8000/BT": 0.009013295556628664,
+        "Solar8000/PLETH_SPO2|Solar8000/ART_MBP": 0.005338540957500121,
+        "Solar8000/PLETH_SPO2|Solar8000/ART_SBP": 0.005182340350082299,
+        "Solar8000/PLETH_SPO2|Solar8000/ART_DBP": 0.005133141128760007,
+        "Solar8000/PLETH_SPO2|BIS/EMG": 0.00046652048564357695,
+        "Primus/ETCO2|Primus/PEEP_MBAR": 0.008928878961728417,
+        "Primus/ETCO2|Primus/PIP_MBAR": 0.02376898622649258,
+        "Primus/ETCO2|Primus/MV": 0.02449352447636488,
+        "Primus/ETCO2|Primus/TV": 0.014454437185220085,
+        "Primus/ETCO2|Primus/RR_CO2": 0.0580443477705566,
+        "Primus/ETCO2|Solar8000/BT": 0.00666899087412913,
+        "Primus/ETCO2|Solar8000/ART_MBP": 0.00401510509333014,
+        "Primus/ETCO2|Solar8000/ART_SBP": 0.004314146850368422,
+        "Primus/ETCO2|Solar8000/ART_DBP": 0.0038192950267523385,
+        "Primus/ETCO2|BIS/EMG": 0.0009350837902589271,
+        "Primus/PEEP_MBAR|Primus/PIP_MBAR": 0.2331313411833771,
+        "Primus/PEEP_MBAR|Primus/MV": 0.058912325231490904,
+        "Primus/PEEP_MBAR|Primus/TV": 0.05449884484947606,
+        "Primus/PEEP_MBAR|Primus/RR_CO2": 0.05326759146490195,
+        "Primus/PEEP_MBAR|Solar8000/BT": 0.038270707492023666,
+        "Primus/PEEP_MBAR|Solar8000/ART_MBP": 0.020856258957296293,
+        "Primus/PEEP_MBAR|Solar8000/ART_SBP": 0.021132300949660253,
+        "Primus/PEEP_MBAR|Solar8000/ART_DBP": 0.019678689537061048,
+        "Primus/PEEP_MBAR|BIS/EMG": 0.012324849430775331,
+        "Primus/PIP_MBAR|Primus/MV": 0.18645239031339764,
+        "Primus/PIP_MBAR|Primus/TV": 0.2802551117480734,
+        "Primus/PIP_MBAR|Primus/RR_CO2": 0.09444851679840104,
+        "Primus/PIP_MBAR|Solar8000/BT": 0.08757006011135784,
+        "Primus/PIP_MBAR|Solar8000/ART_MBP": 0.05642495099696244,
+        "Primus/PIP_MBAR|Solar8000/ART_SBP": 0.0565599884109212,
+        "Primus/PIP_MBAR|Solar8000/ART_DBP": 0.05612377304825229,
+        "Primus/PIP_MBAR|BIS/EMG": 0.03114635027336126,
+        "Primus/MV|Primus/TV": 0.25535708653369765,
+        "Primus/MV|Primus/RR_CO2": 0.24504424469303265,
+        "Primus/MV|Solar8000/BT": 0.04827661723761885,
+        "Primus/MV|Solar8000/ART_MBP": 0.0332906878301226,
+        "Primus/MV|Solar8000/ART_SBP": 0.033839075391253,
+        "Primus/MV|Solar8000/ART_DBP": 0.03400075731775929,
+        "Primus/MV|BIS/EMG": 0.016296583986010686,
+        "Primus/TV|Primus/RR_CO2": 0.07774199803933808,
+        "Primus/TV|Solar8000/BT": 0.04705615135301522,
+        "Primus/TV|Solar8000/ART_MBP": 0.03229132736120523,
+        "Primus/TV|Solar8000/ART_SBP": 0.03304779295288911,
+        "Primus/TV|Solar8000/ART_DBP": 0.03203755760030958,
+        "Primus/TV|BIS/EMG": 0.016724131124304598,
+        "Primus/RR_CO2|Solar8000/BT": 0.033326273770386834,
+        "Primus/RR_CO2|Solar8000/ART_MBP": 0.01926325972873888,
+        "Primus/RR_CO2|Solar8000/ART_SBP": 0.018920018440571923,
+        "Primus/RR_CO2|Solar8000/ART_DBP": 0.019417060286491806,
+        "Primus/RR_CO2|BIS/EMG": 0.002420697504903141,
+        "Solar8000/BT|Solar8000/ART_MBP": 0.05600784647220426,
+        "Solar8000/BT|Solar8000/ART_SBP": 0.057353051091230005,
+        "Solar8000/BT|Solar8000/ART_DBP": 0.05612556355641138,
+        "Solar8000/BT|BIS/EMG": 0.034990445093014036,
+        "Solar8000/ART_MBP|Solar8000/ART_SBP": 1.1301538746121458,
+        "Solar8000/ART_MBP|Solar8000/ART_DBP": 1.1558614090487573,
+        "Solar8000/ART_MBP|BIS/EMG": 0.03757697618284878,
+        "Solar8000/ART_SBP|Solar8000/ART_DBP": 1.080837895938475,
+        "Solar8000/ART_SBP|BIS/EMG": 0.040493309652999195,
+        "Solar8000/ART_DBP|BIS/EMG": 0.0395645613138663
+      }
+    },
+    "mi_top_pairs": [
+      [
+        "Solar8000/ART_SBP|Solar8000/ART_DBP",
+        0.7676006311155454
+      ],
+      [
+        "Solar8000/ART_MBP|Solar8000/ART_SBP",
+        0.4970172292684141
+      ],
+      [
+        "Solar8000/ART_MBP|Solar8000/ART_DBP",
+        0.34374949850489644
+      ],
+      [
+        "Primus/PIP_MBAR|Primus/TV",
+        0.19150741263100646
+      ],
+      [
+        "Primus/PIP_MBAR|Primus/MV",
+        0.09818403975738754
+      ],
+      [
+        "BIS/BIS|Solar8000/ART_MBP",
+        0.08518373951027446
+      ],
+      [
+        "BIS/BIS|Solar8000/ART_DBP",
+        0.08423140636975684
+      ],
+      [
+        "BIS/BIS|Solar8000/ART_SBP",
+        0.08132700046674762
+      ],
+      [
+        "Primus/MV|Primus/TV",
+        -0.06357403341687512
+      ],
+      [
+        "Primus/PIP_MBAR|Primus/RR_CO2",
+        0.054432562973782204
+      ]
+    ]
+  },
+  "full14_auc": 0.9742956628736634,
+  "elapsed_s": 2551.8
+}

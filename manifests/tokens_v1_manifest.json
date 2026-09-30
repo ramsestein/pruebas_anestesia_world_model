@@ -1,0 +1,439 @@
+{
+  "date": "2026-09-19T19:44:16.623396",
+  "sha256_contract": "64a386a63193414a808d9d0f35bcbd1f63447c8675267fec74f0955a282cb70e",
+  "sha256_tokenize_py": "8055bd5dd6ff3f303db01a1c9e037d3da97c97096241aeffd5dfa2628eb83063",
+  "sha256_windows_v2_manifest": "c9e8ee173d2ce646a31bd3be80976162cac36047a694de5794d835c7f29f9d7c",
+  "sha256_pk_v1_manifest": "1db873b51f8537c008e7f40fdae1475392f6513dce280e73f84bb6d2d7b6a8b2",
+  "sha256_context_vocab": "945b78842e0a5fdc916e8ca0ee64e6b01ac48ada45a57a0590d0dfcd3b521a59",
+  "sha256_split_parquet": "40935d1cbda4d76ed0ea9b3bb817be4c018a40fc7d826f35d671431543efe8fd",
+  "normalization_stats": {
+    "drug.propofol.ce_t0": {
+      "mean": 1.3479074407480724,
+      "std": 0.2693359833919077,
+      "n": 4316438
+    },
+    "drug.propofol.ce_t1": {
+      "mean": 1.3535801979436657,
+      "std": 0.2545444481630014,
+      "n": 4316438
+    },
+    "drug.propofol.ce_max": {
+      "mean": 1.3751595093803957,
+      "std": 0.26354353628579313,
+      "n": 4316438
+    },
+    "drug.propofol.bolo": {
+      "mean": 0.021575480691477418,
+      "std": 0.3253571228162598,
+      "n": 4316438
+    },
+    "drug.propofol.dose_cum": {
+      "mean": 6.6846113048575795,
+      "std": 0.7227651341269729,
+      "n": 4316438
+    },
+    "drug.remifentanilo.ce_t0": {
+      "mean": 1.265776218251658,
+      "std": 0.3318443084036481,
+      "n": 4503331
+    },
+    "drug.remifentanilo.ce_t1": {
+      "mean": 1.271187293057951,
+      "std": 0.3219511148622058,
+      "n": 4503331
+    },
+    "drug.remifentanilo.ce_max": {
+      "mean": 1.2887635989556903,
+      "std": 0.32044998221570187,
+      "n": 4503331
+    },
+    "drug.remifentanilo.bolo": {
+      "mean": 0.020705332221541826,
+      "std": 0.2785645962076026,
+      "n": 4503331
+    },
+    "drug.remifentanilo.dose_cum": {
+      "mean": 6.335325302474097,
+      "std": 0.9662447986440229,
+      "n": 4503331
+    },
+    "drug.sevoflurano.ce_t0": {
+      "mean": 0.16809119471767553,
+      "std": 0.23599862915520337,
+      "n": 4504474
+    },
+    "drug.sevoflurano.ce_t1": {
+      "mean": 0.16885698848525948,
+      "std": 0.236083624138532,
+      "n": 4504474
+    },
+    "drug.sevoflurano.ce_max": {
+      "mean": 0.18514644774352548,
+      "std": 0.23517854071278965,
+      "n": 4504474
+    },
+    "drug.sevoflurano.bolo": {
+      "mean": 0.0,
+      "std": 1.0,
+      "n": 4504474
+    },
+    "drug.sevoflurano.dose_cum": {
+      "mean": 0.0,
+      "std": 1.0,
+      "n": 4504474
+    },
+    "drug.fenilefrina.ce_t0": {
+      "mean": 1.8737719790725305,
+      "std": 2.507912522491077,
+      "n": 3932063
+    },
+    "drug.fenilefrina.ce_t1": {
+      "mean": 1.8897707479950447,
+      "std": 2.513583039469862,
+      "n": 3932063
+    },
+    "drug.fenilefrina.ce_max": {
+      "mean": 1.9067163229621007,
+      "std": 2.5170417024893146,
+      "n": 3932063
+    },
+    "drug.fenilefrina.bolo": {
+      "mean": 0.040869703278654974,
+      "std": 0.41129587399603323,
+      "n": 3932063
+    },
+    "drug.fenilefrina.dose_cum": {
+      "mean": 3.767730732524048,
+      "std": 3.188255447478692,
+      "n": 3932063
+    },
+    "drug.noradrenalina.ce_t0": {
+      "mean": 0.060124783759298146,
+      "std": 0.1267949723728079,
+      "n": 3928488
+    },
+    "drug.noradrenalina.ce_t1": {
+      "mean": 0.060280955751445875,
+      "std": 0.1268503730143775,
+      "n": 3928488
+    },
+    "drug.noradrenalina.ce_max": {
+      "mean": 0.06057299694230717,
+      "std": 0.12759227230673756,
+      "n": 3928488
+    },
+    "drug.noradrenalina.bolo": {
+      "mean": 0.0,
+      "std": 1.0,
+      "n": 3928488
+    },
+    "drug.noradrenalina.dose_cum": {
+      "mean": 1.6482441651000923,
+      "std": 1.1076067889592873,
+      "n": 3928488
+    },
+    "drug.efedrina.ce_t0": {
+      "mean": 0.10982581409092422,
+      "std": 0.3598431587551236,
+      "n": 3917641
+    },
+    "drug.efedrina.ce_t1": {
+      "mean": 0.1105569852625829,
+      "std": 0.36069932220396783,
+      "n": 3917641
+    },
+    "drug.efedrina.ce_max": {
+      "mean": 0.11466291715828018,
+      "std": 0.3721968427239112,
+      "n": 3917641
+    },
+    "drug.efedrina.bolo": {
+      "mean": 0.005237071835444247,
+      "std": 0.104705519170745,
+      "n": 3917641
+    },
+    "drug.efedrina.dose_cum": {
+      "mean": 0.5264496402139235,
+      "std": 0.9139731276874831,
+      "n": 3917641
+    },
+    "drug.rocuronio.ce_t0": {
+      "mean": 0.5409556571323118,
+      "std": 0.46657890736702917,
+      "n": 3982074
+    },
+    "drug.rocuronio.ce_t1": {
+      "mean": 0.5422274790442922,
+      "std": 0.4659109694672552,
+      "n": 3982074
+    },
+    "drug.rocuronio.ce_max": {
+      "mean": 0.5477212935381037,
+      "std": 0.46964146033668874,
+      "n": 3982074
+    },
+    "drug.rocuronio.bolo": {
+      "mean": 0.01837847252924429,
+      "std": 0.265658640818688,
+      "n": 3982074
+    },
+    "drug.rocuronio.dose_cum": {
+      "mean": 3.7786374909930784,
+      "std": 0.6503792949223329,
+      "n": 3982074
+    },
+    "vent.fio2.t0": {
+      "mean": 51.26023884850992,
+      "std": 13.662355411071408,
+      "n": 4553155
+    },
+    "vent.fio2.t1": {
+      "mean": 51.28921325654513,
+      "std": 13.710017293230832,
+      "n": 4553155
+    },
+    "vent.tv.t0": {
+      "mean": 0.874832301468997,
+      "std": 13.931432022287398,
+      "n": 4541591
+    },
+    "vent.tv.t1": {
+      "mean": 0.8752305119862178,
+      "std": 13.940557245914258,
+      "n": 4541591
+    },
+    "vent.rr.t0": {
+      "mean": 14.091777698404695,
+      "std": 1.2097107466336114,
+      "n": 4552233
+    },
+    "vent.rr.t1": {
+      "mean": 14.09265644076439,
+      "std": 1.209879170025694,
+      "n": 4552233
+    },
+    "vent.pip.t0": {
+      "mean": 37.40269553365896,
+      "std": 4.406382818051489,
+      "n": 4541042
+    },
+    "vent.pip.t1": {
+      "mean": 37.40238697255715,
+      "std": 4.406723884965236,
+      "n": 4541042
+    },
+    "vent.peep.t0": {
+      "mean": 5.145029055286997,
+      "std": 2.6586888209341755,
+      "n": 4540239
+    },
+    "vent.peep.t1": {
+      "mean": 5.145322983196867,
+      "std": 2.6594469268754954,
+      "n": 4540239
+    },
+    "time.t_since_opstart.value": {
+      "mean": 128.57518153370893,
+      "std": 101.38956547537413,
+      "n": 4652304
+    }
+  },
+  "feature_columns": [
+    "drug_propofol_ce_t0",
+    "drug_propofol_ce_t1",
+    "drug_propofol_ce_max",
+    "drug_propofol_bolo",
+    "drug_propofol_dose_cum",
+    "drug_propofol_bolo_obs",
+    "drug_remifentanilo_ce_t0",
+    "drug_remifentanilo_ce_t1",
+    "drug_remifentanilo_ce_max",
+    "drug_remifentanilo_bolo",
+    "drug_remifentanilo_dose_cum",
+    "drug_remifentanilo_bolo_obs",
+    "drug_sevoflurano_ce_t0",
+    "drug_sevoflurano_ce_t1",
+    "drug_sevoflurano_ce_max",
+    "drug_sevoflurano_bolo",
+    "drug_sevoflurano_dose_cum",
+    "drug_sevoflurano_bolo_obs",
+    "drug_fenilefrina_ce_t0",
+    "drug_fenilefrina_ce_t1",
+    "drug_fenilefrina_ce_max",
+    "drug_fenilefrina_bolo",
+    "drug_fenilefrina_dose_cum",
+    "drug_fenilefrina_bolo_obs",
+    "drug_noradrenalina_ce_t0",
+    "drug_noradrenalina_ce_t1",
+    "drug_noradrenalina_ce_max",
+    "drug_noradrenalina_bolo",
+    "drug_noradrenalina_dose_cum",
+    "drug_noradrenalina_bolo_obs",
+    "drug_efedrina_ce_t0",
+    "drug_efedrina_ce_t1",
+    "drug_efedrina_ce_max",
+    "drug_efedrina_bolo",
+    "drug_efedrina_dose_cum",
+    "drug_efedrina_bolo_obs",
+    "drug_rocuronio_ce_t0",
+    "drug_rocuronio_ce_t1",
+    "drug_rocuronio_ce_max",
+    "drug_rocuronio_bolo",
+    "drug_rocuronio_dose_cum",
+    "drug_rocuronio_bolo_obs",
+    "vent_fio2_t0",
+    "vent_fio2_t1",
+    "vent_tv_t0",
+    "vent_tv_t1",
+    "vent_rr_t0",
+    "vent_rr_t1",
+    "vent_pip_t0",
+    "vent_pip_t1",
+    "vent_peep_t0",
+    "vent_peep_t1",
+    "ctx_age",
+    "ctx_height",
+    "ctx_weight",
+    "ctx_bmi",
+    "ctx_sex:F",
+    "ctx_asa:1",
+    "ctx_asa:2",
+    "ctx_asa:3",
+    "ctx_asa:4",
+    "ctx_asa:otros",
+    "ctx_emop:0",
+    "ctx_emop:1",
+    "time_t_since_opstart"
+  ],
+  "mask_columns": [
+    "drug_propofol_mask",
+    "drug_remifentanilo_mask",
+    "drug_sevoflurano_mask",
+    "drug_fenilefrina_mask",
+    "drug_noradrenalina_mask",
+    "drug_efedrina_mask",
+    "drug_rocuronio_mask",
+    "vent_fio2_mask",
+    "vent_tv_mask",
+    "vent_rr_mask",
+    "vent_pip_mask",
+    "vent_peep_mask"
+  ],
+  "metadata_columns": [
+    "vent_fio2_proxy",
+    "vent_tv_proxy",
+    "vent_rr_proxy",
+    "vent_pip_proxy",
+    "vent_peep_proxy",
+    "n_ctx",
+    "caseid",
+    "t0",
+    "t1",
+    "source",
+    "split",
+    "dense",
+    "pair_id",
+    "cf_role",
+    "split_t",
+    "lever",
+    "post_split"
+  ],
+  "n_rows_by_source_split": {
+    "source=cf_v5/split=train": 2163342,
+    "source=cf_v5/split=val": 4579246,
+    "source=real/split=train": 734663,
+    "source=real/split=val": 1501733,
+    "source=synthetic_v5/split=train": 1667633,
+    "source=synthetic_v5/split=val": 3633467,
+    "source=vaso_reinf_v5/split=train": 86666,
+    "source=vaso_reinf_v5/split=val": 184243
+  },
+  "n_dense_by_source_split": {
+    "source=cf_v5/split=train": 0,
+    "source=cf_v5/split=val": 4196862,
+    "source=real/split=train": 0,
+    "source=real/split=val": 1376544,
+    "source=synthetic_v5/split=train": 0,
+    "source=synthetic_v5/split=val": 3330031,
+    "source=vaso_reinf_v5/split=train": 0,
+    "source=vaso_reinf_v5/split=val": 168858
+  },
+  "discards_by_cause": {
+    "n_grid": 72363779,
+    "hueco": 346380,
+    "induccion": 2755943,
+    "emergencia": 3638967,
+    "valido": 65622489,
+    "emitido": 14550993,
+    "sin_marcas_fase": 35,
+    "sin_celdas": 1
+  },
+  "excluded_no_phase_marks_caseids": [
+    732,
+    813,
+    875,
+    1186,
+    1220,
+    1258,
+    1390,
+    1609,
+    1845,
+    2096,
+    2328,
+    2464,
+    2514,
+    2990,
+    3206,
+    3217,
+    3257,
+    3282,
+    3509,
+    3650,
+    3698,
+    3772,
+    3970,
+    4141,
+    4340,
+    4423,
+    4485,
+    4508,
+    4638,
+    4669,
+    4979,
+    5567,
+    5636,
+    5931,
+    6222
+  ],
+  "sin_celdas_caseids": [
+    4476
+  ],
+  "pairs": {
+    "n_pairs": 6345,
+    "path": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v1\\pairs.parquet",
+    "n_unusable": 183
+  },
+  "dense_estimation": {
+    "n_cells_val": 10906388,
+    "n_cases_val": 4327,
+    "dense_windows_est": 10850137,
+    "bytes_per_row_est": 330,
+    "est_bytes": 3580545210,
+    "est_gb": 3.581,
+    "allowed": true
+  },
+  "dense_val_enabled": true,
+  "n_rows": 14550993,
+  "n_partitions": 363,
+  "elapsed_s": 1408.41,
+  "windows_v2_n_cells_by_source_split": {
+    "source=cf_v5/split=train": 27287214,
+    "source=cf_v5/split=val": 4823182,
+    "source=real/split=train": 12061757,
+    "source=real/split=val": 2063800,
+    "source=synthetic_v5/split=train": 21056838,
+    "source=synthetic_v5/split=val": 3825527,
+    "source=vaso_reinf_v5/split=train": 1092529,
+    "source=vaso_reinf_v5/split=val": 193879
+  }
+}

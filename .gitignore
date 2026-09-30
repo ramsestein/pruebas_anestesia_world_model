@@ -1,6 +1,17 @@
 # Datos (no se suben al repositorio)
 data/
 
+# ── Manifiestos de procedencia (SÍ se versionan) ─────────────────────────────
+# manifests/ guarda copias de los manifiestos y de los resultados de
+# gates/sondas que viven bajo data/ (que está ignorado). Son texto de pocos KB
+# y registran sha256, recuentos y veredictos: son la cadena de procedencia que
+# permitió recuperar el proyecto cuando se perdió windows_v2. Por eso se
+# versionan. Los parquet de data/ NO se versionan: son binarios regenerables y
+# pesados (particiones de ventanas, cases/registry, salidas de audit/tokens).
+# La única excepción binaria es manifests/windows_v4_split.parquet: se copia
+# por pesar <5 MB y por fijar el split heredado bit a bit.
+!manifests/
+
 # Secretos / variables de entorno
 .env
 .env.*
