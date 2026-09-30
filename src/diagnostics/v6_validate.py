@@ -49,17 +49,19 @@ import pyarrow.parquet as pq
 from diagnostics import cohort_gap as cg
 from diagnostics import gap_addendum as ga
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
-WINDOWS_V2 = ROOT / "data" / "windows_v2"
-WINDOWS_V6 = ROOT / "data" / "windows_v3"
-AE_STATS = ROOT / "data" / "ae_v1" / "ae_bal" / "norm_stats.json"
-TOKENS_MANIFEST = ROOT / "data" / "tokens_v1" / "manifest_tokens.json"
-CF_V6_METADATA = ROOT / "data" / "cf_v6" / "metadata"
-OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "reports" / "REPORT_generator_validation.txt"
+WINDOWS_REAL = paths.WINDOWS_DIR
+WINDOWS_V6 = paths.WINDOWS_V3_DIR
+AE_STATS = paths.AE_DIR / "ae_bal" / "norm_stats.json"
+TOKENS_MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
+CF_V6_METADATA = paths.LOST_COHORT_DIRS["cf_v6"] / "metadata"
+OUT_DIR = paths.DIAGNOSTICS_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_generator_validation.txt"
 CACHE_PATH = OUT_DIR / "v6_validate_results.json"
-ROJO_TXT = ROOT / "reports" / "_pytest_v6_validate_rojo.txt"
-VERDE_TXT = ROOT / "reports" / "_pytest_v6_validate_verde.txt"
+ROJO_TXT = paths.REPORTS_DIR / "_pytest_v6_validate_rojo.txt"
+VERDE_TXT = paths.REPORTS_DIR / "_pytest_v6_validate_verde.txt"
 
 SEED = 9876
 N_CELLS = 200_000
@@ -67,8 +69,8 @@ HALF = N_CELLS // 2
 HOLDOUT_SEED = 20260922
 HOLDOUT_FRAC = 0.4
 
-SYNTH_SOURCES_V6: list[str] = ["synthetic_v6", "vaso_reinf_v6", "cf_v6"]
-SYNTH_SOURCES_V5: list[str] = ["synthetic_v5", "vaso_reinf_v5", "cf_v5"]
+SYNTH_SOURCES_V6: list[str] = paths.LOST_SYNTH_V6
+SYNTH_SOURCES_V5: list[str] = paths.LOST_SYNTH_V5
 
 ASSUMPTIONS: list[str] = [
     "La cohorte real se parte por caseid con semilla 20260922 en real_calib "
@@ -365,10 +367,10 @@ def run_v5_pk_gate3() -> dict:
     except Exception as e:  # pragma: no cover
         return {"error": repr(e)}
 
-    meta_dir = ROOT / "data" / "synthetic_v6" / "metadata"
-    cases = sorted((ROOT / "data" / "synthetic_v6" / "cases").glob("*.parquet"))
-    syn_clin = pq.read_table(
-        ROOT / "data" / "synthetic_v6" / "clinical_data.parquet").to_pandas()
+    synth_v6 = paths.LOST_COHORT_DIRS["synthetic_v6"]
+    meta_dir = synth_v6 / "metadata"
+    cases = sorted((synth_v6 / "cases").glob("*.parquet"))
+    syn_clin = pq.read_table(synth_v6 / "clinical_data.parquet").to_pandas()
     demo = {int(r.caseid): dict(weight=float(r.weight), age=float(r.age),
                                 height=float(r.height), sex=str(r.sex))
             for _, r in syn_clin.iterrows()}
@@ -442,7 +444,7 @@ def run_v5_pk_gate3() -> dict:
 # --------------------------------------------------------------------------
 
 def _read_truth(caseid: int, split_t: float) -> np.ndarray | None:
-    path = ROOT / "data" / "cf_v6" / "truth" / f"{caseid}_truth.parquet"
+    path = paths.LOST_COHORT_DIRS["cf_v6"] / "truth" / f"{caseid}_truth.parquet"
     if not path.exists():
         return None
     try:
@@ -512,7 +514,7 @@ def run_v7_dose_effect() -> dict:
     out: dict = {}
     for cohort in ("synthetic_v6", "synthetic_v5"):
         out[cohort] = {}
-        d = ROOT / "data" / cohort / "truth"
+        d = paths.LOST_COHORT_DIRS[cohort] / "truth"
         if not d.exists():
             continue
         ce_p, bis, ce_r, mapv, nora = [], [], [], [], []
@@ -555,7 +557,7 @@ def compute_results() -> dict:
     print(f"[v6_validate] holdout: {len(holdout_ids)} caseids, calib: "
           f"{len(calib)} caseids", flush=True)
 
-    print("[v6_validate] cargando holdout real (windows_v2)", flush=True)
+    print("[v6_validate] cargando holdout real (windows_v4)", flush=True)
     real_all = cg.load_cells(["real"], "val", excluded)
     hmask = np.isin(real_all["caseid"], list(holdout_set))
     holdout = {
@@ -570,8 +572,8 @@ def compute_results() -> dict:
     else:
         print("[v6_validate] AVISO: windows_v3 no existe; V1-V4 se calculan "
               "sobre la cohorte v5 como referencia", flush=True)
-        synth = load_cells_from(WINDOWS_V2, SYNTH_SOURCES_V5, "val", excluded)
-    synth_v5 = load_cells_from(WINDOWS_V2, SYNTH_SOURCES_V5, "val", excluded)
+        synth = load_cells_from(WINDOWS_REAL, SYNTH_SOURCES_V5, "val", excluded)
+    synth_v5 = load_cells_from(WINDOWS_REAL, SYNTH_SOURCES_V5, "val", excluded)
 
     print("[v6_validate] V1/V2 sondas", flush=True)
     v1v2 = _run_v1_v2(holdout, synth)

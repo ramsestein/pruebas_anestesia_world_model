@@ -36,14 +36,16 @@ from pathlib import Path
 import numpy as np
 import pyarrow.parquet as pq
 
+import paths
+
 from diagnostics import cohort_gap as cg
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "reports" / "REPORT_gap_addendum.txt"
+OUT_DIR = paths.DIAGNOSTICS_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_gap_addendum.txt"
 CACHE_PATH = OUT_DIR / "gap_addendum_results.json"
-ROJO_TXT = ROOT / "reports" / "_pytest_gap_addendum_rojo.txt"
-VERDE_TXT = ROOT / "reports" / "_pytest_gap_addendum_verde.txt"
+ROJO_TXT = paths.REPORTS_DIR / "_pytest_gap_addendum_rojo.txt"
+VERDE_TXT = paths.REPORTS_DIR / "_pytest_gap_addendum_verde.txt"
 
 # Variables excluidas del suelo P1a (las tres que concentran la brecha).
 EXCLUDED_FOR_FLOOR = {"BIS/EMG", "Primus/PEEP_MBAR", "Primus/PIP_MBAR"}
@@ -469,11 +471,12 @@ def write_report(results: dict) -> Path:
     add(f"  {'variable':<22} {'real_min':>9} {'real_max':>9} "
         f"{'synth_min':>9} {'synth_max':>9} {'vaso_min':>9} {'vaso_max':>9} "
         f"{'cf_min':>9} {'cf_max':>9}")
+    synth_sources = cg.SYNTH_SOURCES
     for track in cg.IMAGE_TRACKS:
         r = p1d["per_source"]["real"][track]
-        s = p1d["per_source"]["synthetic_v5"][track]
-        v = p1d["per_source"]["vaso_reinf_v5"][track]
-        c = p1d["per_source"]["cf_v5"][track]
+        s = p1d["per_source"][synth_sources[0]][track]
+        v = p1d["per_source"][synth_sources[1]][track]
+        c = p1d["per_source"][synth_sources[2]][track]
         add(f"  {track:<22} {_fmt_g(r['min'])} {_fmt_g(r['max'])} "
             f"{_fmt_g(s['min'])} {_fmt_g(s['max'])} "
             f"{_fmt_g(v['min'])} {_fmt_g(v['max'])} "

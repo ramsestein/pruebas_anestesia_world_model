@@ -39,12 +39,14 @@ from diagnostics import cohort_gap as cg
 from diagnostics import gap_addendum as ga
 from diagnostics import v6_validate as vv
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "reports" / "REPORT_v7_attribution.txt"
+OUT_DIR = paths.DIAGNOSTICS_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_v7_attribution.txt"
 CACHE_PATH = OUT_DIR / "v7_attribution_results.json"
-ROJO_TXT = ROOT / "reports" / "_pytest_v7_attribution_rojo.txt"
-VERDE_TXT = ROOT / "reports" / "_pytest_v7_attribution_verde.txt"
+ROJO_TXT = paths.REPORTS_DIR / "_pytest_v7_attribution_rojo.txt"
+VERDE_TXT = paths.REPORTS_DIR / "_pytest_v7_attribution_verde.txt"
 
 SEED = 9876
 HALF = 100_000
@@ -317,7 +319,7 @@ def compute_results() -> dict:
     _, holdout_ids = vv.split_real_caseids(excluded)
     holdout_set = frozenset(holdout_ids)
 
-    print("[v7_attribution] cargando real_holdout (windows_v2)", flush=True)
+    print("[v7_attribution] cargando real_holdout (windows_v4)", flush=True)
     real_all = cg.load_cells(["real"], "val", excluded)
     hmask = np.isin(real_all["caseid"], list(holdout_set))
     holdout = {"values": real_all["values"][hmask],

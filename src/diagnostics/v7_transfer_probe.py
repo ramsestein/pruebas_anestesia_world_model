@@ -58,11 +58,13 @@ import torch.nn.functional as F
 
 from diagnostics import cohort_gap as cg
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "reports" / "REPORT_v7_transfer_probe.txt"
+OUT_DIR = paths.DIAGNOSTICS_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_v7_transfer_probe.txt"
 CACHE_PATH = OUT_DIR / "v7_transfer_probe_results.json"
-REPORTS_DIR = ROOT / "reports"
+REPORTS_DIR = paths.REPORTS_DIR
 
 SEED = 9876
 N_SYN = 100_000
@@ -111,31 +113,19 @@ VAL_FRAC = 0.1
 
 COHORTS = {
     "v5": {
-        "windows": ROOT / "data" / "windows_v2",
-        "synth_sources": ["synthetic_v5", "vaso_reinf_v5", "cf_v5"],
-        "case_dirs": {
-            "synthetic_v5": ROOT / "data" / "synthetic_v5",
-            "vaso_reinf_v5": ROOT / "data" / "synthetic_vaso_reinf_v5",
-            "cf_v5": ROOT / "data" / "cf_v5",
-        },
+        "windows": paths.WINDOWS_V2_DIR,
+        "synth_sources": paths.LOST_SYNTH_V5,
+        "case_dirs": {k: paths.LOST_COHORT_DIRS[k] for k in paths.LOST_SYNTH_V5},
     },
     "v6": {
-        "windows": ROOT / "data" / "windows_v3",
-        "synth_sources": ["synthetic_v6", "vaso_reinf_v6", "cf_v6"],
-        "case_dirs": {
-            "synthetic_v6": ROOT / "data" / "synthetic_v6",
-            "vaso_reinf_v6": ROOT / "data" / "synthetic_vaso_reinf_v6",
-            "cf_v6": ROOT / "data" / "cf_v6",
-        },
+        "windows": paths.WINDOWS_V3_DIR,
+        "synth_sources": paths.LOST_SYNTH_V6,
+        "case_dirs": {k: paths.LOST_COHORT_DIRS[k] for k in paths.LOST_SYNTH_V6},
     },
     "v7": {
-        "windows": ROOT / "data" / "windows_v4",
-        "synth_sources": ["synthetic_v7", "vaso_reinf_v7", "cf_v7"],
-        "case_dirs": {
-            "synthetic_v7": ROOT / "data" / "synthetic_v7",
-            "vaso_reinf_v7": ROOT / "data" / "synthetic_vaso_reinf_v7",
-            "cf_v7": ROOT / "data" / "cf_v7",
-        },
+        "windows": paths.WINDOWS_DIR,
+        "synth_sources": paths.SYNTH_COHORTS,
+        "case_dirs": {k: paths.COHORTS[k] for k in paths.SYNTH_COHORTS},
     },
 }
 
@@ -679,7 +669,7 @@ def compute_results(cohort: str) -> dict:
 
     print(f"[v7_transfer_probe] {cohort}: construyendo secuencias por caso",
           flush=True)
-    case_dirs = {"real": ROOT / "data" / "real", **cfg["case_dirs"]}
+    case_dirs = {"real": paths.COHORTS["real"], **cfg["case_dirs"]}
     cases_hold = _build_case_arrays(holdout, case_dirs)
     cases_cal = _build_case_arrays(calib, case_dirs)
     cases_syn = _build_case_arrays(synth, case_dirs)

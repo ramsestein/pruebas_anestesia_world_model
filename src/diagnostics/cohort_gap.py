@@ -35,15 +35,17 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
-WINDOWS_V2 = ROOT / "data" / "windows_v2"
-WINDOWS_DIR = WINDOWS_V2 / "windows"
-TOKENS_MANIFEST = ROOT / "data" / "tokens_v1" / "manifest_tokens.json"
-OUT_DIR = ROOT / "data" / "diagnostics"
-REPORT_PATH = ROOT / "reports" / "REPORT_cohort_gap.txt"
+WINDOWS_ROOT = paths.WINDOWS_DIR
+WINDOWS_DIR = WINDOWS_ROOT / "windows"
+TOKENS_MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
+OUT_DIR = paths.DIAGNOSTICS_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_cohort_gap.txt"
 CACHE_PATH = OUT_DIR / "cohort_gap_results.json"
-ROJO_TXT = ROOT / "reports" / "_pytest_cohort_gap_rojo.txt"
-VERDE_TXT = ROOT / "reports" / "_pytest_cohort_gap_verde.txt"
+ROJO_TXT = paths.REPORTS_DIR / "_pytest_cohort_gap_rojo.txt"
+VERDE_TXT = paths.REPORTS_DIR / "_pytest_cohort_gap_verde.txt"
 
 # Semilla y tamaño de la submuestra del gate 6 (sondeo por celda).
 SEED = 9876
@@ -75,8 +77,8 @@ META_COLS: list[str] = ["caseid", "source", "phase_from_clinical"]
 READ_COLS: list[str] = META_COLS + VALUE_COLS + MASK_COLS
 N_VARS: int = len(IMAGE_TRACKS)
 
-SYNTH_SOURCES: list[str] = ["synthetic_v5", "vaso_reinf_v5", "cf_v5"]
-ALL_SOURCES: list[str] = ["real"] + SYNTH_SOURCES
+SYNTH_SOURCES: list[str] = paths.SYNTH_COHORTS
+ALL_SOURCES: list[str] = paths.ALL_COHORTS
 
 
 # --------------------------------------------------------------------------

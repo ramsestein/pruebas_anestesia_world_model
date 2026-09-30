@@ -21,19 +21,21 @@ import pyarrow.parquet as pq
 from diagnostics import v6_validate as vv
 from diagnostics import cohort_gap as cg
 
+import paths
+
 ROOT = vv.ROOT
 
 # ── Monkeypatch de constantes v6 -> v7 ─────────────────────────────────────
-vv.WINDOWS_V6 = ROOT / "data" / "windows_v4"
-vv.SYNTH_SOURCES_V6 = ["synthetic_v7", "vaso_reinf_v7", "cf_v7"]
-vv.CF_V6_METADATA = ROOT / "data" / "cf_v7" / "metadata"
-vv.CACHE_PATH = ROOT / "data" / "diagnostics" / "v7_validate_results.json"
-vv.REPORT_PATH = ROOT / "reports" / "REPORT_generator_validation_v7.txt"
-vv.ROJO_TXT = ROOT / "reports" / "_pytest_v7_validate_rojo.txt"
-vv.VERDE_TXT = ROOT / "reports" / "_pytest_v7_validate_verde.txt"
+vv.WINDOWS_V6 = paths.WINDOWS_DIR
+vv.SYNTH_SOURCES_V6 = paths.SYNTH_COHORTS
+vv.CF_V6_METADATA = paths.COHORTS["cf_v7"] / "metadata"
+vv.CACHE_PATH = paths.DIAGNOSTICS_DIR / "v7_validate_results.json"
+vv.REPORT_PATH = paths.REPORTS_DIR / "REPORT_generator_validation_v7.txt"
+vv.ROJO_TXT = paths.REPORTS_DIR / "_pytest_v7_validate_rojo.txt"
+vv.VERDE_TXT = paths.REPORTS_DIR / "_pytest_v7_validate_verde.txt"
 
-SYNTH_V7 = ROOT / "data" / "synthetic_v7"
-CF_V7 = ROOT / "data" / "cf_v7"
+SYNTH_V7 = paths.COHORTS["synthetic_v7"]
+CF_V7 = paths.COHORTS["cf_v7"]
 
 
 # ── V5: gate 3 de pk_tokens sobre casos v7 ─────────────────────────────────
@@ -159,9 +161,13 @@ def _read_truth_v7(caseid: int, split_t: float) -> np.ndarray | None:
 # ── V7: curvas dosis-efecto v7 vs v5 ───────────────────────────────────────
 def _v7_dose_effect_v7() -> dict:
     out: dict = {}
-    for cohort in ("synthetic_v7", "synthetic_v5"):
+    cohort_dirs = {
+        "synthetic_v7": paths.COHORTS["synthetic_v7"],
+        "synthetic_v5": paths.LOST_COHORT_DIRS["synthetic_v5"],
+    }
+    for cohort, base in cohort_dirs.items():
         out[cohort] = {}
-        d = ROOT / "data" / cohort / "truth"
+        d = base / "truth"
         if not d.exists():
             continue
         ce_p, bis, ce_r, mapv, nora = [], [], [], [], []
