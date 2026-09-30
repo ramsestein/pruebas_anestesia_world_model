@@ -1,0 +1,94 @@
+================================================================
+PASO 0 — FASE A: PROCEDENCIA DE LOS SCRIPTS (auditoría parcial)
+================================================================
+Fecha: 2026-09-30
+Estado: informa la situación REAL del repositorio (la premisa de la tarea
+"ningún script coincide con su manifiesto" NO se cumple para dos scripts:
+window.py y pk_tokens.py SÍ coinciden a día de hoy).
+
+----------------------------------------------------------------
+A1. TABLA DE PROCEDENCIA
+----------------------------------------------------------------
+Los sha del repo se calcularon con Get-FileHash -Algorithm SHA256 sobre los
+ficheros en el commit d4cca6d (HEAD, estado actual). Los sha de manifiesto se
+leyeron de manifests/*.json.
+
+ script          | sha repo (actual)                     | sha manifiesto                        | ¿versión coincidente encontrada? | dónde
+-----------------|----------------------------------------|----------------------------------------|----------------------------------|----------------------------------------------
+ window.py       | 9508ccd0… (9508ccd008b58fb2…)         | 9508ccd0… (windows_v4_manifest)        | SÍ — el propio repo              | src/autoencoder/window.py == manifiesto
+ pk_tokens.py    | 1e3f695b… (1e3f695b3935dd8…)          | 1e3f695b… (pk_v1_manifest)             | SÍ — el propio repo              | src/tokens/pk_tokens.py == manifiesto
+ tokenize.py     | eb87e273… (eb87e273090d3251…)         | 8055bd5d… (tokens_v1_manifest)         | SÍ                                | D:/data/anestesia_world/backup_scripts_20260928/tokens__tokenize.py
+ physio_ae.py    | 2873486e… (2873486e54d488ec…)         | 3f2817c9… (ae_bal_manifest)            | NO                                | —
+
+Detalle de las búsquedas realizadas:
+  - D:/data/anestesia_world/backup_scripts_20260928/ contiene 13 scripts con
+    sha256 calculados:
+      * autoencoder__window.py         9508ccd0…  (= manifiesto windows_v4, = repo)
+      * tokens__pk_tokens.py           1e3f695b…  (= manifiesto pk_v1,      = repo)
+      * tokens__tokenize.py            8055bd5d…  (= manifiesto tokens_v1,  ≠ repo)
+      * ae__physio_ae.py               88f31ed6…  (≠ manifiesto ae_bal 3f2817c9)
+  - Historial de git (solo 2 commits para estos ficheros: 88aa324 y 607e1bc):
+      * tokenize.py   88aa324 → e3b1dedb… ; 607e1bc → 1875c3eb…  (ninguno = 8055bd5d)
+      * physio_ae.py  88aa324 → fd1299d0… ; 607e1bc → b0735a0d…  (ninguno = 3f2817c9)
+  - Búsqueda global en D:\data\anestesia_world\ (recursiva) y dentro del repo
+    (fuera de .venv/__pycache__): no hay más copias de estos ficheros.
+
+----------------------------------------------------------------
+A2. DIFFS CLASIFICADOS
+----------------------------------------------------------------
+Se diffeó cada script del repo contra la versión coincidente con el manifiesto.
+
+* window.py    — sin diff (idéntico bit a bit al manifiesto). Nada que clasificar.
+* pk_tokens.py — sin diff (idéntico bit a bit al manifiesto). Nada que clasificar.
+* tokenize.py  — diff literal completo (git diff --no-index):
+
+    --- a/src/tokens/tokenize.py
+    +++ b/D:/data/anestesia_world/backup_scripts_20260928/tokens__tokenize.py
+    @@ -53,7 +53,7 @@
+     OUT_DIR = ROOT / "data" / "tokens_v1" / "windows"
+     OUT_ROOT = ROOT / "data" / "tokens_v1"
+     MANIFEST_PATH = OUT_ROOT / "manifest_tokens.json"
+    -REPORT_PATH = ROOT / "reports" / "REPORT_tokens.txt"
+    +REPORT_PATH = ROOT / "src" / "tokens" / "REPORT_tokens.txt"
+
+  Clasificación de bloques:
+    - Bloque 1 (REPORT_PATH): COSMÉTICO. Es exactamente el cambio esperado de la
+      limpieza ("mover informes REPORT_*.txt a reports/ y actualizar rutas",
+      commit 607e1bc). No altera ningún número calculado.
+    - Bloques de LÓGICA: NINGUNO.
+
+* physio_ae.py — SIN diff clasificable: no se encontró ninguna versión cuyo sha
+  coincida con 3f2817c9… (ni en backup, ni en git, ni en el repo). Ver A3.
+
+----------------------------------------------------------------
+A3. HALLAZGOS Y PARADAS
+----------------------------------------------------------------
+1. NO hay ningún cambio de LÓGICA detectado en ningún script con versión
+   coincidente (tokenize.py solo difiere en REPORT_PATH, COSMÉTICO). No hay
+   parada por lógica.
+
+2. physio_ae.py: NO se encontró versión coincidente con el manifiesto ae_bal
+   (3f2817c9…). El repo (2873486e…) incluye, sobre la versión que produjo el
+   artefacto ae_bal, al menos: los diagnósticos de cierre diag5b/diag6
+   (iter 4, sin reentrenar) y la corrección de prosa "4476 -> 36 caseids" de
+   la v10 (documentada como SOLO prosa, sin efecto en cómputo).
+   CONSECUENCIA declarada: para physio_ae.py la ÚNICA garantía de equivalencia
+   entre el código repuntado y los números del manifiesto son los números de
+   la FASE D (D2). No se dispone de una versión cerrada coincidente con la que
+   diffear.
+
+3. La premisa del enunciado ("ningún script cerrado coincide con su manifiesto")
+   NO se cumple en el estado actual: window.py y pk_tokens.py SÍ coinciden.
+
+----------------------------------------------------------------
+A4. SHA256 DE PARTIDA (antes de la Fase C)
+----------------------------------------------------------------
+Registrados ANTES de tocar cualquier fichero (punto de partida para el diff de C5):
+
+  src/autoencoder/window.py   9508ccd008b58fb2058e53f8e0ffef884e182341103970f9b52039c2d1a5ebae
+  src/tokens/pk_tokens.py     1e3f695b3935dd85faf458f502fb400b1c5d494db2142e7d98812c6cae45a329
+  src/tokens/tokenize.py      eb87e273090d3251903272613c00a8ce6b19b1b938772e0e1030078b9edbba5b
+  src/ae/physio_ae.py         2873486e54d488ec688a53072b010044fe3d034d607ddc3cbc7f53fe86722fdd
+
+(Estos sha se re-verifican en C5 con git diff --no-index contra el fichero de
+partida, reconstruido con `git show HEAD:<path>`.)
