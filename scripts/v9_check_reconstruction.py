@@ -15,10 +15,12 @@ SRC = Path(__file__).resolve().parents[1] / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+import paths  # noqa: E402
+
 from diagnostics import v6_validate as vv
 from diagnostics import cohort_gap as cg
 
-CACHE = json.load(open("data/diagnostics/v7_validate_results.json", encoding="utf-8"))
+CACHE = json.load(open(paths.DIAGNOSTICS_DIR / "v7_validate_results.json", encoding="utf-8"))
 
 results = {}
 
@@ -30,7 +32,7 @@ results["n_excluded"] = len(excluded)
 #    windows_v4 y verificar el sha de la cache.
 real_ids = []
 for split in ("val",):
-    d = Path("data/windows_v4/windows/source=real") / f"split={split}"
+    d = paths.WINDOWS_DIR / "windows" / "source=real" / f"split={split}"
     import pyarrow.parquet as pq
     for part in sorted(d.glob("part-*.parquet")):
         df = pq.read_table(part, columns=["caseid", "phase_from_clinical"]).to_pandas()
@@ -50,13 +52,13 @@ results["holdout_sha_match"] = (holdout_sha == CACHE["meta"]["holdout_caseids_sh
 
 # 2. Cargar real (val) de windows_v4 y filtrar al holdout.
 print("cargando real val ...", flush=True)
-real_all = vv.load_cells_from(Path("data/windows_v4"), ["real"], "val", excluded)
+real_all = vv.load_cells_from(paths.WINDOWS_DIR, ["real"], "val", excluded)
 hmask = np.isin(real_all["caseid"], holdout_ids)
 holdout = {k: real_all[k][hmask] for k in ("values", "masks", "caseid")}
 
 # 3. Cargar synth v7 (val).
 print("cargando synth v7 val ...", flush=True)
-synth = vv.load_cells_from(Path("data/windows_v4"),
+synth = vv.load_cells_from(paths.WINDOWS_DIR,
                            ["synthetic_v7", "vaso_reinf_v7", "cf_v7"], "val", excluded)
 
 # 4. V1/V2.

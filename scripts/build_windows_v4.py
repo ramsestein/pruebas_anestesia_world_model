@@ -19,6 +19,8 @@ import pyarrow.parquet as pq
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+import paths  # noqa: E402
+
 import autoencoder.window as W  # noqa: E402
 
 
@@ -160,13 +162,8 @@ def _sample_cases_v6(cases: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(parts, ignore_index=True)
 
 
-SOURCES_V7: dict[str, Path] = {
-    "real": ROOT / "data" / "real",
-    "synthetic_v7": ROOT / "data" / "synthetic_v7",
-    "vaso_reinf_v7": ROOT / "data" / "synthetic_vaso_reinf_v7",
-    "cf_v7": ROOT / "data" / "cf_v7",
-}
-OUT_DIR_V7 = ROOT / "data" / "windows_v4"
+SOURCES_V7: dict[str, Path] = paths.COHORTS
+OUT_DIR_V7 = paths.WINDOWS_DIR
 
 
 def _init_worker() -> None:
@@ -174,7 +171,7 @@ def _init_worker() -> None:
     import autoencoder.window as _W
     _W.SOURCES = SOURCES_V7
     _W.OUT_DIR = OUT_DIR_V7
-    _W.EXCLUSIONS_PATH = ROOT / "data" / "audit" / "_nonexistent_v7.csv"
+    _W.EXCLUSIONS_PATH = paths.AUDIT_DIR / "_nonexistent_v7.csv"
 
 
 def generate_v3(max_workers: int = 14) -> None:
@@ -186,7 +183,7 @@ def generate_v3(max_workers: int = 14) -> None:
 
     W.SOURCES = SOURCES_V7
     W.OUT_DIR = OUT_DIR_V7
-    W.EXCLUSIONS_PATH = ROOT / "data" / "audit" / "_nonexistent_v7.csv"
+    W.EXCLUSIONS_PATH = paths.AUDIT_DIR / "_nonexistent_v7.csv"
     W._read_clinical = _read_clinical_v6
     W.list_cases = list_cases_v6
     W._sample_cases = _sample_cases_v6

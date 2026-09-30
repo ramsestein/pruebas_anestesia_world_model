@@ -30,10 +30,12 @@ import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[1]
-WINDOWS_DIR = ROOT / "data" / "windows_v2" / "windows"
-CASES_PATH = ROOT / "data" / "windows_v2" / "cases.parquet"
-MANIFEST = json.loads((ROOT / "data" / "windows_v2" / "manifest.json").read_text(encoding="utf-8"))
+WINDOWS_DIR = paths.WINDOWS_DIR / "windows"
+CASES_PATH = paths.WINDOWS_DIR / "cases.parquet"
+MANIFEST = json.loads((paths.WINDOWS_DIR / "manifest.json").read_text(encoding="utf-8"))
 IMAGE_TRACKS = list(MANIFEST["image_tracks"])
 
 SEED = 0
@@ -213,8 +215,8 @@ def main() -> int:
                 [f"sin top-3 ({', '.join(top3_vars)})", f"{acc_b_without(set(top3_vars)):.4f}"]]))
 
     # pares de cohortes sobre (c)
-    pairs = [("real", "synthetic_v5"), ("real", "cf_v5"),
-             ("real", "vaso_reinf_v5"), ("synthetic_v5", "cf_v5")]
+    pairs = [("real", "synthetic_v7"), ("real", "cf_v7"),
+             ("real", "vaso_reinf_v7"), ("synthetic_v7", "cf_v7")]
     print()
     print("(c) por pares de cohortes (balanced accuracy):")
     from sklearn.linear_model import LogisticRegression as LR2

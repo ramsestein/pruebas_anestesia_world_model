@@ -10,14 +10,16 @@ SRC = Path(__file__).resolve().parents[1] / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+import paths  # noqa: E402
+
 from diagnostics import cohort_gap as cg
 from diagnostics import v6_validate as vv
 
 excluded = cg.load_excluded_caseids()
-cells = vv.load_cells_from(Path("data/windows_v4"), ["real"], "val", excluded)
+cells = vv.load_cells_from(paths.WINDOWS_DIR, ["real"], "val", excluded)
 stats = cg.marginal_stats(cells["values"], cells["masks"])
 
-ref = json.load(open("data/diagnostics/cohort_gap_results.json", encoding="utf-8"))
+ref = json.load(open(paths.DIAGNOSTICS_DIR / "cohort_gap_results.json", encoding="utf-8"))
 ref_real = ref["d4"]["per_source"]["real"]
 
 print(f"{'variable':<24} {'n_rec':>9} {'n_D4':>9} {'mean_rec':>10} {'mean_D4':>10} "

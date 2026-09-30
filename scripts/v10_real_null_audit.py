@@ -11,7 +11,9 @@ import pathlib
 import numpy as np
 import pyarrow.parquet as pq
 
-CASES = pathlib.Path("data/real/cases")
+import paths
+
+CASES = paths.COHORTS["real"] / "cases"
 files = sorted(CASES.glob("*.parquet"))
 N = len(files)
 

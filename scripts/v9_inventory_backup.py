@@ -5,6 +5,8 @@ import pathlib
 import shutil
 from datetime import datetime, timezone
 
+import paths
+
 ROOT = pathlib.Path(".")
 
 
@@ -34,16 +36,16 @@ inv = {}
 
 # ── Cohortes (directorios de casos) ──
 cohorts = {
-    "real": "data/real",
-    "synthetic_v5": "data/synthetic_v5",
-    "vaso_reinf_v5": "data/synthetic_vaso_reinf_v5",
-    "cf_v5": "data/cf_v5",
-    "synthetic_v6": "data/synthetic_v6",
-    "vaso_reinf_v6": "data/synthetic_vaso_reinf_v6",
-    "cf_v6": "data/cf_v6",
-    "synthetic_v7": "data/synthetic_v7",
-    "vaso_reinf_v7": "data/synthetic_vaso_reinf_v7",
-    "cf_v7": "data/cf_v7",
+    "real": str(paths.COHORTS["real"]),
+    "synthetic_v5": str(paths.LOST_COHORT_DIRS["synthetic_v5"]),
+    "vaso_reinf_v5": str(paths.LOST_COHORT_DIRS["vaso_reinf_v5"]),
+    "cf_v5": str(paths.LOST_COHORT_DIRS["cf_v5"]),
+    "synthetic_v6": str(paths.LOST_COHORT_DIRS["synthetic_v6"]),
+    "vaso_reinf_v6": str(paths.LOST_COHORT_DIRS["vaso_reinf_v6"]),
+    "cf_v6": str(paths.LOST_COHORT_DIRS["cf_v6"]),
+    "synthetic_v7": str(paths.COHORTS["synthetic_v7"]),
+    "vaso_reinf_v7": str(paths.COHORTS["vaso_reinf_v7"]),
+    "cf_v7": str(paths.COHORTS["cf_v7"]),
 }
 inv["cohorts"] = {}
 for name, path in cohorts.items():
@@ -57,9 +59,9 @@ for name, path in cohorts.items():
 
 # ── Ventanas ──
 windows = {
-    "windows_v2": "data/windows_v2",
-    "windows_v3": "data/windows_v3",
-    "windows_v4": "data/windows_v4",
+    "windows_v2": str(paths.WINDOWS_V2_DIR),
+    "windows_v3": str(paths.WINDOWS_V3_DIR),
+    "windows_v4": str(paths.WINDOWS_DIR),
 }
 inv["windows"] = {}
 for name, path in windows.items():
@@ -75,11 +77,11 @@ for name, path in windows.items():
         inv["windows"][name] = {"status": "perdido", "sha256_manifest": "missing"}
 
 # ── Conjuntos de tokens / AE ──
-inv["tokens_v1"] = {"status": "presente" if pathlib.Path("data/tokens_v1").exists() else "perdido",
-                    "sha256_manifest": sha256(pathlib.Path("data/tokens_v1/manifest_tokens.json"))}
+inv["tokens_v1"] = {"status": "presente" if paths.TOKENS_DIR.exists() else "perdido",
+                    "sha256_manifest": sha256(paths.TOKENS_DIR / "manifest_tokens.json")}
 inv["ae_v1_ae_bal"] = {"status": "presente",
-                       "sha256_norm_stats": sha256(pathlib.Path("data/ae_v1/ae_bal/norm_stats.json")),
-                       "sha256_manifest": sha256(pathlib.Path("data/ae_v1/ae_bal/manifest_ae.json"))}
+                       "sha256_norm_stats": sha256(paths.AE_DIR / "ae_bal" / "norm_stats.json"),
+                       "sha256_manifest": sha256(paths.AE_DIR / "ae_bal" / "manifest_ae.json")}
 
 # ── Scripts cerrados ──
 scripts = {
@@ -107,7 +109,7 @@ manifest = {
     "generated_at": datetime.now(timezone.utc).isoformat(),
     "inventory": inv,
 }
-pathlib.Path("data/diagnostics/v9_manifest_global.json").write_text(
+(paths.DIAGNOSTICS_DIR / "v9_manifest_global.json").write_text(
     json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
 
 # ── Copia de seguridad de scripts cerrados fuera del árbol de trabajo ──
@@ -122,11 +124,11 @@ for name, path in scripts.items():
     shutil.copy2(src, dst)
     copied.append(str(dst))
 manifest["backup_copied"] = copied
-pathlib.Path("data/diagnostics/v9_manifest_global.json").write_text(
+(paths.DIAGNOSTICS_DIR / "v9_manifest_global.json").write_text(
     json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
 
 print("scripts copiados a", backup_dir, ":", len(copied))
-print("manifiesto global:", "data/diagnostics/v9_manifest_global.json")
+print("manifiesto global:", paths.DIAGNOSTICS_DIR / "v9_manifest_global.json")
 for name, d in inv["cohorts"].items():
     print(f"  cohort {name}: {d['status']} ({d['n_cases_parquet']} cases)")
 for name, d in inv["windows"].items():

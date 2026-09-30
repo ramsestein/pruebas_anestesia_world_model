@@ -10,7 +10,9 @@ import pathlib
 import numpy as np
 import pyarrow.parquet as pq
 
-ROOT = pathlib.Path("data")
+import paths
+
+ROOT = paths.DATA_ROOT
 
 def sha256(p):
     if not p.exists():
@@ -114,7 +116,7 @@ for j, t in enumerate(IMAGE_TRACKS):
     real_stats[t] = {"n": int(n), "mean": float(mean), "std": float(np.sqrt(var))}
 out["real_stats_maintenance_mask1"] = real_stats
 
-pathlib.Path("data/diagnostics/v9_real_equivalence.json").write_text(
+(paths.DIAGNOSTICS_DIR / "v9_real_equivalence.json").write_text(
     json.dumps(out, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
 print("OK. n_cells_all=", out["real_n_cells_all"],
       "n_maint=", out["real_n_cells_maintenance"])

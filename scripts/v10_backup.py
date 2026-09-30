@@ -11,9 +11,11 @@ import shutil
 import sys
 import time
 
-SRC = pathlib.Path("data")
+import paths
+
+SRC = paths.DATA_ROOT
 DST = pathlib.Path("D:/data/anestesia_world/backup_v7_20260928")
-DIRS = ["windows_v4", "synthetic_v7", "synthetic_vaso_reinf_v7", "cf_v7"]
+DIRS = [paths.WINDOWS_DIR.name] + [paths.COHORTS[c].name for c in paths.SYNTH_COHORTS]
 
 CHUNK = 1 << 22  # 4 MiB
 

@@ -12,14 +12,16 @@ SRC = Path(__file__).resolve().parents[1] / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+import paths  # noqa: E402
+
 # IMPORTANTE (Windows): importar ae.physio_ae ANTES que torch; el módulo
 # importa pyarrow antes que torch (orden seguro) para no romper pq.read_table.
 import ae.physio_ae as pa  # noqa: E402
 import torch  # noqa: E402  (ya importado por pa en el orden correcto)
 
 # La cohorte real en windows_v4 es equivalente a windows_v2 (v9 1.1); el AE
-# lee de WINDOWS_V2 que ya no existe, así que se redirige a windows_v4.
-pa.WINDOWS_DIR = Path("data/windows_v4/windows")
+# lee de WINDOWS_DIR que ahora apunta a windows_v4 vía paths.
+pa.WINDOWS_DIR = paths.WINDOWS_DIR / "windows"
 
 device = torch.device("cpu")
 model = pa.load_model("ae_bal", "cpu").to(device)
@@ -45,7 +47,7 @@ out = {
     "n_real_val_cells": int(val["values"].shape[0]),
     "n_real_val_cases": int(len(val["case_ids"])),
 }
-Path("data/diagnostics/v10_gate_recheck.json").write_text(
+Path(paths.DIAGNOSTICS_DIR / "v10_gate_recheck.json").write_text(
     json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
 
 print("GATE 2 real (ae_bal congelado, windows_v4):")
@@ -55,7 +57,7 @@ print("GATE 3:", json.dumps(g3, ensure_ascii=False))
 print("celdas:", out["n_real_val_cells"], "casos:", out["n_real_val_cases"])
 
 # Comparación contra el manifest registrado.
-m = json.load(open("data/ae_v1/ae_bal/manifest_ae.json", encoding="utf-8"))
+m = json.load(open(paths.AE_DIR / "ae_bal" / "manifest_ae.json", encoding="utf-8"))
 ref2 = m["gates"]["gate2"]["real"]
 ref3 = m["gates"]["gate3"]
 print("\ncomparación:")

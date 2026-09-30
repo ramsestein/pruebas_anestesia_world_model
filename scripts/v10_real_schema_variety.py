@@ -4,7 +4,9 @@ import pathlib
 
 import pyarrow.parquet as pq
 
-CASES = pathlib.Path("data/real/cases")
+import paths
+
+CASES = paths.COHORTS["real"] / "cases"
 files = sorted(CASES.glob("*.parquet"))
 
 col_counts = collections.Counter()
