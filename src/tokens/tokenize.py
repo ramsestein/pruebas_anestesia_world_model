@@ -42,18 +42,20 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 from numpy.lib.stride_tricks import sliding_window_view
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_PATH = ROOT / "contrato_tokens_v1.md"
-WINDOWS_V2 = ROOT / "data" / "windows_v2"
-WINDOWS_DIR = WINDOWS_V2 / "windows"
-PK_DIR = ROOT / "data" / "pk_v1" / "windows"
-CTX_TOKENS = ROOT / "data" / "context_v1" / "tokens.parquet"
-CTX_VOCAB = ROOT / "data" / "context_v1" / "vocab.json"
-CF_META_DIR = ROOT / "data" / "cf_v5" / "metadata"
-OUT_DIR = ROOT / "data" / "tokens_v1" / "windows"
-OUT_ROOT = ROOT / "data" / "tokens_v1"
+WINDOWS_ROOT = paths.WINDOWS_DIR
+WINDOWS_DIR = WINDOWS_ROOT / "windows"
+PK_DIR = paths.PK_DIR / "windows"
+CTX_TOKENS = paths.CONTEXT_DIR / "tokens.parquet"
+CTX_VOCAB = paths.CONTEXT_DIR / "vocab.json"
+CF_META_DIR = paths.COHORTS["cf_v7"] / "metadata"
+OUT_DIR = paths.TOKENS_DIR / "windows"
+OUT_ROOT = paths.TOKENS_DIR
 MANIFEST_PATH = OUT_ROOT / "manifest_tokens.json"
-REPORT_PATH = ROOT / "reports" / "REPORT_tokens.txt"
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_tokens.txt"
 
 GRID_S = 5.0
 STEP_S = 60
@@ -98,12 +100,7 @@ LEVER_GROUP = {
     "peep_up": "ventilacion",
 }
 
-SOURCES = {
-    "real": ROOT / "data" / "real",
-    "synthetic_v5": ROOT / "data" / "synthetic_v5",
-    "vaso_reinf_v5": ROOT / "data" / "synthetic_vaso_reinf_v5",
-    "cf_v5": ROOT / "data" / "cf_v5",
-}
+SOURCES = paths.COHORTS
 
 
 # --------------------------------------------------------------------------
@@ -132,7 +129,7 @@ def load_vocab_v1() -> tuple[str, ...]:
 
 @lru_cache(maxsize=1)
 def load_cases() -> pd.DataFrame:
-    df = pq.read_table(WINDOWS_V2 / "cases.parquet",
+    df = pq.read_table(WINDOWS_ROOT / "cases.parquet",
                        columns=["caseid", "source", "split", "n_windows",
                                 "t_first", "t_last"]).to_pandas()
     df["caseid"] = df["caseid"].astype("int64")
@@ -876,7 +873,7 @@ def build_pairs_parquet() -> dict:
 
     # por caseid: conjunto de t0 dense=False y conteos pre/post
     info: dict[int, dict] = {}
-    for part in sorted(OUT_DIR.glob("source=cf_v5/split=*/part-*.parquet")):
+    for part in sorted(OUT_DIR.glob("source=cf_v7/split=*/part-*.parquet")):
         df = pq.read_table(part, columns=["caseid", "dense", "t0", "post_split"]).to_pandas()
         df = df[df.dense == False]
         for cid, grp in df.groupby("caseid"):
@@ -948,7 +945,7 @@ def _bytes_per_row_estimate() -> int:
 
 def estimate_dense() -> dict:
     """Estima el tamaño de las ventanas densas de val antes de generarlas."""
-    manifest = json.loads((WINDOWS_V2 / "manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads((WINDOWS_ROOT / "manifest.json").read_text(encoding="utf-8"))
     n_cases_val = sum(v for k, v in manifest["n_cases_by_source_split"].items()
                       if k.endswith("|val"))
     n_cells_val = sum(v for k, v in manifest["n_windows_by_source_split"].items()
@@ -1066,15 +1063,15 @@ def verify_output() -> dict:
 
 
 def build_manifest(summary: dict) -> dict:
-    win_manifest = json.loads((WINDOWS_V2 / "manifest.json").read_text(encoding="utf-8"))
+    win_manifest = json.loads((WINDOWS_ROOT / "manifest.json").read_text(encoding="utf-8"))
     return {
         "date": pd.Timestamp.now().isoformat(),
         "sha256_contract": _sha256(CONTRACT_PATH),
         "sha256_tokenize_py": _sha256(Path(__file__).resolve()),
-        "sha256_windows_v2_manifest": _sha256(WINDOWS_V2 / "manifest.json"),
-        "sha256_pk_v1_manifest": _sha256(ROOT / "data" / "pk_v1" / "manifest_pk.json"),
+        "sha256_windows_v2_manifest": _sha256(WINDOWS_ROOT / "manifest.json"),
+        "sha256_pk_v1_manifest": _sha256(paths.PK_DIR / "manifest_pk.json"),
         "sha256_context_vocab": _sha256(CTX_VOCAB),
-        "sha256_split_parquet": _sha256(WINDOWS_V2 / "split.parquet"),
+        "sha256_split_parquet": _sha256(WINDOWS_ROOT / "split.parquet"),
         "normalization_stats": summary["stats"],
         "feature_columns": feature_columns(),
         "mask_columns": mask_columns(),
@@ -1134,10 +1131,10 @@ def write_report() -> None:
     L.append("-" * 40)
     L.append(f"  contrato_tokens_v1.md             sha256 {m['sha256_contract']}")
     L.append(f"  tokenize.py                       sha256 {m['sha256_tokenize_py']}")
-    L.append(f"  windows_v2/manifest.json          sha256 {m['sha256_windows_v2_manifest']}")
+    L.append(f"  windows_v4/manifest.json          sha256 {m['sha256_windows_v2_manifest']}")
     L.append(f"  pk_v1/manifest_pk.json            sha256 {m['sha256_pk_v1_manifest']}")
     L.append(f"  context_v1/vocab.json             sha256 {m['sha256_context_vocab']}")
-    L.append(f"  windows_v2/split.parquet          sha256 {m['sha256_split_parquet']}")
+    L.append(f"  windows_v4/split.parquet          sha256 {m['sha256_split_parquet']}")
     L.append(f"  fecha                             {m['date']}")
     L.append("")
     L.append("1. Tests y salida en ROJO")

@@ -82,6 +82,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
 
 # --------------------------------------------------------------------------
@@ -94,8 +96,8 @@ ART_MIN_COV = 0.20
 NIBP_MIN_COV = 0.20
 PART_SIZE = 200_000
 
-OUT_DIR = ROOT / "data" / "windows_v2"
-EXCLUSIONS_PATH = ROOT / "data" / "audit" / "exclusions_proposed_v5.csv"
+OUT_DIR = paths.WINDOWS_V2_DIR
+EXCLUSIONS_PATH = paths.AUDIT_DIR / "exclusions_proposed_v5.csv"
 
 # Alias de nombres de fuente (el CSV de exclusiones usa el nombre de directorio
 # "synthetic_vaso_reinf_v5"; el valor canónico de source es "vaso_reinf_v5").

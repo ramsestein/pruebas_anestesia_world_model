@@ -76,11 +76,22 @@ ALL_COHORTS: list[str] = ["real"] + SYNTH_COHORTS
 # ---------------------------------------------------------------------------
 # Cohortes y directorios de ventanas PERDIDOS (solo registro histórico).
 # ---------------------------------------------------------------------------
-LOST_COHORTS: list[str] = [
-    "synthetic_v5", "vaso_reinf_v5", "cf_v5",
-    "synthetic_v6", "vaso_reinf_v6", "cf_v6",
-    "windows_v2", "windows_v3",
-]
+LOST_SYNTH_V5: list[str] = ["synthetic_v5", "vaso_reinf_v5", "cf_v5"]
+LOST_SYNTH_V6: list[str] = ["synthetic_v6", "vaso_reinf_v6", "cf_v6"]
+
+LOST_COHORTS: list[str] = (
+    LOST_SYNTH_V5 + LOST_SYNTH_V6 + ["windows_v2", "windows_v3"]
+)
+
+# Directorios históricos de casos de las cohortes perdidas (registro).
+LOST_COHORT_DIRS: dict[str, Path] = {
+    "synthetic_v5": DATA_ROOT / "synthetic_v5",
+    "vaso_reinf_v5": DATA_ROOT / "synthetic_vaso_reinf_v5",
+    "cf_v5": DATA_ROOT / "cf_v5",
+    "synthetic_v6": DATA_ROOT / "synthetic_v6",
+    "vaso_reinf_v6": DATA_ROOT / "synthetic_vaso_reinf_v6",
+    "cf_v6": DATA_ROOT / "cf_v6",
+}
 
 
 # ---------------------------------------------------------------------------

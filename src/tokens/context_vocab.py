@@ -46,20 +46,22 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_PATH = ROOT / "contrato_tokens_v1.md"
-WINDOWS_V2 = ROOT / "data" / "windows_v2"
-CASES_PATH = WINDOWS_V2 / "cases.parquet"
-SPLIT_PATH = WINDOWS_V2 / "split.parquet"
-OUT_DIR = ROOT / "data" / "context_v1"
-REPORT_PATH = ROOT / "reports" / "REPORT_context_vocab_v2.txt"
+WINDOWS_ROOT = paths.WINDOWS_DIR
+CASES_PATH = WINDOWS_ROOT / "cases.parquet"
+SPLIT_PATH = WINDOWS_ROOT / "split.parquet"
+OUT_DIR = paths.CONTEXT_DIR
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_context_vocab_v2.txt"
 
-SOURCE_ORDER = ["real", "synthetic_v5", "cf_v5", "vaso_reinf_v5"]
+SOURCE_ORDER = ["real", "synthetic_v7", "cf_v7", "vaso_reinf_v7"]
 SOURCE_DIRS = {
-    "real": ROOT / "data" / "real" / "clinical_data_enriched.parquet",
-    "synthetic_v5": ROOT / "data" / "synthetic_v5" / "clinical_data.parquet",
-    "cf_v5": ROOT / "data" / "cf_v5",
-    "vaso_reinf_v5": ROOT / "data" / "synthetic_vaso_reinf_v5",
+    "real": paths.COHORTS["real"] / "clinical_data_enriched.parquet",
+    "synthetic_v7": paths.COHORTS["synthetic_v7"] / "clinical_data.parquet",
+    "cf_v7": paths.COHORTS["cf_v7"],
+    "vaso_reinf_v7": paths.COHORTS["vaso_reinf_v7"],
 }
 
 # --------------------------------------------------------------------------
@@ -392,7 +394,7 @@ def load_clinical(source: str) -> pd.DataFrame:
     if source == "real":
         df = pq.read_table(SOURCE_DIRS[source], columns=cols).to_pandas()
         df = dedupe_inspire(df)
-    elif source == "synthetic_v5":
+    elif source == "synthetic_v7":
         df = pq.read_table(SOURCE_DIRS[source], columns=cols).to_pandas()
     else:
         base = SOURCE_DIRS[source]
@@ -715,13 +717,13 @@ def _probe_sources(tokens, cases, pos_sources, neg_sources, ablation_top1=False)
 
 def gate6_probe(tokens: pd.DataFrame, cases: pd.DataFrame) -> dict:
     base = _probe_sources(tokens, cases, ["real"],
-                          ["synthetic_v5", "cf_v5", "vaso_reinf_v5"],
+                          ["synthetic_v7", "cf_v7", "vaso_reinf_v7"],
                           ablation_top1=True)
     pairs = {
-        "real_vs_synthetic_v5": _probe_sources(tokens, cases, ["real"], ["synthetic_v5"]),
-        "real_vs_cf_v5": _probe_sources(tokens, cases, ["real"], ["cf_v5"]),
-        "real_vs_vaso_reinf_v5": _probe_sources(tokens, cases, ["real"], ["vaso_reinf_v5"]),
-        "synthetic_v5_vs_cf_v5": _probe_sources(tokens, cases, ["synthetic_v5"], ["cf_v5"]),
+        "real_vs_synthetic_v7": _probe_sources(tokens, cases, ["real"], ["synthetic_v7"]),
+        "real_vs_cf_v7": _probe_sources(tokens, cases, ["real"], ["cf_v7"]),
+        "real_vs_vaso_reinf_v7": _probe_sources(tokens, cases, ["real"], ["vaso_reinf_v7"]),
+        "synthetic_v7_vs_cf_v7": _probe_sources(tokens, cases, ["synthetic_v7"], ["cf_v7"]),
     }
     base["pairwise"] = {
         k: {"accuracy": v["accuracy"], "presence_accuracy": v["presence_accuracy"],
@@ -897,9 +899,9 @@ def build_report(summary: dict) -> str:
     L.append("-" * 40)
     L.append(f"  contrato_tokens_v1.md        sha256 {s['sha_contract']}")
     L.append(f"  context_vocab.py             sha256 {s['sha_module']}")
-    L.append(f"  windows_v2/split.parquet     sha256 {s['sha_split']}")
+    L.append(f"  windows_v4/split.parquet     sha256 {s['sha_split']}")
     L.append(f"  fecha                        {s['date']}")
-    L.append(f"  casos (windows_v2/cases)     {s['n_cases']}")
+    L.append(f"  casos (windows_v4/cases)     {s['n_cases']}")
     L.append(f"  filas tokens (solo v1)       {s['n_token_rows']}")
     L.append(f"  items vocab (v1+v2)          {s['n_items']} "
              f"({s['n_items_v1']} v1 + {s['n_items_v2']} v2)")
@@ -950,7 +952,7 @@ def build_report(summary: dict) -> str:
     L.append("")
     L.append("  5.4 Cobertura v1 por eje x cohorte (fracción emitida)")
     L.append(_fmt_table(
-        ["eje", "real", "synthetic_v5", "cf_v5", "vaso_reinf_v5"], s["coverage_by_axis"]))
+        ["eje"] + SOURCE_ORDER, s["coverage_by_axis"]))
     L.append("")
     L.append("  5.5 Tokens por caso v1 (distribución por cohorte)")
     L.append(_fmt_table(
@@ -1105,8 +1107,8 @@ def run() -> dict:
         "La tabla eje -> item_id de vocab.json se mantiene completa (86 items) y cada "
         "entrada lleva su scope.",
         "Gate 6: se repite sobre el inventario v1 y se añaden la ablación quitando el "
-        "top-1 y el desglose por pares de cohortes (real vs synthetic_v5, real vs "
-        "cf_v5, real vs vaso_reinf_v5, synthetic_v5 vs cf_v5).",
+        "top-1 y el desglose por pares de cohortes (real vs synthetic_v7, real vs "
+        "cf_v7, real vs vaso_reinf_v7, synthetic_v7 vs cf_v7).",
         "Nuevo diagnóstico de fuga en fisiología en scripts/diag_source_probe_physio.py "
         "(sin salida a data/).",
     ]
@@ -1129,7 +1131,7 @@ def run() -> dict:
         f"v2 = {summary['n_items_v2']}.",
         "Scope v1 = ejes demografia y riesgo_global; scope v2 = el resto. Los "
         "estadísticos de normalización de v2 se calculan y guardan (referencia).",
-        "Split: heredado bit a bit de windows_v2 (columna 'split' de cases.parquet, "
+        "Split: heredado bit a bit de windows_v4 (columna 'split' de cases.parquet, "
         "verificada idéntica al mapeo de split.parquet); sha registrado en vocab.json.",
     ]
     summary["assumptions"] = [

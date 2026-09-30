@@ -38,9 +38,11 @@ import pyarrow.parquet as pq
 from anessim.pk.propofol import PropofolSchnider
 from anessim.pk.remifentanil import RemifentanilMinto
 
+import paths
+
 ROOT = Path(__file__).resolve().parents[2]
-WINDOWS_DIR = ROOT / "data" / "windows_v2" / "windows"
-OUT_DIR = ROOT / "data" / "pk_v1" / "windows"
+WINDOWS_DIR = paths.WINDOWS_DIR / "windows"
+OUT_DIR = paths.PK_DIR / "windows"
 CONTRACT_PATH = ROOT / "contrato_tokens_v1.md"
 PART_SIZE = 200_000
 DT_S = 5.0
@@ -77,12 +79,7 @@ BOLUS_COLS = {
     "rocuronio": "roc_bolus",
 }
 
-SOURCES = {
-    "real": ROOT / "data" / "real",
-    "synthetic_v5": ROOT / "data" / "synthetic_v5",
-    "vaso_reinf_v5": ROOT / "data" / "synthetic_vaso_reinf_v5",
-    "cf_v5": ROOT / "data" / "cf_v5",
-}
+SOURCES = paths.COHORTS
 
 
 # --------------------------------------------------------------------------
@@ -337,7 +334,7 @@ def _sha256(path: Path) -> str:
 @lru_cache(maxsize=1)
 def load_registry() -> dict[str, set[str]]:
     """Devuelve {source: {tracks presentes en esa cohorte}} desde registry.parquet."""
-    reg = pq.read_table(ROOT / "data" / "windows_v2" / "registry.parquet").to_pandas()
+    reg = pq.read_table(paths.WINDOWS_DIR / "registry.parquet").to_pandas()
     out: dict[str, set[str]] = {}
     for _, r in reg.iterrows():
         for src in str(r["sources"]).split(","):
@@ -370,11 +367,11 @@ def load_clinical_map() -> dict[str, dict[int, dict]]:
     real["_nn"] = real.notna().sum(axis=1)
     real = real.sort_values("_nn", ascending=False).drop_duplicates("caseid", keep="first")
     out["real"] = {int(r.caseid): _demo_from_row(r) for _, r in real.iterrows()}
-    # synthetic_v5
-    syn = pq.read_table(SOURCES["synthetic_v5"] / "clinical_data.parquet").to_pandas()
-    out["synthetic_v5"] = {int(r.caseid): _demo_from_row(r) for _, r in syn.iterrows()}
-    # vaso_reinf_v5 y cf_v5: fila clínica por caso
-    for src in ("vaso_reinf_v5", "cf_v5"):
+    # synthetic_v7
+    syn = pq.read_table(SOURCES["synthetic_v7"] / "clinical_data.parquet").to_pandas()
+    out["synthetic_v7"] = {int(r.caseid): _demo_from_row(r) for _, r in syn.iterrows()}
+    # vaso_reinf_v7 y cf_v7: fila clínica por caso
+    for src in ("vaso_reinf_v7", "cf_v7"):
         base = SOURCES[src]
         m: dict[int, dict] = {}
         for p in sorted((base / "clinical").glob("*_clinical.parquet")):
@@ -388,7 +385,7 @@ def load_clinical_map() -> dict[str, dict[int, dict]]:
 @lru_cache(maxsize=1)
 
 def load_cf_pairs() -> list[dict]:
-    base = SOURCES["cf_v5"] / "metadata"
+    base = SOURCES["cf_v7"] / "metadata"
     pairs = []
     for p in sorted(base.glob("cf_pair_*.json")):
         d = json.loads(p.read_text(encoding="utf-8"))
@@ -519,7 +516,7 @@ def _compute_case_tokens(windows: pd.DataFrame, case_cols: pd.DataFrame,
 def _case_partition_path(caseid: int, source: str, split: str) -> Path:
     """Localiza la partición de un caso por suma acumulada de n_windows (misma
     lógica de flush de window.py: partición nueva cada 200 000 filas)."""
-    cases_df = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet").to_pandas()
+    cases_df = pq.read_table(paths.WINDOWS_DIR / "cases.parquet").to_pandas()
     grp = cases_df[(cases_df.source == source) & (cases_df.split == split)].sort_values("caseid")
     pos = int((grp.caseid == caseid).argmax())
     rows_before = int(grp.n_windows.iloc[:pos].sum())
@@ -529,7 +526,7 @@ def _case_partition_path(caseid: int, source: str, split: str) -> Path:
 
 def process_case_tokens(caseid: int, source: str) -> pd.DataFrame:
     """Calcula los tokens de un caso leyendo su partición y su parquet crudo."""
-    cases_df = pq.read_table(ROOT / "data" / "windows_v2" / "cases.parquet").to_pandas()
+    cases_df = pq.read_table(paths.WINDOWS_DIR / "cases.parquet").to_pandas()
     row = cases_df[cases_df.caseid == caseid]
     if len(row) == 0:
         raise KeyError(caseid)
@@ -682,7 +679,7 @@ ASSUMPTIONS = [
 
 def verify_output() -> dict:
     """Verifica filas, duplicados y conteos por fuente/split frente a windows_v2."""
-    win_manifest = json.loads((ROOT / "data" / "windows_v2" / "manifest.json").read_text())
+    win_manifest = json.loads((paths.WINDOWS_DIR / "manifest.json").read_text())
     expected_counts = win_manifest["n_windows_by_source_split"]
     total = 0
     dup = 0
@@ -702,7 +699,7 @@ def verify_output() -> dict:
         n_rows=total,
         n_duplicates=dup,
         n_partitions=len(parts),
-        counts_match_windows_v2=(not mismatches),
+        counts_match_windows=(not mismatches),
         mismatches=mismatches,
         expected_total=win_manifest["n_windows_by_source_split"].get("__total__", None),
     )
