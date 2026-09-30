@@ -1,3 +1,9 @@
+> ⚠️ AVISO DE DESACTUALIZACIÓN (2026-09-30): LAS REFERENCIAS A LAS COHORTES v5
+> (real, synthetic_v5, vaso_reinf_v5, cf_v5) Y A windows_v2 YA NO CORRESPONDEN
+> AL ESTADO ACTUAL: windows_v2 Y LAS COHORTES v5 ESTÁN PERDIDAS. LOS TOKENS v1
+> GENERADOS SOBRE windows_v2 ESTÁN PENDIENTES DE REGENERAR SOBRE windows_v4.
+> VÉASE MEMORIA.md.
+
 Contrato de tokens v1 — anestesia_world
 18 sept 2026 · @Ramses
 Alcance
