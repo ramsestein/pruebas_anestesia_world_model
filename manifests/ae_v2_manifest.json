@@ -4091,5 +4091,7 @@
     "BIS/EMG": 0.1046682606508077
   },
   "elapsed_train_s": 2260.13,
-  "elapsed_total_s": 2649.08
+  "elapsed_total_s": 2649.08,
+  "decision": "ACCEPTED",
+  "k_def_final": 12
 }

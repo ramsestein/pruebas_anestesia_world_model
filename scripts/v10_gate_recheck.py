@@ -24,6 +24,7 @@ import torch  # noqa: E402  (ya importado por pa en el orden correcto)
 pa.WINDOWS_DIR = paths.WINDOWS_DIR / "windows"
 
 device = torch.device("cpu")
+pa.OUT_ROOT = paths.AE_V1_DIR  # ae_bal es histórico (data/ae_v1)
 model = pa.load_model("ae_bal", "cpu").to(device)
 norm_stats = pa.load_norm_stats("ae_bal")
 excluded = pa.excluded_caseids()
@@ -57,7 +58,7 @@ print("GATE 3:", json.dumps(g3, ensure_ascii=False))
 print("celdas:", out["n_real_val_cells"], "casos:", out["n_real_val_cases"])
 
 # Comparación contra el manifest registrado.
-m = json.load(open(paths.AE_DIR / "ae_bal" / "manifest_ae.json", encoding="utf-8"))
+m = json.load(open(paths.AE_V1_DIR / "ae_bal" / "manifest_ae.json", encoding="utf-8"))
 ref2 = m["gates"]["gate2"]["real"]
 ref3 = m["gates"]["gate3"]
 print("\ncomparación:")

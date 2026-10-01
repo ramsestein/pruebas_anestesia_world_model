@@ -43,7 +43,7 @@ PK_DIR = DATA_ROOT / "pk_v1"
 CONTEXT_DIR = DATA_ROOT / "context_v1"
 # AE vigente del proyecto. En el paso 2 (fase D) se repunta a ae_v2; antes
 # apunta a ae_v1 (histórico). Véanse AE_V1_DIR y AE_V2_DIR más abajo.
-AE_DIR = DATA_ROOT / "ae_v1"
+AE_DIR = DATA_ROOT / "ae_v2"
 DIAGNOSTICS_DIR = DATA_ROOT / "diagnostics"
 AUDIT_DIR = DATA_ROOT / "audit"
 

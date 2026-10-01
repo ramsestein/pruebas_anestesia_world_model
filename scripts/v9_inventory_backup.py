@@ -80,8 +80,8 @@ for name, path in windows.items():
 inv["tokens_v1"] = {"status": "presente" if paths.TOKENS_DIR.exists() else "perdido",
                     "sha256_manifest": sha256(paths.TOKENS_DIR / "manifest_tokens.json")}
 inv["ae_v1_ae_bal"] = {"status": "presente",
-                       "sha256_norm_stats": sha256(paths.AE_DIR / "ae_bal" / "norm_stats.json"),
-                       "sha256_manifest": sha256(paths.AE_DIR / "ae_bal" / "manifest_ae.json")}
+                       "sha256_norm_stats": sha256(paths.AE_V1_DIR / "ae_bal" / "norm_stats.json"),
+                       "sha256_manifest": sha256(paths.AE_V1_DIR / "ae_bal" / "manifest_ae.json")}
 
 # ── Scripts cerrados ──
 scripts = {

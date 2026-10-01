@@ -70,7 +70,7 @@ def main() -> int:
     tails_ = tm.tails(model, norm_stats, val, device)
     print("[reeval] veredictos C1-C9 ...", flush=True)
     ae_bal_manifest = json.loads(
-        (paths.AE_DIR / "ae_bal" / "manifest_ae.json").read_text(encoding="utf-8"))
+        (paths.AE_V1_DIR / "ae_bal" / "manifest_ae.json").read_text(encoding="utf-8"))
     paso2 = tm.compute_paso2_gates(gates, diagnostics, d5b, tails_,
                                    ae_bal_manifest)
 

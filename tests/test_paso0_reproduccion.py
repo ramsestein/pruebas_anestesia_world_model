@@ -60,7 +60,10 @@ def test_d2_ae_gates_23_reproduce_manifest():
 
     from ae import physio_ae as pa
 
-    m = json.loads((paths.AE_DIR / "ae_bal" / "manifest_ae.json").read_text(encoding="utf-8"))
+    # ae_bal es histórico (data/ae_v1); el AE vigente es ae_v2.
+    pa.OUT_ROOT = paths.AE_V1_DIR
+
+    m = json.loads((paths.AE_V1_DIR / "ae_bal" / "manifest_ae.json").read_text(encoding="utf-8"))
     ref2 = m["gates"]["gate2"]["real"]
     ref3 = m["gates"]["gate3"]
 

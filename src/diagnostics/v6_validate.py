@@ -54,7 +54,7 @@ import paths
 ROOT = Path(__file__).resolve().parents[2]
 WINDOWS_REAL = paths.WINDOWS_DIR
 WINDOWS_V6 = paths.WINDOWS_V3_DIR
-AE_STATS = paths.AE_DIR / "ae_bal" / "norm_stats.json"
+AE_STATS = paths.AE_V1_DIR / "ae_bal" / "norm_stats.json"
 TOKENS_MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
 CF_V6_METADATA = paths.LOST_COHORT_DIRS["cf_v6"] / "metadata"
 OUT_DIR = paths.DIAGNOSTICS_DIR

@@ -18,9 +18,14 @@ import paths
 
 from ae import physio_ae as pae
 
+# El AE vigente es ae_v2 (paso 2); los artefactos de ae_real/ae_bal son
+# históricos y viven en data/ae_v1. pae.OUT_ROOT se repunta para que
+# load_model/load_norm_stats lean del histórico.
+pae.OUT_ROOT = paths.AE_V1_DIR
+
 ROOT = Path(__file__).resolve().parents[1]
 WINDOWS_DIR = paths.WINDOWS_DIR / "windows"
-AE_DIR = paths.AE_DIR
+AE_DIR = paths.AE_V1_DIR
 
 
 # --------------------------------------------------------------------------

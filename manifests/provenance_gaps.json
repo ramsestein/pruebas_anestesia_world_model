@@ -16,9 +16,10 @@
     },
     {
       "artifact": "cohortes v5 (synthetic_v5, vaso_reinf_v5, cf_v5)",
-      "status": "perdidas",
+      "status": "superado por ae_v2",
       "lost": "Los casos sintéticos de la generación v5 (y sus parquets clínicos/metadata) no existen en disco.",
-      "substitute": "Sin sustituto: la generación v7 las supera (recalibración v6/v7). Referencias restantes en window.py (generador de ventanas v5 congelado) y en claves históricas de manifiestos."
+      "substitute": "Sin sustituto: la generación v7 las supera (recalibración v6/v7). Referencias restantes en window.py (generador de ventanas v5 congelado) y en claves históricas de manifiestos.",
+      "superseded_by": "ae_v2 entrenado sobre real + v7 (synthetic_v7, vaso_reinf_v7, cf_v7)"
     },
     {
       "artifact": "cohortes v6 (synthetic_v6, vaso_reinf_v6, cf_v6)",
@@ -40,9 +41,10 @@
     },
     {
       "artifact": "physio_ae.py en el sha 3f2817c9 (código con el que se ENTRENÓ ae_bal)",
-      "status": "no_encontrado",
+      "status": "superado por ae_v2",
       "lost": "No existe en ningún backup ni en el historial de git el fichero exacto con el que se entrenó ae_bal.",
-      "substitute": "La parte de EVALUACIÓN está garantizada por el criterio D2 del paso 0 (gates 2/3 reproducen el manifest ae_bal). La de ENTRENAMIENTO no lo está; solo importa si hay que reentrenar, y en ese caso el reentrenamiento es un artefacto nuevo con sus propios gates."
+      "substitute": "La parte de EVALUACIÓN está garantizada por el criterio D2 del paso 0 (gates 2/3 reproducen el manifest ae_bal). La de ENTRENAMIENTO no lo está; solo importa si hay que reentrenar, y en ese caso el reentrenamiento es un artefacto nuevo con sus propios gates.",
+      "superseded_by": "ae_v2 entrenado con physio_ae.py sha256 4b4c383bd2fd76078b4913b16720d60ee75d9d676124c0718cecd84d5a6607f9"
     },
     {
       "artifact": "context_v1/vocab.json original (sha 945b7884…)",

@@ -38,6 +38,9 @@ import paths  # noqa: E402
 from ae import physio_ae as pa  # noqa: E402
 import torch  # noqa: E402  (ya importado por pa en el orden correcto)
 
+# ae_bal es histórico (data/ae_v1); el AE vigente es ae_v2 (paso 2).
+pa.OUT_ROOT = paths.AE_V1_DIR
+
 CLINICAL = ["Solar8000/HR", "Solar8000/ART_MBP", "BIS/BIS", "Primus/ETCO2"]
 V7_COHORTS = ["synthetic_v7", "vaso_reinf_v7", "cf_v7"]
 
@@ -77,7 +80,7 @@ def main() -> int:
     model.eval()
     norm_stats = pa.load_norm_stats("ae_bal")
     excluded = pa.excluded_caseids()
-    manifest = json.loads((paths.AE_DIR / "ae_bal" / "manifest_ae.json").read_text(encoding="utf-8"))
+    manifest = json.loads((paths.AE_V1_DIR / "ae_bal" / "manifest_ae.json").read_text(encoding="utf-8"))
     ref_gate2 = manifest["gates"]["gate2"]
 
     print("cargando val completo (real + v7) ...", flush=True)
@@ -208,8 +211,8 @@ def main() -> int:
 
     results = {
         "weights_sha256": {
-            "encoder": sha256(paths.AE_DIR / "ae_bal" / "encoder.pt"),
-            "decoder": sha256(paths.AE_DIR / "ae_bal" / "decoder.pt"),
+            "encoder": sha256(paths.AE_V1_DIR / "ae_bal" / "encoder.pt"),
+            "decoder": sha256(paths.AE_V1_DIR / "ae_bal" / "decoder.pt"),
         },
         "A1_gate2_v7": a1,
         "A1_references": a1_ref,

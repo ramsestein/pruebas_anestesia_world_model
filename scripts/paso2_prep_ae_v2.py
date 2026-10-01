@@ -86,7 +86,7 @@ def main() -> int:
     NORM_STATS_COPY.write_text(json.dumps(stats, indent=2), encoding="utf-8")
 
     ae_bal_stats = json.loads(
-        (paths.AE_DIR / "ae_bal" / "norm_stats.json").read_text(encoding="utf-8"))
+        (paths.AE_V1_DIR / "ae_bal" / "norm_stats.json").read_text(encoding="utf-8"))
 
     # ---- imprimir tablas para el informe ----
     print("\n===== A3 — COMPOSICIÓN (casos | celdas, tras filtro mantenimiento) =====",

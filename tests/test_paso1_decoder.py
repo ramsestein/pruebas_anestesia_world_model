@@ -18,6 +18,9 @@ import paths
 # romper pq.read_table.
 from ae import physio_ae as pa  # noqa: E402
 
+# ae_bal es histórico (data/ae_v1); el AE vigente es ae_v2 (paso 2).
+pa.OUT_ROOT = paths.AE_V1_DIR
+
 import torch  # noqa: E402  (ya importado por pa en el orden correcto)
 
 CLINICAL = ["Solar8000/HR", "Solar8000/ART_MBP", "BIS/BIS", "Primus/ETCO2"]
@@ -50,7 +53,7 @@ def test_b1_diag5b_real_reproduces(frozen):
     d5b = gates["diag5b"]["cohorts"]["real"]
     assert d5b["k_clinico"] == 13
 
-    ref = json.loads((paths.AE_DIR / "ae_bal" / "manifest_ae.json").read_text(
+    ref = json.loads((paths.AE_V1_DIR / "ae_bal" / "manifest_ae.json").read_text(
         encoding="utf-8"))["gates"]["diag5b"]["cohorts"]["real"]
     for v in pa.DIAG5B_VARS:
         a = np.asarray(d5b["per_variable"][v], dtype=np.float64)
