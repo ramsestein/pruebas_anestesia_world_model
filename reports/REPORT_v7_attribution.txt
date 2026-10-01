@@ -19,46 +19,46 @@ REPORT_v7_attribution.txt — atribución de la sonda no lineal (PASO A)
 
 2. Salida literal de pytest (ROJO)
 ----------------------------------------
-
-=================================== ERRORS ====================================
-________________ ERROR collecting tests/test_v7_attribution.py ________________
-ImportError while importing test module 'C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\tests\test_v7_attribution.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py:126: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-tests\test_v7_attribution.py:19: in <module>
-    from diagnostics import v7_attribution as va  # noqa: E402
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-E   ImportError: cannot import name 'v7_attribution' from 'diagnostics' (C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\src\diagnostics\__init__.py)
-=========================== short test summary info ===========================
-ERROR tests/test_v7_attribution.py
-!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
-1 error in 0.49s
+
+=================================== ERRORS ====================================
+________________ ERROR collecting tests/test_v7_attribution.py ________________
+ImportError while importing test module 'C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\tests\test_v7_attribution.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_v7_attribution.py:19: in <module>
+    from diagnostics import v7_attribution as va  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ImportError: cannot import name 'v7_attribution' from 'diagnostics' (C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\src\diagnostics\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_v7_attribution.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.49s
 
 
 3. Salida literal de pytest (VERDE)
 ----------------------------------------
-============================= test session starts =============================
-platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
-cachedir: .pytest_cache
-rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
-configfile: pyproject.toml
-collecting ... collected 10 items
-
-tests/test_v7_attribution.py::test_a_pairwise_mutual_information_scale PASSED [ 10%]
-tests/test_v7_attribution.py::test_b_corr_matrix_difference_frobenius PASSED [ 20%]
-tests/test_v7_attribution.py::test_c_top_discrepancies_sorted PASSED     [ 30%]
-tests/test_v7_attribution.py::test_d_quantization_table_columns PASSED   [ 40%]
-tests/test_v7_attribution.py::test_e_hgb_ablation_drop_sorted PASSED     [ 50%]
-tests/test_v7_attribution.py::test_f_a1_a3_present PASSED                [ 60%]
-tests/test_v7_attribution.py::test_g_a4_deltas_present PASSED            [ 70%]
-tests/test_v7_attribution.py::test_h_a5_quantization_present PASSED      [ 80%]
-tests/test_v7_attribution.py::test_i_a6_corr_mi_present PASSED           [ 90%]
-tests/test_v7_attribution.py::test_j_report_written PASSED               [100%]
-
-============================= 10 passed in 0.53s ==============================
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 10 items
+
+tests/test_v7_attribution.py::test_a_pairwise_mutual_information_scale PASSED [ 10%]
+tests/test_v7_attribution.py::test_b_corr_matrix_difference_frobenius PASSED [ 20%]
+tests/test_v7_attribution.py::test_c_top_discrepancies_sorted PASSED     [ 30%]
+tests/test_v7_attribution.py::test_d_quantization_table_columns PASSED   [ 40%]
+tests/test_v7_attribution.py::test_e_hgb_ablation_drop_sorted PASSED     [ 50%]
+tests/test_v7_attribution.py::test_f_a1_a3_present PASSED                [ 60%]
+tests/test_v7_attribution.py::test_g_a4_deltas_present PASSED            [ 70%]
+tests/test_v7_attribution.py::test_h_a5_quantization_present PASSED      [ 80%]
+tests/test_v7_attribution.py::test_i_a6_corr_mi_present PASSED           [ 90%]
+tests/test_v7_attribution.py::test_j_report_written PASSED               [100%]
+
+============================= 10 passed in 0.53s ==============================
 
 
 4. A1 — Univariante HGB (14 valores)
