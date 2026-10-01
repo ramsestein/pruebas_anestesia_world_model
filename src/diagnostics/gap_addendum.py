@@ -42,7 +42,7 @@ from diagnostics import cohort_gap as cg
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = paths.DIAGNOSTICS_DIR
-REPORT_PATH = paths.REPORTS_DIR / "REPORT_gap_addendum.txt"
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_gap_addendum_v7.txt"
 CACHE_PATH = OUT_DIR / "gap_addendum_results.json"
 ROJO_TXT = paths.REPORTS_DIR / "_pytest_gap_addendum_rojo.txt"
 VERDE_TXT = paths.REPORTS_DIR / "_pytest_gap_addendum_verde.txt"
@@ -393,10 +393,10 @@ def write_report(results: dict, report_path: Path = REPORT_PATH) -> Path:
     lines: list[str] = []
     add = lines.append
     meta = results["meta"]
-    add("REPORT_gap_addendum.txt — mediciones adicionales de la brecha (P1)")
+    add("REPORT_gap_addendum_v7.txt — mediciones adicionales de la brecha (P1)")
     add("=" * 78)
     add("")
-    add("Complemento de REPORT_cohort_gap.txt. Antes de tocar el generador:")
+    add("Complemento de REPORT_cohort_gap_v7.txt. Antes de tocar el generador:")
     add("P1a suelo lineal, P1b cuantización, P1c sonda no lineal, P1d recortes.")
     add("")
     add("0. Contexto y ficheros")

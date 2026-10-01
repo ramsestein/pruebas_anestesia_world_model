@@ -54,6 +54,7 @@ def test_d1_windows_counts_v4():
 # ---------------------------------------------------------------------------
 
 @INTEGRATION
+@pytest.mark.slow
 def test_d2_ae_gates_23_reproduce_manifest():
     import torch
 

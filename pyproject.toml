@@ -31,3 +31,9 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 anessim = ["configs/*.yaml"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+markers = [
+    "slow: tests que tardan más de 2 minutos (excluibles con 'pytest -m \"not slow\"')",
+]

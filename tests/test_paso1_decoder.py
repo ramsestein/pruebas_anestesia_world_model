@@ -40,6 +40,7 @@ def _model_and_stats():
 
 
 @pytest.mark.integration
+@pytest.mark.slow
 def test_b1_diag5b_real_reproduces(frozen):
     """B1: diag 5b real reproduce el manifest ae_bal (k_clinico = 13, +-0.0005)."""
     model, norm_stats, device = _model_and_stats()
@@ -61,6 +62,7 @@ def test_b1_diag5b_real_reproduces(frozen):
 
 
 @pytest.mark.integration
+@pytest.mark.slow
 def test_a1_gate2_and_b2_diag5b_reproduce(frozen):
     """A1 (gate2 v7) y B2 (diag5b v7 por cohorte y unión) reproducen el manifest."""
     model, norm_stats, device = _model_and_stats()

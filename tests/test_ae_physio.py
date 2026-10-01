@@ -165,6 +165,7 @@ def test_g_gate7_read_columns(monkeypatch):
 
 
 @pytest.mark.integration
+@pytest.mark.slow
 def test_h_gate8_stats_match_manifest():
     """Gate 8: los estadísticos del manifest coinciden con los recalculados
     sobre train (real)."""

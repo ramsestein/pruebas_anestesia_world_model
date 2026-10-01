@@ -42,7 +42,7 @@ WINDOWS_ROOT = paths.WINDOWS_DIR
 WINDOWS_DIR = WINDOWS_ROOT / "windows"
 TOKENS_MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
 OUT_DIR = paths.DIAGNOSTICS_DIR
-REPORT_PATH = paths.REPORTS_DIR / "REPORT_cohort_gap.txt"
+REPORT_PATH = paths.REPORTS_DIR / "REPORT_cohort_gap_v7.txt"
 CACHE_PATH = OUT_DIR / "cohort_gap_results.json"
 ROJO_TXT = paths.REPORTS_DIR / "_pytest_cohort_gap_rojo.txt"
 VERDE_TXT = paths.REPORTS_DIR / "_pytest_cohort_gap_verde.txt"
@@ -644,7 +644,7 @@ def write_report(results: dict, report_path: Path = REPORT_PATH) -> Path:
     lines: list[str] = []
     add = lines.append
     meta = results["meta"]
-    add("REPORT_cohort_gap.txt — caracterización de la brecha real/sintético")
+    add("REPORT_cohort_gap_v7.txt — caracterización de la brecha real/sintético")
     add("=" * 78)
     add("")
     add("Diagnóstico independiente del autoencoder (contrato_ae_v1.md, diag A4).")
