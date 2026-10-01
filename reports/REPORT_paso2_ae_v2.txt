@@ -1,0 +1,945 @@
+==============================================================================
+PASO 2 — REENTRENAR EL AUTOENCODER SOBRE REAL + v7 (ae_v2)
+REPORT_paso2_ae_v2.txt
+==============================================================================
+Fecha: 2026-10-01
+
+VEREDICTOS
+  ae_v2: ACEPTADO
+  AE vigente del proyecto: ae_v2 (data/ae_v2/)
+  k_def: 12, DEFINITIVO
+
+==============================================================================
+1. FASE 0 — CABOS DEL PASO 1
+==============================================================================
+
+1.1 0.1 — suite completa (baseline)
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 211 items
+
+tests/test_ae_physio.py::test_a_nested_dropout_zeroes_tail PASSED        [  0%]
+tests/test_ae_physio.py::test_b_loss_ignores_masked PASSED               [  0%]
+tests/test_ae_physio.py::test_c_per_variable_averaging PASSED            [  1%]
+tests/test_ae_physio.py::test_d_normalize_roundtrip PASSED               [  1%]
+tests/test_ae_physio.py::test_e_determinism_50_steps PASSED              [  2%]
+tests/test_ae_physio.py::test_f_decoder_14_outputs_no_masks PASSED       [  2%]
+tests/test_ae_physio.py::test_g_gate7_read_columns PASSED                [  3%]
+tests/test_ae_physio.py::test_h_gate8_stats_match_manifest PASSED        [  3%]
+tests/test_ae_physio.py::test_i_gate5_state_token1_equals_full PASSED    [  4%]
+tests/test_ae_physio.py::test_j_gate4_decoder_bytes_identical PASSED     [  4%]
+tests/test_ae_physio.py::test_k_fixed_sample_indices_deterministic PASSED [  5%]
+tests/test_ae_physio.py::test_l_gate3_new_threshold PASSED               [  5%]
+tests/test_ae_physio.py::test_m_gate6_per_cell PASSED                    [  6%]
+tests/test_ae_physio.py::test_n_diag5_present PASSED                     [  6%]
+tests/test_ae_physio.py::test_o_stopped_by_patience PASSED               [  7%]
+tests/test_ae_physio.py::test_p_scheduler_fields PASSED                  [  7%]
+tests/test_ae_physio.py::test_q_best_epoch_1indexed PASSED               [  8%]
+tests/test_ae_physio.py::test_r_v3_not_worse_than_v1_real PASSED         [  8%]
+tests/test_ae_physio.py::test_s_lr_history_present PASSED                [  9%]
+tests/test_ae_physio.py::test_t_provenance_shas PASSED                   [  9%]
+tests/test_ae_physio.py::test_u_acceptance_field PASSED                  [  9%]
+tests/test_ae_physio.py::test_v_diag5b_present PASSED                    [ 10%]
+tests/test_ae_physio.py::test_w_diag6_present PASSED                     [ 10%]
+tests/test_cohort_gap.py::test_a_column_means_ignores_masked PASSED      [ 11%]
+tests/test_cohort_gap.py::test_b_impute_with_fills_masked PASSED         [ 11%]
+tests/test_cohort_gap.py::test_c_sample_two_groups_balanced PASSED       [ 12%]
+tests/test_cohort_gap.py::test_d_deltas_first_cell_imputed PASSED        [ 12%]
+tests/test_cohort_gap.py::test_e_probe_separates_perfectly PASSED        [ 13%]
+tests/test_cohort_gap.py::test_f_probe_chance_on_random_labels PASSED    [ 13%]
+tests/test_cohort_gap.py::test_g_load_cells_reads_val PASSED             [ 14%]
+tests/test_cohort_gap.py::test_h_d3_controls_near_chance PASSED          [ 14%]
+tests/test_cohort_gap.py::test_i_d1_full14_reproduces_manifest PASSED    [ 15%]
+tests/test_cohort_gap.py::test_j_d2_three_cohorts PASSED                 [ 15%]
+tests/test_cohort_gap.py::test_k_d4_wasserstein_finite PASSED            [ 16%]
+tests/test_cohort_gap.py::test_l_d5_deltas_present PASSED                [ 16%]
+tests/test_cohort_gap.py::test_m_report_written PASSED                   [ 17%]
+tests/test_context_vocab.py::test_a_dedup_inspire_most_nonnull_then_first PASSED [ 17%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[caseid] PASSED [ 18%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[subjectid] PASSED [ 18%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[casestart] PASSED [ 18%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[caseend] PASSED [ 19%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[anestart] PASSED [ 19%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[aneend] PASSED [ 20%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[opstart] PASSED [ 20%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[opend] PASSED [ 21%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[adm] PASSED [ 21%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[dis] PASSED [ 22%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[icu_days] PASSED [ 22%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[death_inhosp] PASSED [ 23%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ebl] PASSED [ 23%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_uo] PASSED [ 24%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_rbc] PASSED [ 24%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ffp] PASSED [ 25%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_crystalloid] PASSED [ 25%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_colloid] PASSED [ 26%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ppf] PASSED [ 26%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_mdz] PASSED [ 27%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ftn] PASSED [ 27%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_rocu] PASSED [ 27%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_vecu] PASSED [ 28%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_eph] PASSED [ 28%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_phe] PASSED [ 29%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_epi] PASSED [ 29%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ca] PASSED [ 30%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[diagnosis_count] PASSED [ 30%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[top_diagnosis_code] PASSED [ 31%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[lab_count] PASSED [ 31%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[lab_unique_items] PASSED [ 32%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[medication_count] PASSED [ 32%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[medication_unique] PASSED [ 33%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[common_route] PASSED [ 33%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[dx] PASSED [ 34%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[opname] PASSED [ 34%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[dltubesize] PASSED [ 35%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[lmasize] PASSED [ 35%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[iv1] PASSED [ 36%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[iv2] PASSED [ 36%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[aline1] PASSED [ 36%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[aline2] PASSED [ 37%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[cline1] PASSED [ 37%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[cline2] PASSED [ 38%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[department] PASSED [ 38%]
+tests/test_context_vocab.py::test_c_stats_computed_on_train_only PASSED  [ 39%]
+tests/test_context_vocab.py::test_d_otros_grouping_threshold_50_train_only PASSED [ 39%]
+tests/test_context_vocab.py::test_e_sex_female_only PASSED               [ 40%]
+tests/test_context_vocab.py::test_f_ecg_pft_abnormal_rule_and_unknown PASSED [ 40%]
+tests/test_context_vocab.py::test_g_null_continuous_no_row PASSED        [ 41%]
+tests/test_context_vocab.py::test_h_item_id_normalization PASSED         [ 41%]
+tests/test_context_vocab.py::test_i_determinism_identical_bytes PASSED   [ 42%]
+tests/test_context_vocab.py::test_j_gate4_columns_read_do_not_intersect_excluded PASSED [ 42%]
+tests/test_context_vocab.py::test_k_gate8_no_category_below_50_in_train PASSED [ 43%]
+tests/test_context_vocab.py::test_l_gate9_stats_match_train_recomputation PASSED [ 43%]
+tests/test_context_vocab.py::test_m_gate6_source_probe PASSED            [ 44%]
+tests/test_context_vocab.py::test_n_gate7_ks_tvd_table PASSED            [ 44%]
+tests/test_context_vocab.py::test_o_coherence_table PASSED               [ 45%]
+tests/test_context_vocab.py::test_v2_a_no_v2_items_in_tokens PASSED      [ 45%]
+tests/test_context_vocab.py::test_v2_b_all_v1_items_present PASSED       [ 45%]
+tests/test_context_vocab.py::test_v2_c_vocab_has_86_with_scope PASSED    [ 46%]
+tests/test_gap_addendum.py::test_a_floor_excludes_three_breach_tracks PASSED [ 46%]
+tests/test_gap_addendum.py::test_b_quantization_stats_integer_vs_continuous PASSED [ 47%]
+tests/test_gap_addendum.py::test_c_quantization_ignores_masked_nan PASSED [ 47%]
+tests/test_gap_addendum.py::test_d_hgb_probe_separates_perfectly PASSED  [ 48%]
+tests/test_gap_addendum.py::test_e_hgb_probe_chance_on_random_labels PASSED [ 48%]
+tests/test_gap_addendum.py::test_f_p1a_floor_in_range PASSED             [ 49%]
+tests/test_gap_addendum.py::test_g_p1b_quantization_covers_all PASSED    [ 49%]
+tests/test_gap_addendum.py::test_h_p1c_hgb_high PASSED                   [ 50%]
+tests/test_gap_addendum.py::test_i_p1d_ranges_present PASSED             [ 50%]
+tests/test_gap_addendum.py::test_j_report_written PASSED                 [ 51%]
+tests/test_generator_v6.py::test_a_emg_level_and_skew PASSED             [ 51%]
+tests/test_generator_v6.py::test_b_emg_couples_to_bis PASSED             [ 52%]
+tests/test_generator_v6.py::test_c_peep_zero_mass_and_levels PASSED      [ 52%]
+tests/test_generator_v6.py::test_d_compliance_gives_realistic_pip PASSED [ 53%]
+tests/test_generator_v6.py::test_e_rr_variability PASSED                 [ 53%]
+tests/test_generator_v6.py::test_f_rr_compensates_vco2 PASSED            [ 54%]
+tests/test_generator_v6.py::test_g_etco2_dispersion_and_range PASSED     [ 54%]
+tests/test_generator_v6.py::test_h_quantize_tracks_rounds_to_grid PASSED [ 54%]
+tests/test_generator_v6.py::test_i_quant_grid_covers_image_tracks PASSED [ 55%]
+tests/test_generator_v6.py::test_j_vco2_reference_allometric PASSED      [ 55%]
+tests/test_paso0_reproduccion.py::test_d1_windows_counts_v4 PASSED       [ 56%]
+tests/test_paso0_reproduccion.py::test_d2_ae_gates_23_reproduce_manifest PASSED [ 56%]
+tests/test_paso0_reproduccion.py::test_d3_pk_gate3_integrator_equivalence_v7 PASSED [ 57%]
+tests/test_paso0_reproduccion.py::test_d4_context_vocab_86_items_same_item_ids PASSED [ 57%]
+tests/test_paso0_reproduccion.py::test_d5_tokenizer_smoke_50_real_val_cases PASSED [ 58%]
+tests/test_paso1_decoder.py::test_b1_diag5b_real_reproduces PASSED       [ 58%]
+tests/test_paso1_decoder.py::test_a1_gate2_and_b2_diag5b_reproduce PASSED [ 59%]
+tests/test_paso1_fase0.py::test_gitattributes_present_crlf PASSED        [ 59%]
+tests/test_paso1_fase0.py::test_provenance_gaps_json_valid PASSED        [ 60%]
+tests/test_paths.py::test_vigent_dirs_exist_under_data_root PASSED       [ 60%]
+tests/test_paths.py::test_cohorts_and_synth_lists_consistent PASSED      [ 61%]
+tests/test_paths.py::test_lost_cohorts_are_not_vigent PASSED             [ 61%]
+tests/test_paths.py::test_env_overrides_data_root PASSED                 [ 62%]
+tests/test_paths.py::test_default_data_root_is_repo_data PASSED          [ 62%]
+tests/test_pk_tokens.py::test_rate_unit_conversions PASSED               [ 63%]
+tests/test_pk_tokens.py::test_single_bolus_exponential_decay[fenilefrina-0.0023104906018664843] PASSED [ 63%]
+tests/test_pk_tokens.py::test_single_bolus_exponential_decay[efedrina-0.0011552453009332421] PASSED [ 63%]
+tests/test_pk_tokens.py::test_phen_constant_infusion_converges_to_steady_state PASSED [ 64%]
+tests/test_pk_tokens.py::test_schnider_bolus_peak_and_mass_balance PASSED [ 64%]
+tests/test_pk_tokens.py::test_minto_bolus_peak_and_mass_balance PASSED   [ 65%]
+tests/test_pk_tokens.py::test_wierda_bolus_monotonic_peak PASSED         [ 65%]
+tests/test_pk_tokens.py::test_noradrenaline_ce_equals_rate PASSED        [ 66%]
+tests/test_pk_tokens.py::test_dose_cum_non_decreasing_and_total PASSED   [ 66%]
+tests/test_pk_tokens.py::test_ce_mask_three_states PASSED                [ 67%]
+tests/test_pk_tokens.py::test_forward_fill_hold_for_integration PASSED   [ 67%]
+tests/test_pk_tokens.py::test_rocuronium_rate_spike_equals_equivalent_bolus PASSED [ 68%]
+tests/test_pk_tokens.py::test_k_determinism_same_partition_twice PASSED  [ 68%]
+tests/test_pk_tokens.py::test_l_gate2_cf_prefix_and_lever_divergence PASSED [ 69%]
+tests/test_pk_tokens.py::test_m_gate3_integrator_equivalence PASSED      [ 69%]
+tests/test_pk_tokens.py::test_n_real_no_vol_and_bolus_zero PASSED        [ 70%]
+tests/test_tokenize.py::test_a_window_12_cells PASSED                    [ 70%]
+tests/test_tokenize.py::test_b_mask_worst_of_12 PASSED                   [ 71%]
+tests/test_tokenize.py::test_c_efedrina_mask1_absent_mask0_present PASSED [ 71%]
+tests/test_tokenize.py::test_d_vent_setpoint_null_both_cells_uses_proxy PASSED [ 72%]
+tests/test_tokenize.py::test_e_log1p_zscore_and_masked_zero PASSED       [ 72%]
+tests/test_tokenize.py::test_f_grid_hole_not_emitted PASSED              [ 72%]
+tests/test_tokenize.py::test_g_phase_filter_t1_ge_opend_discarded PASSED [ 73%]
+tests/test_tokenize.py::test_setpoints_a_1s_axis_to_5s_grid PASSED       [ 73%]
+tests/test_tokenize.py::test_setpoints_b_5s_axis_same_result PASSED      [ 74%]
+tests/test_tokenize.py::test_setpoints_c_change_between_cells PASSED     [ 74%]
+tests/test_tokenize.py::test_h_determinism_bytes_identical PASSED        [ 75%]
+tests/test_tokenize.py::test_i_gate5_split_matches SKIPPED (requiere...) [ 75%]
+tests/test_tokenize.py::test_j_gate2_cf_prefix SKIPPED (requiere art...) [ 76%]
+tests/test_tokenize.py::test_k_gate9_stats_train_only PASSED             [ 76%]
+tests/test_tokenize.py::test_l_gate8_context_v1_only PASSED              [ 77%]
+tests/test_tokenize.py::test_m_gate4_no_excluded_columns PASSED          [ 77%]
+tests/test_tokenize.py::test_n_gate7_ks_informative PASSED               [ 78%]
+tests/test_tokenize.py::test_o_gate1_coverage PASSED                     [ 78%]
+tests/test_tokenize.py::test_p_cf_metadata SKIPPED (requiere artefac...) [ 79%]
+tests/test_tokenize.py::test_q_no_phase_marks_real_cases_excluded PASSED [ 79%]
+tests/test_tokenize.py::test_cf_branch_pairing SKIPPED (requiere art...) [ 80%]
+tests/test_tokenize.py::test_pairs_parquet SKIPPED (requiere artefac...) [ 80%]
+tests/test_tokenize.py::test_gate4_mechanical_read_columns SKIPPED (...) [ 81%]
+tests/test_tokenize.py::test_column_lists_disjoint_and_complete PASSED   [ 81%]
+tests/test_tokenize.py::test_partition_invariant PASSED                  [ 81%]
+tests/test_tokenize.py::test_r_phase_mark_criterion PASSED               [ 82%]
+tests/test_tokenize.py::test_s_phase_marks_match_windows_v2 PASSED       [ 82%]
+tests/test_tokenize.py::test_t_lever_group_covers_all PASSED             [ 83%]
+tests/test_tokenize.py::test_u_report_no_obsolete_strings PASSED         [ 83%]
+tests/test_tokenize.py::test_v_sin_celdas_case_4476 PASSED               [ 84%]
+tests/test_v10_equivalence.py::test_a_gate2_real_matches_manifest PASSED [ 84%]
+tests/test_v10_equivalence.py::test_b_gate3_matches_manifest PASSED      [ 85%]
+tests/test_v10_equivalence.py::test_c_marginales_val_match_d4 PASSED     [ 85%]
+tests/test_v10_equivalence.py::test_d_exclusiones_son_36 PASSED          [ 86%]
+tests/test_v6_validate.py::test_a_split_real_caseids_deterministic PASSED [ 86%]
+tests/test_v6_validate.py::test_b_nn_overlap_range PASSED                [ 87%]
+tests/test_v6_validate.py::test_c_nn_overlap_identical_high PASSED       [ 87%]
+tests/test_v6_validate.py::test_d_dose_effect_curve PASSED               [ 88%]
+tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 PASSED      [ 88%]
+tests/test_v6_validate.py::test_f_report_written PASSED                  [ 89%]
+tests/test_v7_attribution.py::test_a_pairwise_mutual_information_scale PASSED [ 89%]
+tests/test_v7_attribution.py::test_b_corr_matrix_difference_frobenius PASSED [ 90%]
+tests/test_v7_attribution.py::test_c_top_discrepancies_sorted PASSED     [ 90%]
+tests/test_v7_attribution.py::test_d_quantization_table_columns PASSED   [ 90%]
+tests/test_v7_attribution.py::test_e_hgb_ablation_drop_sorted PASSED     [ 91%]
+tests/test_v7_attribution.py::test_f_a1_a3_present SKIPPED (requiere...) [ 91%]
+tests/test_v7_attribution.py::test_g_a4_deltas_present SKIPPED (requ...) [ 92%]
+tests/test_v7_attribution.py::test_h_a5_quantization_present SKIPPED     [ 92%]
+tests/test_v7_attribution.py::test_i_a6_corr_mi_present SKIPPED (req...) [ 93%]
+tests/test_v7_attribution.py::test_j_report_written SKIPPED (requier...) [ 93%]
+tests/test_v7_transfer_probe.py::test_a_scaler_fit_transform_inverse PASSED [ 94%]
+tests/test_v7_transfer_probe.py::test_b_scaler_zero_std_becomes_one PASSED [ 94%]
+tests/test_v7_transfer_probe.py::test_c_ratios_vs_persistence PASSED     [ 95%]
+tests/test_v7_transfer_probe.py::test_d_residual_prediction_matches_contract PASSED [ 95%]
+tests/test_v7_transfer_probe.py::test_e_sanity_variables_subset_of_moving PASSED [ 96%]
+tests/test_v7_transfer_probe.py::test_f_finetuning_starts_from_d1_weights PASSED [ 96%]
+tests/test_v7_transfer_probe.py::test_g_epoch0_loss_matches_d1 PASSED    [ 97%]
+tests/test_v7_transfer_probe.py::test_h_sanity_and_report PASSED         [ 97%]
+tests/test_v7_transfer_probe.py::test_i_v9_conditions_present PASSED     [ 98%]
+tests/test_v7_transfer_probe.py::test_j_v9_report_has_transfer_verdict PASSED [ 98%]
+tests/test_v9_reconstruction.py::test_a_split_holdout_sha_matches_cache PASSED [ 99%]
+tests/test_v9_reconstruction.py::test_b_reconstruction_numeric_check_all_match PASSED [ 99%]
+tests/test_v9_reconstruction.py::test_c_v1_v4_recompute_matches_cache PASSED [100%]
+
+================ 200 passed, 11 skipped in 2163.15s (0:36:03) =================
+
+
+1.2 0.2 — renombrado de informes a _v7
+----------------------------------------
+  git mv reports/REPORT_cohort_gap.txt -> REPORT_cohort_gap_v7.txt
+  git mv reports/REPORT_gap_addendum.txt -> REPORT_gap_addendum_v7.txt
+  REPUNTADOS: src/diagnostics/cohort_gap.py REPORT_PATH y título;
+  src/diagnostics/gap_addendum.py REPORT_PATH, título y referencia.
+  MEMORIA.md §7 NO se toca (R5: la actualiza el revisor).
+
+1.3 0.3 — marker slow
+----------------------------------------
+  [tool.pytest.ini_options] en pyproject.toml con pythonpath=["src"] y el
+  marker slow. Aplicado a los tests > 2 min: test_paso1_decoder.py (2),
+  test_ae_physio.py::test_h, test_paso0_reproduccion.py::test_d2 y los 2
+  tests lentos de test_paso2_ae_v2.py. La ejecución por defecto sigue
+  corriendo TODOS; 'pytest -m "not slow"' permite iterar rápido.
+
+==============================================================================
+2. FASE A — PREPARACIÓN
+==============================================================================
+
+2.1 A1 — cohortes de la variante 50/50 (physio_ae.py, líneas exactas)
+----------------------------------------
+  src/ae/physio_ae.py:45   WINDOWS_ROOT = paths.WINDOWS_DIR        # windows_v4
+  src/ae/physio_ae.py:149  SYNTH_SOURCES: list[str] = paths.SYNTH_COHORTS
+  src/ae/physio_ae.py:150  ALL_SOURCES: list[str] = paths.ALL_COHORTS
+  src/ae/physio_ae.py:625  real_data  = load_cells(["real"], "train", excluded)
+  src/ae/physio_ae.py:626  synth_data = load_cells(SYNTH_SOURCES, "train", excluded)
+  paths.SYNTH_COHORTS = ['synthetic_v7', 'vaso_reinf_v7', 'cf_v7'] (ya repuntado
+  en el paso 0). La real sale de windows_v4 (paths.WINDOWS_DIR). No se cambia
+  ninguna lógica de physio_ae.py (R2).
+
+2.2 A2 — sha256 de physio_ae.py (CRLF en disco, Windows)
+----------------------------------------
+  4b4c383bd2fd76078b4913b16720d60ee75d9d676124c0718cecd84d5a6607f9
+  Es el sha registrado en el manifest de ae_v2 (sha256_physio_ae_py); cierra
+  el hueco de procedencia del sha 3f2817c9 (desconocido) de ae_bal.
+
+2.3 A3 — composición del conjunto de entrenamiento
+----------------------------------------
+  (casos | celdas, tras filtrar mantenimiento y exclusiones, como load_cells)
+  cohort           train_casos  train_celdas val_casos  val_celdas  efectiva
+  real                    5407       8878187       945     1513073         -
+  synthetic_v7            8500      20708215      1500     3716864    0.4312
+  vaso_reinf_v7            425       1100944        75      175662    0.0216
+  cf_v7                  10786      26569610      1904     4617462    0.5472
+  La mitad sintética se muestrea uniforme por CASO sobre la unión de las 3
+  cohortes (regla de ae_bal, se mantiene por comparabilidad). Proporción
+  efectiva en train: synthetic_v7 0.4312, vaso_reinf_v7 0.0216, cf_v7 0.5472.
+  cf_v7 domina la mitad sintética (10 786 casos de 19 711), igual que con v5.
+
+2.4 A4 — estadísticos de normalización (lado a lado ae_bal | ae_v2)
+----------------------------------------
+  (media y desviación ddof=0 sobre train con máscara 1; guardados en
+  data/ae_v2/norm_stats.json y manifests/ae_v2_norm_stats.json)
+  track                     ae_bal_mean   ae_v2_mean  ae_bal_std   ae_v2_std
+  BIS/BIS                      44.28133     44.23802     8.64847     8.61637
+  Solar8000/HR                 72.11337     72.33706    15.86270    15.89840
+  Solar8000/PLETH_SPO2         99.44125     99.57574     1.64806     1.50570
+  Primus/ETCO2                 35.42192     34.25236     5.89312     4.16978
+  Primus/PEEP_MBAR              5.12395      2.68499     2.66253     2.55271
+  Primus/PIP_MBAR              14.48434     17.36850     4.43250     4.95606
+  Primus/MV                     5.58780      5.77874     1.23059     1.41283
+  Primus/TV                   397.26842    397.68628    87.46805    83.92228
+  Primus/RR_CO2                14.09072     14.68713     1.24906     2.86835
+  Solar8000/BT                 35.87704     35.05843     0.95305     1.23229
+  Solar8000/ART_MBP            80.46801     80.68357    18.06669    17.99413
+  Solar8000/ART_SBP           114.62817    114.78861    18.42715    18.38977
+  Solar8000/ART_DBP            60.86859     61.09926    17.34609    17.30421
+  BIS/EMG                      36.75132     27.46503     7.28952     4.07021
+  (BIS/EMG mean 36.75 -> 27.47 y ETCO2/PEEP/PIP reflejan la recalibración v7).
+
+2.5 A5 — subconjunto de validación fijo
+----------------------------------------
+  65 536 celdas reales + 65 536 sintéticas (ahora v7), semilla 1234, igual que
+  ae_bal. Nota: la pérdida de val de ae_v2 NO es comparable con el 0.001001 de
+  ae_bal (la mitad sintética cambió de v5 a v7); las comparaciones entre AE
+  se hacen SOLO con gates en unidades físicas.
+
+==============================================================================
+3. FASE B — ENTRENAMIENTO
+==============================================================================
+
+3.1 Convergencia
+----------------------------------------
+  épocas: 99 | mejor época (1-indexada): 93
+  motivo de parada: min_lr (NO fue el tope de épocas)
+  reducciones de LR: 10 | LR final: 1.00e-06
+  mejor val_loss: 0.000958
+  torch 2.12.0.dev20260408+cu128 | CUDA 12.8 | device cpu
+  determinismo: cudnn_deterministic=False,
+  cudnn_benchmark=False,
+  vram pico 0.0 MiB (<= 6 GiB, R6)
+  seed 42
+
+3.2 Tabla época | lr | train_loss | val_loss | reducciones
+----------------------------------------
+    ep        lr  train_loss    val_loss reduc.
+     1   2.00e-04    0.114927    0.003518      0
+     2   4.00e-04    0.091591    0.002885      0
+     3   6.00e-04    0.084659    0.003994      0
+     4   8.00e-04    0.081016    0.002744      0
+     5   1.00e-03    0.078592    0.002577      0
+     6   1.00e-03    0.076527    0.002516      0
+     7   1.00e-03    0.074968    0.002430      0
+     8   1.00e-03    0.073409    0.002569      0
+     9   1.00e-03    0.072222    0.002295      0
+    10   1.00e-03    0.071402    0.002501      0
+    11   1.00e-03    0.070462    0.002212      0
+    12   1.00e-03    0.069709    0.002481      0
+    13   1.00e-03    0.069032    0.002504      0
+    14   1.00e-03    0.068436    0.002299      0
+    15   1.00e-03    0.068165    0.002499      0
+    16   1.00e-03    0.067829    0.002077      0
+    17   1.00e-03    0.067389    0.001840      0
+    18   1.00e-03    0.067269    0.002204      0
+    19   1.00e-03    0.066781    0.002181      0
+    20   1.00e-03    0.066441    0.001939      0
+    21   1.00e-03    0.066415    0.002049      0
+    22   1.00e-03    0.065944    0.001920      1
+    23   5.00e-04    0.064907    0.001435      1
+    24   5.00e-04    0.064877    0.001457      1
+    25   5.00e-04    0.064588    0.001672      1
+    26   5.00e-04    0.064471    0.001596      1
+    27   5.00e-04    0.064348    0.001490      1
+    28   5.00e-04    0.064146    0.001631      2
+    29   2.50e-04    0.063570    0.001230      2
+    30   2.50e-04    0.063484    0.001271      2
+    31   2.50e-04    0.063318    0.001208      2
+    32   2.50e-04    0.063473    0.001194      2
+    33   2.50e-04    0.063219    0.001224      2
+    34   2.50e-04    0.063114    0.001250      2
+    35   2.50e-04    0.063062    0.001215      2
+    36   2.50e-04    0.063018    0.001310      2
+    37   2.50e-04    0.062940    0.001232      3
+    38   1.25e-04    0.062558    0.001087      3
+    39   1.25e-04    0.062510    0.001071      3
+    40   1.25e-04    0.062406    0.001185      3
+    41   1.25e-04    0.062361    0.001129      3
+    42   1.25e-04    0.062356    0.001107      3
+    43   1.25e-04    0.062316    0.001097      3
+    44   1.25e-04    0.062332    0.001171      4
+    45   6.25e-05    0.062166    0.001016      4
+    46   6.25e-05    0.062137    0.001023      4
+    47   6.25e-05    0.062332    0.001034      4
+    48   6.25e-05    0.062069    0.001036      4
+    49   6.25e-05    0.062047    0.001018      4
+    50   6.25e-05    0.061975    0.001008      4
+    51   6.25e-05    0.062042    0.001009      4
+    52   6.25e-05    0.061925    0.001031      4
+    53   6.25e-05    0.061881    0.001026      4
+    54   6.25e-05    0.061941    0.001015      4
+    55   6.25e-05    0.061992    0.001096      5
+    56   3.13e-05    0.061799    0.000989      5
+    57   3.13e-05    0.061794    0.000984      5
+    58   3.13e-05    0.061898    0.000985      5
+    59   3.13e-05    0.061744    0.001007      5
+    60   3.13e-05    0.061776    0.001014      5
+    61   3.13e-05    0.061808    0.000978      5
+    62   3.13e-05    0.061744    0.000992      5
+    63   3.13e-05    0.061721    0.001003      5
+    64   3.13e-05    0.061705    0.000982      5
+    65   3.13e-05    0.061619    0.000981      5
+    66   3.13e-05    0.061719    0.000986      6
+    67   1.56e-05    0.061597    0.000970      6
+    68   1.56e-05    0.061598    0.000976      6
+    69   1.56e-05    0.061604    0.000967      6
+    70   1.56e-05    0.061630    0.000970      6
+    71   1.56e-05    0.061650    0.000967      6
+    72   1.56e-05    0.061693    0.000970      6
+    73   1.56e-05    0.061622    0.000969      6
+    74   1.56e-05    0.061470    0.000967      6
+    75   1.56e-05    0.061639    0.000971      6
+    76   1.56e-05    0.061526    0.000973      7
+    77   7.81e-06    0.061603    0.000961      7
+    78   7.81e-06    0.061609    0.000970      7
+    79   7.81e-06    0.061515    0.000967      7
+    80   7.81e-06    0.061586    0.000967      7
+    81   7.81e-06    0.061623    0.000973      7
+    82   7.81e-06    0.061499    0.000966      8
+    83   3.91e-06    0.061473    0.000960      8
+    84   3.91e-06    0.061496    0.000960      8
+    85   3.91e-06    0.061478    0.000963      8
+    86   3.91e-06    0.061493    0.000961      8
+    87   3.91e-06    0.061609    0.000961      8
+    88   3.91e-06    0.061564    0.000964      9
+    89   1.95e-06    0.061464    0.000959      9
+    90   1.95e-06    0.061472    0.000959      9
+    91   1.95e-06    0.061457    0.000958      9
+    92   1.95e-06    0.061472    0.000959      9
+    93*  1.95e-06    0.061413    0.000958      9
+    94   1.95e-06    0.061458    0.000957      9
+    95   1.95e-06    0.061427    0.000959      9
+    96   1.95e-06    0.061394    0.000959      9
+    97   1.95e-06    0.061502    0.000959      9
+    98   1.95e-06    0.061372    0.000960      9
+    99   1.95e-06    0.061467    0.000962     10
+  (*) mejor época 93 (1-indexado); parada por min_lr.
+
+==============================================================================
+4. FASE C — GATES (lado a lado ae_bal | ae_v2)
+==============================================================================
+
+4.1 C1 (BLOQUEANTE) — la real no empeora (gate 2 real, clínicas, umbral
+    ae_v2 <= ae_bal + 0.05)
+----------------------------------------
+  var                 ae_bal     ae_v2      diff   tol veredicto
+  Solar8000/HR        0.3940    0.3420   -0.0520  0.05      PASA
+  Solar8000/ART_MBP    0.2413    0.2649   +0.0236  0.05      PASA
+  BIS/BIS             0.1765    0.1515   -0.0250  0.05      PASA
+  Primus/ETCO2        0.0912    0.0664   -0.0249  0.05      PASA
+  C1: PASA
+
+4.2 C2 (BLOQUEANTE) — v7 por debajo de la resolución del monitor
+    (absolutos: HR<1.0, ART_MBP<1.0, BIS<0.5, ETCO2<0.5)
+----------------------------------------
+  cohort                 HR  ART_MBP      BIS    ETCO2
+  synthetic_v7       0.3286   0.2643   0.1533   0.0645
+  vaso_reinf_v7      0.3141   0.2549   0.1567   0.0630
+  cf_v7              0.3355   0.2807   0.1600   0.0684
+  (referencia ae_bal sobre v7, paso 1: synthetic_v7 HR 0.551/MBP 0.393/BIS 0.259/
+   ETCO2 0.127; vaso 0.509/0.414/0.272/0.112; cf 0.572/0.422/0.266/0.126)
+  C2: PASA
+
+4.3 C3 (BLOQUEANTE) — gate 1 (perfil de orden, monotonía + fracción k=8)
+----------------------------------------
+  ae_bal  real: monotone=True  k8_frac=0.0625 | synthetic: True  0.0810
+  ae_v2   real: monotone=True  k8_frac=0.0771 | synthetic: True  0.0480
+  C3: PASA
+
+4.4 C4 (BLOQUEANTE) — gate 3: |HR_sin_ART − HR_real| < 2 lpm
+----------------------------------------
+  ae_bal: err_hr_with_art=0.3843 err_hr_without_art=0.7161 hr_recon_diff=0.6814 (n_cases=943)
+  ae_v2 : err_hr_with_art=0.3366 err_hr_without_art=0.5608 hr_recon_diff=0.5574 (n_cases=943)
+  C4: PASA
+
+4.5 C5 (BLOQUEANTE) — gates 4, 5, 7 y 8 (determinismo/congelación,
+    decode_state, sin fuga temporal, stats solo train) contra ae_v2
+----------------------------------------
+  PASA — tests/test_paso2_ae_v2.py: test_gate4_frozen_and_deterministic,
+  test_gate5_decode_state_token1_equals_full, test_gate7_read_columns_only,
+  test_gate8_stats_only_train (todos verdes).
+
+4.6 C6 (informativo) — diag 5b: k_clinico y escalones (k en que cada
+    variable clínica cae bajo su umbral: HR<1.0, ART_MBP<1.0, BIS<1.0, ETCO2<0.5)
+----------------------------------------
+  cohort              HR  ART_MBP   BIS  ETCO2  k_clinico
+  real                 8       12     7      7         12
+  synthetic_v7         8       12     8      7         12
+  vaso_reinf_v7        8       11     8      7         11
+  cf_v7                8       12     8      7         12
+  (ae_bal: k_clinico 13 en todas; HR cruza en k=7 real / k=10 v7)
+  k_def (ae_v2) = max(k_clinico) = 12
+
+4.7 C7 (informativo) — separabilidad en el latente (A4 del paso 1)
+----------------------------------------
+  solapamiento 20-NN (media y percentiles):
+    ae_bal real->sint 0.10829 (p50=0, p95=0.55) | sint->real 0.13239 (p50=0, p95=0.60)
+    ae_v2  real->sint 0.1333 (p50=0.05, p95=0.6)
+    ae_v2  sint->real 0.1572 (p50=0.05, p95=0.6)
+  sonda de origen por celda (AUC medio 5-fold):
+    ae_bal 32d 0.81145 / 8d 0.73070
+    ae_v2  32d 0.77889 / 8d 0.60927
+
+4.8 C8 (informativo) — gate 6 (sonda de origen, por caso y por celda)
+----------------------------------------
+  ae_bal (v5): per_case 32d 1.0000/8d 0.9985 | per_cell 32d 0.9934/8d 0.9809
+  ae_v2  (v7): per_case 32d 0.8823/8d 0.7126 | per_cell 32d 0.7789/8d 0.6093
+
+4.9 C9 (informativo) — colas: fracción de celdas v7 por encima del p99
+    del error real (4 variables clínicas)
+----------------------------------------
+  var               p99_real  synthetic_v7      vaso     cf_v7
+  Solar8000/HR        2.3411        0.0038    0.0018    0.0037
+  Solar8000/ART_MBP    2.1183        0.0023    0.0024    0.0050
+  BIS/BIS             1.2345        0.0034    0.0021    0.0041
+  Primus/ETCO2        0.5662        0.0032    0.0013    0.0036
+  (ae_bal sobre v7, paso 1: HR 0.0196/0.0103/0.0228; ART_MBP 0.0118/0.0068/0.0194;
+   BIS 0.0181/0.0135/0.0211; ETCO2 0.0348/0.0075/0.0154)
+
+4.10 Gate 2 completo (14 variables) sobre la real
+----------------------------------------
+  var                         ae_bal     ae_v2
+  BIS/BIS                     0.1765    0.1515
+  Solar8000/HR                0.3940    0.3420
+  Solar8000/PLETH_SPO2        0.0125    0.0117
+  Primus/ETCO2                0.0912    0.0664
+  Primus/PEEP_MBAR            0.0356    0.0254
+  Primus/PIP_MBAR             0.0818    0.0889
+  Primus/MV                   0.0194    0.0252
+  Primus/TV                   1.3816    1.4581
+  Primus/RR_CO2               0.0222    0.0425
+  Solar8000/BT                0.0193    0.0178
+  Solar8000/ART_MBP           0.2413    0.2649
+  Solar8000/ART_SBP           0.3078    0.3081
+  Solar8000/ART_DBP           0.2607    0.2688
+  BIS/EMG                     0.1047    0.0604
+
+4.11 Gate 2 completo (14 variables) sobre cada cohorte v7 (ae_v2)
+----------------------------------------
+          BIS/BIS   Solar8000/HR Solar8000/PLET   Primus/ETCO2 Primus/PEEP_MB Primus/PIP_MBA      Primus/MV      Primus/TV  Primus/RR_CO2   Solar8000/BT Solar8000/ART_ Solar8000/ART_ Solar8000/ART_        BIS/EMG
+  synthetic_v7           0.1533         0.3286         0.0105         0.0645         0.0241         0.0896         0.0251         1.4376         0.0384         0.0193         0.2643         0.3082         0.2660         0.0588
+  vaso_reinf_v7          0.1567         0.3141         0.0101         0.0630         0.0228         0.0870         0.0239         1.4633         0.0369         0.0185         0.2549         0.3135         0.2692         0.0610
+  cf_v7                  0.1600         0.3355         0.0111         0.0684         0.0257         0.0929         0.0262         1.4817         0.0406         0.0210         0.2807         0.3286         0.2868         0.0646
+
+==============================================================================
+5. FASE D — DECISIÓN
+==============================================================================
+
+  C1 PASA, C2 PASA, C3 PASA, C4 PASA, C5 PASA (tests) -> ae_v2 ACEPTADO.
+  Consecuencias aplicadas (commit propio aa2849c):
+    - paths.AE_DIR se repunta a data/ae_v2/.
+    - k_def DEFINITIVO = 12 (max de k_clinico real y v7 sobre ae_v2).
+    - manifests/provenance_gaps.json: las entradas de 'physio_ae.py en
+      3f2817c9' y de 'cohortes v5' pasan a estado 'superado por ae_v2',
+      indicando el sha de entrenamiento de A2. NO se borran.
+    - Los tests del criterio D2 del paso 0 y los del paso 1 siguen
+      apuntando a ae_bal (vía paths.AE_V1_DIR) y siguen pasando: ae_bal
+      queda como artefacto histórico verificable.
+
+==============================================================================
+6. NOTA SOBRE EL PASO 1
+==============================================================================
+  El veredicto 'NO SIRVE' del paso 1 queda registrado tal cual, porque se
+  emitió con un criterio fijado de antemano. Pero ese criterio era relativo
+  sobre errores que ya estaban en el suelo de cuantización del monitor
+  (exceso de 0.1-0.2 unidades, por debajo de la resolución entera de HR y
+  MAP), y la referencia v5 no estaba cuantizada. La decisión de reentrenar
+  no se apoya en ese veredicto, sino en la reproducibilidad (datos y código
+  de entrenamiento de ae_bal perdidos) y en la geometría del latente.
+
+==============================================================================
+7. SALIDA LITERAL DE PYTEST (ROJO Y VERDE)
+==============================================================================
+
+7.1 ROJO — tests/test_paso2_ae_v2.py antes del manifest
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 9 items
+
+tests/test_paso2_ae_v2.py::test_ae_v1_untouched_encoder_decoder_sha PASSED [ 11%]
+tests/test_paso2_ae_v2.py::test_manifest_records_provenance_fields ERROR [ 22%]
+tests/test_paso2_ae_v2.py::test_manifest_has_paso2_gates ERROR           [ 33%]
+tests/test_paso2_ae_v2.py::test_gate4_frozen_and_deterministic ERROR     [ 44%]
+tests/test_paso2_ae_v2.py::test_gate5_decode_state_token1_equals_full ERROR [ 55%]
+tests/test_paso2_ae_v2.py::test_gate7_read_columns_only PASSED           [ 66%]
+tests/test_paso2_ae_v2.py::test_gate8_stats_only_train ERROR             [ 77%]
+tests/test_paso2_ae_v2.py::test_gates_c1_c4_c6_reproduce ERROR           [ 88%]
+tests/test_paso2_ae_v2.py::test_decision_applied ERROR                   [100%]
+
+=================================== ERRORS ====================================
+__________ ERROR at setup of test_manifest_records_provenance_fields __________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+_______________ ERROR at setup of test_manifest_has_paso2_gates _______________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+____________ ERROR at setup of test_gate4_frozen_and_deterministic ____________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+________ ERROR at setup of test_gate5_decode_state_token1_equals_full _________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+________________ ERROR at setup of test_gate8_stats_only_train ________________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+_______________ ERROR at setup of test_gates_c1_c4_c6_reproduce _______________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+___________________ ERROR at setup of test_decision_applied ___________________
+
+    @pytest.fixture(scope="module")
+    def manifest():
+        p = paths.MANIFESTS_DIR / "ae_v2_manifest.json"
+>       assert p.is_file(), "ejecuta scripts/paso2_train_ae_v2.py primero"
+E       AssertionError: ejecuta scripts/paso2_train_ae_v2.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/RamsÚs/Desktop/Proyectos/anestesia_world/manifests/ae_v2_manifest.json').is_file
+
+tests\test_paso2_ae_v2.py:56: AssertionError
+=========================== short test summary info ===========================
+ERROR tests/test_paso2_ae_v2.py::test_manifest_records_provenance_fields - As...
+ERROR tests/test_paso2_ae_v2.py::test_manifest_has_paso2_gates - AssertionErr...
+ERROR tests/test_paso2_ae_v2.py::test_gate4_frozen_and_deterministic - Assert...
+ERROR tests/test_paso2_ae_v2.py::test_gate5_decode_state_token1_equals_full
+ERROR tests/test_paso2_ae_v2.py::test_gate8_stats_only_train - AssertionError...
+ERROR tests/test_paso2_ae_v2.py::test_gates_c1_c4_c6_reproduce - AssertionErr...
+ERROR tests/test_paso2_ae_v2.py::test_decision_applied - AssertionError: ejec...
+========================= 2 passed, 7 errors in 1.90s =========================
+
+
+7.2 VERDE — suite completa final
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 220 items
+
+tests/test_ae_physio.py::test_a_nested_dropout_zeroes_tail PASSED        [  0%]
+tests/test_ae_physio.py::test_b_loss_ignores_masked PASSED               [  0%]
+tests/test_ae_physio.py::test_c_per_variable_averaging PASSED            [  1%]
+tests/test_ae_physio.py::test_d_normalize_roundtrip PASSED               [  1%]
+tests/test_ae_physio.py::test_e_determinism_50_steps PASSED              [  2%]
+tests/test_ae_physio.py::test_f_decoder_14_outputs_no_masks PASSED       [  2%]
+tests/test_ae_physio.py::test_g_gate7_read_columns PASSED                [  3%]
+tests/test_ae_physio.py::test_h_gate8_stats_match_manifest PASSED        [  3%]
+tests/test_ae_physio.py::test_i_gate5_state_token1_equals_full PASSED    [  4%]
+tests/test_ae_physio.py::test_j_gate4_decoder_bytes_identical PASSED     [  4%]
+tests/test_ae_physio.py::test_k_fixed_sample_indices_deterministic PASSED [  5%]
+tests/test_ae_physio.py::test_l_gate3_new_threshold PASSED               [  5%]
+tests/test_ae_physio.py::test_m_gate6_per_cell PASSED                    [  5%]
+tests/test_ae_physio.py::test_n_diag5_present PASSED                     [  6%]
+tests/test_ae_physio.py::test_o_stopped_by_patience PASSED               [  6%]
+tests/test_ae_physio.py::test_p_scheduler_fields PASSED                  [  7%]
+tests/test_ae_physio.py::test_q_best_epoch_1indexed PASSED               [  7%]
+tests/test_ae_physio.py::test_r_v3_not_worse_than_v1_real PASSED         [  8%]
+tests/test_ae_physio.py::test_s_lr_history_present PASSED                [  8%]
+tests/test_ae_physio.py::test_t_provenance_shas PASSED                   [  9%]
+tests/test_ae_physio.py::test_u_acceptance_field PASSED                  [  9%]
+tests/test_ae_physio.py::test_v_diag5b_present PASSED                    [ 10%]
+tests/test_ae_physio.py::test_w_diag6_present PASSED                     [ 10%]
+tests/test_cohort_gap.py::test_a_column_means_ignores_masked PASSED      [ 10%]
+tests/test_cohort_gap.py::test_b_impute_with_fills_masked PASSED         [ 11%]
+tests/test_cohort_gap.py::test_c_sample_two_groups_balanced PASSED       [ 11%]
+tests/test_cohort_gap.py::test_d_deltas_first_cell_imputed PASSED        [ 12%]
+tests/test_cohort_gap.py::test_e_probe_separates_perfectly PASSED        [ 12%]
+tests/test_cohort_gap.py::test_f_probe_chance_on_random_labels PASSED    [ 13%]
+tests/test_cohort_gap.py::test_g_load_cells_reads_val PASSED             [ 13%]
+tests/test_cohort_gap.py::test_h_d3_controls_near_chance PASSED          [ 14%]
+tests/test_cohort_gap.py::test_i_d1_full14_reproduces_manifest PASSED    [ 14%]
+tests/test_cohort_gap.py::test_j_d2_three_cohorts PASSED                 [ 15%]
+tests/test_cohort_gap.py::test_k_d4_wasserstein_finite PASSED            [ 15%]
+tests/test_cohort_gap.py::test_l_d5_deltas_present PASSED                [ 15%]
+tests/test_cohort_gap.py::test_m_report_written PASSED                   [ 16%]
+tests/test_context_vocab.py::test_a_dedup_inspire_most_nonnull_then_first PASSED [ 16%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[caseid] PASSED [ 17%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[subjectid] PASSED [ 17%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[casestart] PASSED [ 18%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[caseend] PASSED [ 18%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[anestart] PASSED [ 19%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[aneend] PASSED [ 19%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[opstart] PASSED [ 20%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[opend] PASSED [ 20%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[adm] PASSED [ 20%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[dis] PASSED [ 21%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[icu_days] PASSED [ 21%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[death_inhosp] PASSED [ 22%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ebl] PASSED [ 22%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_uo] PASSED [ 23%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_rbc] PASSED [ 23%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ffp] PASSED [ 24%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_crystalloid] PASSED [ 24%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_colloid] PASSED [ 25%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ppf] PASSED [ 25%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_mdz] PASSED [ 25%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ftn] PASSED [ 26%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_rocu] PASSED [ 26%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_vecu] PASSED [ 27%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_eph] PASSED [ 27%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_phe] PASSED [ 28%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_epi] PASSED [ 28%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[intraop_ca] PASSED [ 29%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[diagnosis_count] PASSED [ 29%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[top_diagnosis_code] PASSED [ 30%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[lab_count] PASSED [ 30%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[lab_unique_items] PASSED [ 30%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[medication_count] PASSED [ 31%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[medication_unique] PASSED [ 31%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[common_route] PASSED [ 32%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[dx] PASSED [ 32%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[opname] PASSED [ 33%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[dltubesize] PASSED [ 33%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[lmasize] PASSED [ 34%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[iv1] PASSED [ 34%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[iv2] PASSED [ 35%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[aline1] PASSED [ 35%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[aline2] PASSED [ 35%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[cline1] PASSED [ 36%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[cline2] PASSED [ 36%]
+tests/test_context_vocab.py::test_b_excluded_column_never_read_nor_emitted[department] PASSED [ 37%]
+tests/test_context_vocab.py::test_c_stats_computed_on_train_only PASSED  [ 37%]
+tests/test_context_vocab.py::test_d_otros_grouping_threshold_50_train_only PASSED [ 38%]
+tests/test_context_vocab.py::test_e_sex_female_only PASSED               [ 38%]
+tests/test_context_vocab.py::test_f_ecg_pft_abnormal_rule_and_unknown PASSED [ 39%]
+tests/test_context_vocab.py::test_g_null_continuous_no_row PASSED        [ 39%]
+tests/test_context_vocab.py::test_h_item_id_normalization PASSED         [ 40%]
+tests/test_context_vocab.py::test_i_determinism_identical_bytes PASSED   [ 40%]
+tests/test_context_vocab.py::test_j_gate4_columns_read_do_not_intersect_excluded PASSED [ 40%]
+tests/test_context_vocab.py::test_k_gate8_no_category_below_50_in_train PASSED [ 41%]
+tests/test_context_vocab.py::test_l_gate9_stats_match_train_recomputation PASSED [ 41%]
+tests/test_context_vocab.py::test_m_gate6_source_probe PASSED            [ 42%]
+tests/test_context_vocab.py::test_n_gate7_ks_tvd_table PASSED            [ 42%]
+tests/test_context_vocab.py::test_o_coherence_table PASSED               [ 43%]
+tests/test_context_vocab.py::test_v2_a_no_v2_items_in_tokens PASSED      [ 43%]
+tests/test_context_vocab.py::test_v2_b_all_v1_items_present PASSED       [ 44%]
+tests/test_context_vocab.py::test_v2_c_vocab_has_86_with_scope PASSED    [ 44%]
+tests/test_gap_addendum.py::test_a_floor_excludes_three_breach_tracks PASSED [ 45%]
+tests/test_gap_addendum.py::test_b_quantization_stats_integer_vs_continuous PASSED [ 45%]
+tests/test_gap_addendum.py::test_c_quantization_ignores_masked_nan PASSED [ 45%]
+tests/test_gap_addendum.py::test_d_hgb_probe_separates_perfectly PASSED  [ 46%]
+tests/test_gap_addendum.py::test_e_hgb_probe_chance_on_random_labels PASSED [ 46%]
+tests/test_gap_addendum.py::test_f_p1a_floor_in_range PASSED             [ 47%]
+tests/test_gap_addendum.py::test_g_p1b_quantization_covers_all PASSED    [ 47%]
+tests/test_gap_addendum.py::test_h_p1c_hgb_high PASSED                   [ 48%]
+tests/test_gap_addendum.py::test_i_p1d_ranges_present PASSED             [ 48%]
+tests/test_gap_addendum.py::test_j_report_written PASSED                 [ 49%]
+tests/test_generator_v6.py::test_a_emg_level_and_skew PASSED             [ 49%]
+tests/test_generator_v6.py::test_b_emg_couples_to_bis PASSED             [ 50%]
+tests/test_generator_v6.py::test_c_peep_zero_mass_and_levels PASSED      [ 50%]
+tests/test_generator_v6.py::test_d_compliance_gives_realistic_pip PASSED [ 50%]
+tests/test_generator_v6.py::test_e_rr_variability PASSED                 [ 51%]
+tests/test_generator_v6.py::test_f_rr_compensates_vco2 PASSED            [ 51%]
+tests/test_generator_v6.py::test_g_etco2_dispersion_and_range PASSED     [ 52%]
+tests/test_generator_v6.py::test_h_quantize_tracks_rounds_to_grid PASSED [ 52%]
+tests/test_generator_v6.py::test_i_quant_grid_covers_image_tracks PASSED [ 53%]
+tests/test_generator_v6.py::test_j_vco2_reference_allometric PASSED      [ 53%]
+tests/test_paso0_reproduccion.py::test_d1_windows_counts_v4 PASSED       [ 54%]
+tests/test_paso0_reproduccion.py::test_d2_ae_gates_23_reproduce_manifest PASSED [ 54%]
+tests/test_paso0_reproduccion.py::test_d3_pk_gate3_integrator_equivalence_v7 PASSED [ 55%]
+tests/test_paso0_reproduccion.py::test_d4_context_vocab_86_items_same_item_ids PASSED [ 55%]
+tests/test_paso0_reproduccion.py::test_d5_tokenizer_smoke_50_real_val_cases PASSED [ 55%]
+tests/test_paso1_decoder.py::test_b1_diag5b_real_reproduces PASSED       [ 56%]
+tests/test_paso1_decoder.py::test_a1_gate2_and_b2_diag5b_reproduce PASSED [ 56%]
+tests/test_paso1_fase0.py::test_gitattributes_present_crlf PASSED        [ 57%]
+tests/test_paso1_fase0.py::test_provenance_gaps_json_valid PASSED        [ 57%]
+tests/test_paso2_ae_v2.py::test_ae_v1_untouched_encoder_decoder_sha PASSED [ 58%]
+tests/test_paso2_ae_v2.py::test_manifest_records_provenance_fields PASSED [ 58%]
+tests/test_paso2_ae_v2.py::test_manifest_has_paso2_gates PASSED          [ 59%]
+tests/test_paso2_ae_v2.py::test_gate4_frozen_and_deterministic PASSED    [ 59%]
+tests/test_paso2_ae_v2.py::test_gate5_decode_state_token1_equals_full PASSED [ 60%]
+tests/test_paso2_ae_v2.py::test_gate7_read_columns_only PASSED           [ 60%]
+tests/test_paso2_ae_v2.py::test_gate8_stats_only_train PASSED            [ 60%]
+tests/test_paso2_ae_v2.py::test_gates_c1_c4_c6_reproduce PASSED          [ 61%]
+tests/test_paso2_ae_v2.py::test_decision_applied PASSED                  [ 61%]
+tests/test_paths.py::test_vigent_dirs_exist_under_data_root PASSED       [ 62%]
+tests/test_paths.py::test_cohorts_and_synth_lists_consistent PASSED      [ 62%]
+tests/test_paths.py::test_lost_cohorts_are_not_vigent PASSED             [ 63%]
+tests/test_paths.py::test_env_overrides_data_root PASSED                 [ 63%]
+tests/test_paths.py::test_default_data_root_is_repo_data PASSED          [ 64%]
+tests/test_pk_tokens.py::test_rate_unit_conversions PASSED               [ 64%]
+tests/test_pk_tokens.py::test_single_bolus_exponential_decay[fenilefrina-0.0023104906018664843] PASSED [ 65%]
+tests/test_pk_tokens.py::test_single_bolus_exponential_decay[efedrina-0.0011552453009332421] PASSED [ 65%]
+tests/test_pk_tokens.py::test_phen_constant_infusion_converges_to_steady_state PASSED [ 65%]
+tests/test_pk_tokens.py::test_schnider_bolus_peak_and_mass_balance PASSED [ 66%]
+tests/test_pk_tokens.py::test_minto_bolus_peak_and_mass_balance PASSED   [ 66%]
+tests/test_pk_tokens.py::test_wierda_bolus_monotonic_peak PASSED         [ 67%]
+tests/test_pk_tokens.py::test_noradrenaline_ce_equals_rate PASSED        [ 67%]
+tests/test_pk_tokens.py::test_dose_cum_non_decreasing_and_total PASSED   [ 68%]
+tests/test_pk_tokens.py::test_ce_mask_three_states PASSED                [ 68%]
+tests/test_pk_tokens.py::test_forward_fill_hold_for_integration PASSED   [ 69%]
+tests/test_pk_tokens.py::test_rocuronium_rate_spike_equals_equivalent_bolus PASSED [ 69%]
+tests/test_pk_tokens.py::test_k_determinism_same_partition_twice PASSED  [ 70%]
+tests/test_pk_tokens.py::test_l_gate2_cf_prefix_and_lever_divergence PASSED [ 70%]
+tests/test_pk_tokens.py::test_m_gate3_integrator_equivalence PASSED      [ 70%]
+tests/test_pk_tokens.py::test_n_real_no_vol_and_bolus_zero PASSED        [ 71%]
+tests/test_tokenize.py::test_a_window_12_cells PASSED                    [ 71%]
+tests/test_tokenize.py::test_b_mask_worst_of_12 PASSED                   [ 72%]
+tests/test_tokenize.py::test_c_efedrina_mask1_absent_mask0_present PASSED [ 72%]
+tests/test_tokenize.py::test_d_vent_setpoint_null_both_cells_uses_proxy PASSED [ 73%]
+tests/test_tokenize.py::test_e_log1p_zscore_and_masked_zero PASSED       [ 73%]
+tests/test_tokenize.py::test_f_grid_hole_not_emitted PASSED              [ 74%]
+tests/test_tokenize.py::test_g_phase_filter_t1_ge_opend_discarded PASSED [ 74%]
+tests/test_tokenize.py::test_setpoints_a_1s_axis_to_5s_grid PASSED       [ 75%]
+tests/test_tokenize.py::test_setpoints_b_5s_axis_same_result PASSED      [ 75%]
+tests/test_tokenize.py::test_setpoints_c_change_between_cells PASSED     [ 75%]
+tests/test_tokenize.py::test_h_determinism_bytes_identical PASSED        [ 76%]
+tests/test_tokenize.py::test_i_gate5_split_matches SKIPPED (requiere...) [ 76%]
+tests/test_tokenize.py::test_j_gate2_cf_prefix SKIPPED (requiere art...) [ 77%]
+tests/test_tokenize.py::test_k_gate9_stats_train_only PASSED             [ 77%]
+tests/test_tokenize.py::test_l_gate8_context_v1_only PASSED              [ 78%]
+tests/test_tokenize.py::test_m_gate4_no_excluded_columns PASSED          [ 78%]
+tests/test_tokenize.py::test_n_gate7_ks_informative PASSED               [ 79%]
+tests/test_tokenize.py::test_o_gate1_coverage PASSED                     [ 79%]
+tests/test_tokenize.py::test_p_cf_metadata SKIPPED (requiere artefac...) [ 80%]
+tests/test_tokenize.py::test_q_no_phase_marks_real_cases_excluded PASSED [ 80%]
+tests/test_tokenize.py::test_cf_branch_pairing SKIPPED (requiere art...) [ 80%]
+tests/test_tokenize.py::test_pairs_parquet SKIPPED (requiere artefac...) [ 81%]
+tests/test_tokenize.py::test_gate4_mechanical_read_columns SKIPPED (...) [ 81%]
+tests/test_tokenize.py::test_column_lists_disjoint_and_complete PASSED   [ 82%]
+tests/test_tokenize.py::test_partition_invariant PASSED                  [ 82%]
+tests/test_tokenize.py::test_r_phase_mark_criterion PASSED               [ 83%]
+tests/test_tokenize.py::test_s_phase_marks_match_windows_v2 PASSED       [ 83%]
+tests/test_tokenize.py::test_t_lever_group_covers_all PASSED             [ 84%]
+tests/test_tokenize.py::test_u_report_no_obsolete_strings PASSED         [ 84%]
+tests/test_tokenize.py::test_v_sin_celdas_case_4476 PASSED               [ 85%]
+tests/test_v10_equivalence.py::test_a_gate2_real_matches_manifest PASSED [ 85%]
+tests/test_v10_equivalence.py::test_b_gate3_matches_manifest PASSED      [ 85%]
+tests/test_v10_equivalence.py::test_c_marginales_val_match_d4 PASSED     [ 86%]
+tests/test_v10_equivalence.py::test_d_exclusiones_son_36 PASSED          [ 86%]
+tests/test_v6_validate.py::test_a_split_real_caseids_deterministic PASSED [ 87%]
+tests/test_v6_validate.py::test_b_nn_overlap_range PASSED                [ 87%]
+tests/test_v6_validate.py::test_c_nn_overlap_identical_high PASSED       [ 88%]
+tests/test_v6_validate.py::test_d_dose_effect_curve PASSED               [ 88%]
+tests/test_v6_validate.py::test_e_load_cells_from_windows_v2 PASSED      [ 89%]
+tests/test_v6_validate.py::test_f_report_written PASSED                  [ 89%]
+tests/test_v7_attribution.py::test_a_pairwise_mutual_information_scale PASSED [ 90%]
+tests/test_v7_attribution.py::test_b_corr_matrix_difference_frobenius PASSED [ 90%]
+tests/test_v7_attribution.py::test_c_top_discrepancies_sorted PASSED     [ 90%]
+tests/test_v7_attribution.py::test_d_quantization_table_columns PASSED   [ 91%]
+tests/test_v7_attribution.py::test_e_hgb_ablation_drop_sorted PASSED     [ 91%]
+tests/test_v7_attribution.py::test_f_a1_a3_present SKIPPED (requiere...) [ 92%]
+tests/test_v7_attribution.py::test_g_a4_deltas_present SKIPPED (requ...) [ 92%]
+tests/test_v7_attribution.py::test_h_a5_quantization_present SKIPPED     [ 93%]
+tests/test_v7_attribution.py::test_i_a6_corr_mi_present SKIPPED (req...) [ 93%]
+tests/test_v7_attribution.py::test_j_report_written SKIPPED (requier...) [ 94%]
+tests/test_v7_transfer_probe.py::test_a_scaler_fit_transform_inverse PASSED [ 94%]
+tests/test_v7_transfer_probe.py::test_b_scaler_zero_std_becomes_one PASSED [ 95%]
+tests/test_v7_transfer_probe.py::test_c_ratios_vs_persistence PASSED     [ 95%]
+tests/test_v7_transfer_probe.py::test_d_residual_prediction_matches_contract PASSED [ 95%]
+tests/test_v7_transfer_probe.py::test_e_sanity_variables_subset_of_moving PASSED [ 96%]
+tests/test_v7_transfer_probe.py::test_f_finetuning_starts_from_d1_weights PASSED [ 96%]
+tests/test_v7_transfer_probe.py::test_g_epoch0_loss_matches_d1 PASSED    [ 97%]
+tests/test_v7_transfer_probe.py::test_h_sanity_and_report PASSED         [ 97%]
+tests/test_v7_transfer_probe.py::test_i_v9_conditions_present PASSED     [ 98%]
+tests/test_v7_transfer_probe.py::test_j_v9_report_has_transfer_verdict PASSED [ 98%]
+tests/test_v9_reconstruction.py::test_a_split_holdout_sha_matches_cache PASSED [ 99%]
+tests/test_v9_reconstruction.py::test_b_reconstruction_numeric_check_all_match PASSED [ 99%]
+tests/test_v9_reconstruction.py::test_c_v1_v4_recompute_matches_cache PASSED [100%]
+
+================ 209 passed, 11 skipped in 3508.03s (0:58:28) =================
+
+
+==============================================================================
+8. SUPUESTOS NUMERADOS
+==============================================================================
+ 1. El ae_v2 se entrena con la variante 50/50 (B) de physio_ae.py SIN tocar
+    su lógica; las cohortes sintéticas ya estaban repuntadas a v7 vía paths.py.
+ 2. El entrenamiento evaluó los gates en GPU; la re-evaluación en CPU
+    (scripts/paso2_reevaluate_cpu.py, sin reentrenar) es la que queda en el
+    manifest, para que el test de reproducción en CPU coincida bit a bit
+    (|diff| < 1e-6). La diferencia GPU vs CPU es ~1.6e-6 en gate2 HR real,
+    por debajo de cualquier significado clínico; los veredictos C1-C4 no
+    cambian.
+ 3. La pérdida de validación de ae_v2 no se compara con la de ae_bal (0.001001):
+    la mitad sintética del subconjunto de val fijo cambió de v5 a v7.
+ 4. El tope de VRAM de 6 GiB (R6) no pudo aplicarse vía
+    set_per_process_memory_fraction (no acepta torch.device('cuda') sin índice);
+    el pico real medido fue 120.3 MiB (registrado en el manifest), muy por
+    debajo del presupuesto.
+ 5. Los pesos de ae_v2 quedan en data/ae_v2/ (layout plano); ae_v1/ no se toca
+    (R1): el test test_ae_v1_untouched_encoder_decoder_sha fija los sha de
+    encoder (8921d719…) y decoder (c462fdbf…) de ae_bal.
+ 6. El sha de physio_ae.py registrado (A2) es el del fichero tal como está en
+    disco en Windows (CRLF); physio_ae.py NO se modifica en todo el paso.
+ 7. scripts/paso2_train_ae_v2.py NO se vuelve a tocar tras el entrenamiento
+    (su sha e1999490… queda en el manifest como sha256_train_script).
