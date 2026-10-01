@@ -1,0 +1,290 @@
+REPORT_cohort_gap.txt — caracterización de la brecha real/sintético
+==============================================================================
+
+Diagnóstico independiente del autoencoder (contrato_ae_v1.md, diag A4).
+NO toca physio_ae.py, ni los pesos, ni ningún gate del AE.
+
+0. Contexto y ficheros
+----------------------------------------
+  cohort_gap.py                  sha256 6bbd8bcdc82a56abb5b21275efec4071598fa8d422038ef86134bf1104fa87c9
+  tokens_v1/manifest_tokens.json sha256 58d2923181bbdc53f74c9260861901bb245129caf76415621c8bd30f5b88942f
+  generado                       2026-09-30T04:20:12.627882+00:00
+  celdas val                     10023061
+  casos val                      4424
+  protocolo de sondeo: LogisticRegression(max_iter=5000), GroupKFold 5 por caseid, estandarización por fold, 200000 celdas seed 9876, entrada cruda imputada
+
+1. Supuestos numerados
+----------------------------------------
+  1. Replica literal del protocolo del gate 6 del AE: submuestra estratificada de 200 000 celdas de val (100 000 reales + 100 000 sintéticas), semilla 9876, GroupKFold(5) agrupado por caseid, StandardScaler ajustado por fold, LogisticRegression(max_iter=5000), AUC (roc_auc_score) promediado entre folds; real es la clase positiva.
+  2. La 'entrada cruda' son los 14 valores en UNIDADES FÍSICAS de windows_v2 (no los z-score del AE). Las celdas con máscara m=0 se imputan con la media de la variable sobre celdas con m=1 de todo el split val (constante global, sin usar etiquetas).
+  3. El orden de columnas es el canónico de windows_v2 (BIS/BIS ... BIS/EMG), idéntico al manifest y al AE.
+  4. 'Sintético' = unión de las tres cohortes sintéticas (synthetic_v5, vaso_reinf_v5, cf_v5) con muestreo uniforme por celda, como en el gate 6. En D2 cada cohorte se enfrenta por separado.
+  5. Delta de una celda = valor - valor de la celda anterior (t - t_menos_1) dentro del mismo caso (rejilla contigua de 5 s). La primera celda de cada caso, y cualquier delta con alguna de las dos celdas enmascarada, se imputa con la media del delta válido por variable.
+  6. D3a usa real-train vs real-val (100 000 celdas de cada uno, semilla 9876). D3b particiona la cohorte real de val en dos mitades POR CASEID (semilla 9876) y sondea 100 000 + 100 000 celdas.
+  7. D4 usa el split val, solo celdas con máscara m=1, en unidades físicas. La Wasserstein-1 se normaliza por la desviación típica real (ddof=0).
+  8. Exclusiones: caseids del manifest de tokens_v1 (35 sin marcas de fase + el caseid 4476 sin celdas, 36 en total); solo se retienen celdas phase_from_clinical=maintenance.
+
+2. Salida literal de pytest (ROJO)
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+__________________ ERROR collecting tests/test_cohort_gap.py __________________
+ImportError while importing test module 'C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\tests\test_cohort_gap.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_cohort_gap.py:24: in <module>
+    from diagnostics import cohort_gap as cg  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ModuleNotFoundError: No module named 'diagnostics'
+=========================== short test summary info ===========================
+ERROR tests/test_cohort_gap.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.20s ===============================
+
+
+3. Salida literal de pytest (VERDE)
+----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 13 items
+
+tests/test_cohort_gap.py::test_a_column_means_ignores_masked PASSED      [  7%]
+tests/test_cohort_gap.py::test_b_impute_with_fills_masked PASSED         [ 15%]
+tests/test_cohort_gap.py::test_c_sample_two_groups_balanced PASSED       [ 23%]
+tests/test_cohort_gap.py::test_d_deltas_first_cell_imputed PASSED        [ 30%]
+tests/test_cohort_gap.py::test_e_probe_separates_perfectly PASSED        [ 38%]
+tests/test_cohort_gap.py::test_f_probe_chance_on_random_labels PASSED    [ 46%]
+tests/test_cohort_gap.py::test_g_load_cells_reads_val PASSED             [ 53%]
+tests/test_cohort_gap.py::test_h_d3_controls_near_chance PASSED          [ 61%]
+tests/test_cohort_gap.py::test_i_d1_full14_auc_high PASSED               [ 69%]
+tests/test_cohort_gap.py::test_j_d2_three_cohorts PASSED                 [ 76%]
+tests/test_cohort_gap.py::test_k_d4_wasserstein_finite PASSED            [ 84%]
+tests/test_cohort_gap.py::test_l_d5_deltas_present PASSED                [ 92%]
+tests/test_cohort_gap.py::test_m_report_written PASSED                   [100%]
+
+======================== 13 passed in 83.50s (0:01:23) ========================
+
+
+4. D3 — Controles de cordura (DEBEN dar AUC ~0.5)
+----------------------------------------
+  D3a real-train vs real-val: AUC =   0.4910  (n=200000, train=100000, val=100000)
+  D3b mitad aleatoria real (por caseid): AUC =   0.4810  (n=200000)
+  -> protocolo OK
+
+5. D1 — Atribución por variable
+----------------------------------------
+  D1a. Univariante (AUC por variable, ordenado de mayor a menor):
+   #  variable                    AUC
+   1  Solar8000/BT             0.7251
+   2  BIS/BIS                  0.6045
+   3  Solar8000/ART_DBP        0.5880
+   4  Solar8000/ART_MBP        0.5637
+   5  Primus/ETCO2             0.5598
+   6  Primus/RR_CO2            0.5291
+   7  Solar8000/ART_SBP        0.5257
+   8  Primus/MV                0.5245
+   9  Solar8000/HR             0.5194
+  10  Solar8000/PLETH_SPO2     0.5136
+  11  Primus/PIP_MBAR          0.5134
+  12  BIS/EMG                  0.5119
+  13  Primus/PEEP_MBAR         0.4966
+  14  Primus/TV                0.4844
+
+  D1b. Acumulativo hacia delante (en el orden de D1a):
+   k       AUC  variables
+   1    0.7251  Solar8000/BT
+   2    0.7479  Solar8000/BT + BIS/BIS
+   3    0.7584  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP
+   4    0.7584  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP
+   5    0.7611  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2
+   6    0.7655  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2
+   7    0.7676  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP
+   8    0.7676  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV
+   9    0.7667  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV + Solar8000/HR
+  10    0.7670  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV + Solar8000/HR + Solar8000/PLETH_SPO2
+  11    0.7665  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV + Solar8000/HR + Solar8000/PLETH_SPO2 + Primus/PIP_MBAR
+  12    0.7654  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV + Solar8000/HR + Solar8000/PLETH_SPO2 + Primus/PIP_MBAR + BIS/EMG
+  13    0.7652  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV + Solar8000/HR + Solar8000/PLETH_SPO2 + Primus/PIP_MBAR + BIS/EMG + Primus/PEEP_MBAR
+  14    0.7653  Solar8000/BT + BIS/BIS + Solar8000/ART_DBP + Solar8000/ART_MBP + Primus/ETCO2 + Primus/RR_CO2 + Solar8000/ART_SBP + Primus/MV + Solar8000/HR + Solar8000/PLETH_SPO2 + Primus/PIP_MBAR + BIS/EMG + Primus/PEEP_MBAR + Primus/TV
+
+  D1c. Ablación (14 variables menos una; caída respecto a las 14):
+  variable                    AUC    caida
+  Solar8000/BT             0.6597   0.1056
+  BIS/BIS                  0.7408   0.0245
+  Primus/ETCO2             0.7607   0.0046
+  Solar8000/ART_DBP        0.7619   0.0034
+  Solar8000/ART_SBP        0.7631   0.0022
+  Primus/RR_CO2            0.7643   0.0010
+  Solar8000/ART_MBP        0.7649   0.0004
+  Solar8000/PLETH_SPO2     0.7650   0.0002
+  Primus/TV                0.7652   0.0001
+  Primus/MV                0.7654  -0.0001
+  Primus/PEEP_MBAR         0.7655  -0.0002
+  Primus/PIP_MBAR          0.7657  -0.0004
+  Solar8000/HR             0.7661  -0.0008
+  BIS/EMG                  0.7663  -0.0010
+
+6. D2 — Desglose por cohorte sintética
+----------------------------------------
+  Real vs una sola cohorte sintética (14 valores):
+    real vs synthetic_v7       AUC =   0.7635
+    real vs vaso_reinf_v7      AUC =   0.7466
+    real vs cf_v7              AUC =   0.7724
+  Pares sintético-vs-sintético:
+    synthetic_v7_vs_vaso_reinf_v7      AUC =   0.5721
+    synthetic_v7_vs_cf_v7              AUC =   0.6237
+    vaso_reinf_v7_vs_cf_v7             AUC =   0.4138
+
+7. D4 — Distribuciones marginales (unidades físicas) y Wasserstein-1
+----------------------------------------
+  Estadísticos por variable y cohorte (celdas con máscara 1, val):
+  --- real ---
+  variable                     n    media     std      p1      p5     p50     p95     p99     min     max
+  BIS/BIS                1430557    40.91   11.54    0.00   25.40   40.70   60.00   71.70    0.00   97.70
+  Solar8000/HR           1494687    73.53   15.62   46.00   51.00   72.00  101.00  118.00   10.00  240.00
+  Solar8000/PLETH_SPO2   1503472    99.51    1.26   95.00   97.00  100.00  100.00  100.00   47.00  100.00
+  Primus/ETCO2           1501480    34.80    3.77   24.00   30.00   35.00   41.00   45.00   10.00   74.00
+  Primus/PEEP_MBAR       1469788     2.66    2.54    0.00    0.00    4.00    6.00    7.00    0.00   25.00
+  Primus/PIP_MBAR        1471312    17.56    5.24    8.00   10.00   17.00   27.00   32.00    5.00   57.00
+  Primus/MV              1479189     5.70    1.42    2.80    3.70    5.60    8.10    9.50    0.00   18.70
+  Primus/TV              1476631   397.19   88.54  168.00  275.00  394.00  541.00  619.00   50.00 1499.00
+  Primus/RR_CO2          1506008    14.44    2.77    9.00   10.00   14.00   18.00   22.00    2.00   60.00
+  Solar8000/BT           1398063    35.78    0.98   32.10   34.60   35.90   36.80   37.10   25.00   45.00
+  Solar8000/ART_MBP      1496526    83.51   18.50   52.00   61.00   82.00  109.00  130.00    0.00  300.00
+  Solar8000/ART_SBP      1482476   116.27   20.61   72.00   87.00  115.00  151.00  170.00    0.00  345.00
+  Solar8000/ART_DBP      1482137    64.15   13.74   38.00   45.00   63.00   85.00   97.00    0.00  300.00
+  BIS/EMG                1401355    27.35    3.69   24.03   24.75   26.54   32.97   46.24    0.00   84.10
+
+  --- synthetic_v7 ---
+  variable                     n    media     std      p1      p5     p50     p95     p99     min     max
+  BIS/BIS                3365106    44.72    7.86   33.60   35.50   43.20   58.60   69.60   29.70   95.30
+  Solar8000/HR           3651871    72.50   15.88   45.00   46.00   72.00  100.00  111.00   38.00  176.00
+  Solar8000/PLETH_SPO2   3492153    99.71    1.27   91.00   99.00  100.00  100.00  100.00   85.00  100.00
+  Primus/ETCO2           3338828    34.04    3.91   26.00   28.00   34.00   41.00   44.00   14.00   57.00
+  Primus/PEEP_MBAR       3402022     2.74    2.55    0.00    0.00    4.00    6.00    7.00    0.00   22.00
+  Primus/PIP_MBAR        3402082    17.49    4.84    8.00   10.00   17.00   26.00   31.00    6.00   42.00
+  Primus/MV              3403415     5.80    1.44    3.10    3.70    5.70    8.40   10.10    2.20   15.60
+  Primus/TV              3403389   397.94   86.31  225.00  270.00  393.00  542.00  657.00  161.00 1004.00
+  Primus/RR_CO2          3612434    14.74    2.88    9.00   10.00   15.00   20.00   22.00    6.00   30.00
+  Solar8000/BT           3307386    34.98    1.24   31.50   32.70   35.10   36.80   37.10   25.00   37.80
+  Solar8000/ART_MBP      3126828    79.63   15.54   49.00   60.00   76.00  109.00  127.00   41.00  240.00
+  Solar8000/ART_SBP      3105342   113.44   15.64   83.00   93.00  110.00  143.00  161.00   68.00  240.00
+  Solar8000/ART_DBP      3114639    60.59   15.44   31.00   41.00   57.00   90.00  108.00   24.00  239.00
+  BIS/EMG                3161957    27.49    4.18   23.83   24.55   26.65   32.17   46.97   21.42  100.00
+
+  --- vaso_reinf_v7 ---
+  variable                     n    media     std      p1      p5     p50     p95     p99     min     max
+  BIS/BIS                 175592    44.95    8.44   33.00   34.30   43.90   59.80   70.00   29.90   95.30
+  Solar8000/HR            172545    72.05   15.15   45.00   46.00   72.00   98.00  107.00   39.00  175.00
+  Solar8000/PLETH_SPO2    165262    99.72    1.26   91.00   99.00  100.00  100.00  100.00   85.00  100.00
+  Primus/ETCO2            158208    34.51    3.91   26.00   28.00   34.00   41.00   46.00   19.00   50.00
+  Primus/PEEP_MBAR        171476     2.37    2.53    0.00    0.00    0.00    5.00    7.00    0.00    9.00
+  Primus/PIP_MBAR         171473    17.73    5.74    8.00   10.00   17.00   31.00   34.00    7.00   37.00
+  Primus/MV               171468     5.78    1.26    3.20    3.90    5.40    7.90    8.10    2.70    9.20
+  Primus/TV               171467   402.85   81.88  223.00  277.00  399.00  560.00  598.00  172.00  637.00
+  Primus/RR_CO2           171490    14.46    2.35   10.00   11.00   14.00   19.00   21.00   10.00   22.00
+  Solar8000/BT            172903    34.90    1.37   30.80   32.00   35.20   36.60   36.90   27.30   37.50
+  Solar8000/ART_MBP       168262    80.68   15.18   54.00   63.00   77.00  108.00  124.00   46.00  240.00
+  Solar8000/ART_SBP       166008   115.70   14.92   88.00   97.00  112.00  142.00  158.00   80.00  233.00
+  Solar8000/ART_DBP       166635    60.37   15.72   30.00   41.00   57.00   89.00  105.00   25.00  226.00
+  BIS/EMG                 175605    27.50    4.19   23.83   24.54   26.66   32.23   46.97   22.00  100.00
+
+  --- cf_v7 ---
+  variable                     n    media     std      p1      p5     p50     p95     p99     min     max
+  BIS/BIS                4615336    44.53    7.72   34.20   35.90   42.90   58.00   70.30   29.30   95.30
+  Solar8000/HR           4530066    71.48   15.90   45.00   45.00   71.00   99.00  112.00   31.00  175.00
+  Solar8000/PLETH_SPO2   4330624    99.48    1.69   90.00   99.00  100.00  100.00  100.00   82.00  100.00
+  Primus/ETCO2           4167844    34.20    4.65   25.00   28.00   34.00   42.00   46.00   14.00   80.00
+  Primus/PEEP_MBAR       4511302     2.66    2.59    0.00    0.00    4.00    6.00    8.00    0.00   18.00
+  Primus/PIP_MBAR        4511276    16.95    4.73    8.00   10.00   17.00   26.00   31.00    6.00   42.00
+  Primus/MV              4511386     5.83    1.42    2.90    3.70    5.70    8.40    9.30    1.30   11.60
+  Primus/TV              4511332   398.59   82.20  224.00  269.00  394.00  539.00  609.00   94.00  746.00
+  Primus/RR_CO2          4511336    14.77    2.79    9.00   10.00   15.00   19.00   22.00    6.00   27.00
+  Solar8000/BT           4540072    34.88    1.27   31.20   32.50   35.00   36.70   37.10   25.40   37.70
+  Solar8000/ART_MBP      4415124    80.39   19.47   48.00   51.00   78.00  117.00  137.00   44.00  240.00
+  Solar8000/ART_SBP      4428468   115.45   19.65   83.00   86.00  113.00  152.00  173.00   79.00  239.00
+  Solar8000/ART_DBP      4411430    60.27   19.49   28.00   31.00   58.00   96.00  117.00   22.00  240.00
+  BIS/EMG                4615828    27.49    4.20   23.83   24.54   26.64   32.19   47.03   21.09  100.00
+
+  Distancia Wasserstein-1 real vs cada cohorte (normalizada por std real):
+  --- synthetic_v7 (ordenado por W1 normalizada descendente) ---
+  variable                     W1 W1/std_real
+  Solar8000/BT             0.8397   0.8598
+  BIS/BIS                  3.9890   0.3458
+  Solar8000/ART_DBP        4.7172   0.3432
+  Solar8000/ART_SBP        4.9702   0.2412
+  Solar8000/PLETH_SPO2     0.3002   0.2391
+  Primus/ETCO2             0.8805   0.2333
+  Solar8000/ART_MBP        3.9920   0.2157
+  Primus/RR_CO2            0.3629   0.1311
+  Solar8000/HR             1.3176   0.0843
+  Primus/MV                0.1021   0.0717
+  BIS/EMG                  0.2539   0.0689
+  Primus/PIP_MBAR          0.3577   0.0683
+  Primus/PEEP_MBAR         0.0962   0.0379
+  Primus/TV                3.1518   0.0356
+
+  --- vaso_reinf_v7 (ordenado por W1 normalizada descendente) ---
+  variable                     W1 W1/std_real
+  Solar8000/BT             0.9178   0.9397
+  Solar8000/ART_DBP        5.0015   0.3639
+  BIS/BIS                  4.0775   0.3535
+  Solar8000/PLETH_SPO2     0.3031   0.2414
+  Solar8000/ART_SBP        4.4114   0.2141
+  Solar8000/ART_MBP        3.1679   0.1712
+  Primus/MV                0.2128   0.1494
+  Primus/RR_CO2            0.3942   0.1424
+  Primus/ETCO2             0.4968   0.1316
+  Primus/PIP_MBAR          0.6435   0.1229
+  Primus/PEEP_MBAR         0.2997   0.1180
+  Solar8000/HR             1.6558   0.1060
+  Primus/TV                7.8298   0.0884
+  BIS/EMG                  0.2583   0.0701
+
+  --- cf_v7 (ordenado por W1 normalizada descendente) ---
+  variable                     W1 W1/std_real
+  Solar8000/BT             0.9333   0.9556
+  Solar8000/ART_DBP        7.0906   0.5159
+  BIS/BIS                  3.8683   0.3353
+  Solar8000/ART_MBP        5.1326   0.2774
+  Primus/ETCO2             0.9830   0.2604
+  Solar8000/PLETH_SPO2     0.2341   0.1864
+  Primus/RR_CO2            0.3882   0.1403
+  Solar8000/HR             2.0668   0.1323
+  Primus/PIP_MBAR          0.6217   0.1187
+  Primus/MV                0.1575   0.1106
+  Solar8000/ART_SBP        1.7349   0.0842
+  BIS/EMG                  0.2537   0.0688
+  Primus/TV                3.8475   0.0435
+  Primus/PEEP_MBAR         0.0621   0.0244
+
+8. D5 — ¿Nivel o dinámica?
+----------------------------------------
+  AUC solo 14 deltas:          0.5026
+  AUC 28 (valores + deltas):   0.7653
+
+9. D6 — Conclusión
+----------------------------------------
+Respuestas (sin hedging, con los números delante):
+
+1. La separación está REPARTIDA: ninguna acumulación alcanza AUC > 0.90 hasta incluir las 14 variables.
+
+2. La brecha es HOMOGÉNEA entre las tres cohortes sintéticas: los AUC real-vs-cohorte son 0.7635 (synthetic_v5), 0.7466 (vaso_reinf_v5) y 0.7724 (cf_v5); rango máximo 0.0257.
+
+3. La brecha está en el NIVEL, no en la dinámica: los 14 deltas solos dan AUC 0.5026 (azar). Los niveles instantáneos bastan para separar (AUC 0.7653 con 14 valores); añadir los deltas apenas cambia el resultado (0.7653 con 28).
+
+4. Recalibrar pocas variables no bastará: la separación está repartida entre las 14 variables (nivel). Cerrarla exige una recalibración amplia de las distribuciones de parámetros o cambios estructurales.
+
+Nota adicional: las cohortes sintéticas son distinguibles ENTRE SÍ (pares sintético-vs-sintético: synthetic_v7_vs_vaso_reinf_v7=0.5721, synthetic_v7_vs_cf_v7=0.6237, vaso_reinf_v7_vs_cf_v7=0.4138), aunque mucho menos que frente a la real; comparten el mismo generador base y difieren sobre todo en las palancas aplicadas.

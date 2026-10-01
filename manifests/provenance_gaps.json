@@ -1,0 +1,54 @@
+{
+  "description": "Registro central de huecos de procedencia. Cada entrada documenta un artefacto perdido o de procedencia no garantizada y qué lo sustituye o lo garantiza.",
+  "generated_at": "2026-10-01",
+  "entries": [
+    {
+      "artifact": "windows_v2",
+      "status": "perdido",
+      "lost": "El dataset de ventanas de las cohortes v5 (ventanas reales + synthetic_v5/vaso_reinf_v5/cf_v5) ya no existe en disco.",
+      "substitute": "La cohorte REAL de windows_v4 es equivalente a windows_v2 (verificada en la v9 y en la v10); la garantizan los criterios D1 y D2 del paso 0. Las cohortes sintéticas v5 no tienen sustituto: v7 las supera."
+    },
+    {
+      "artifact": "windows_v3",
+      "status": "perdido",
+      "lost": "El dataset de ventanas de las cohortes v6 no existe en ninguna parte.",
+      "substitute": "Sin sustituto. La validación v6 (V1-V7) se re-ejecuta sobre windows_v4/v7 vía v7_validate."
+    },
+    {
+      "artifact": "cohortes v5 (synthetic_v5, vaso_reinf_v5, cf_v5)",
+      "status": "perdidas",
+      "lost": "Los casos sintéticos de la generación v5 (y sus parquets clínicos/metadata) no existen en disco.",
+      "substitute": "Sin sustituto: la generación v7 las supera (recalibración v6/v7). Referencias restantes en window.py (generador de ventanas v5 congelado) y en claves históricas de manifiestos."
+    },
+    {
+      "artifact": "cohortes v6 (synthetic_v6, vaso_reinf_v6, cf_v6)",
+      "status": "perdidas",
+      "lost": "Los casos sintéticos de la generación v6 no existen en disco.",
+      "substitute": "Sin sustituto: la generación v7 las supera. v6_validate/v7_attribution referencian v6 solo como registro (tests marcados requires_lost_data)."
+    },
+    {
+      "artifact": "REPORT_window_v2.txt (original)",
+      "status": "perdido",
+      "lost": "El informe original del proceso de ventanas v2 no se conserva.",
+      "substitute": "Existe reports/REPORT_window_v2_RECONSTRUIDO.txt, una reconstrucción retrospectiva NO válida como procedencia."
+    },
+    {
+      "artifact": "v6_validate.py (original)",
+      "status": "perdido",
+      "lost": "El fichero fuente original se perdió; solo quedaba el bytecode (.pyc).",
+      "substitute": "Reconstruido desde bytecode (desensamblado función a función) y validado numéricamente en la v9 (re-ejecución de V1-V4 reproduce la cache exacta)."
+    },
+    {
+      "artifact": "physio_ae.py en el sha 3f2817c9 (código con el que se ENTRENÓ ae_bal)",
+      "status": "no_encontrado",
+      "lost": "No existe en ningún backup ni en el historial de git el fichero exacto con el que se entrenó ae_bal.",
+      "substitute": "La parte de EVALUACIÓN está garantizada por el criterio D2 del paso 0 (gates 2/3 reproducen el manifest ae_bal). La de ENTRENAMIENTO no lo está; solo importa si hay que reentrenar, y en ese caso el reentrenamiento es un artefacto nuevo con sus propios gates."
+    },
+    {
+      "artifact": "context_v1/vocab.json original (sha 945b7884…)",
+      "status": "no_encontrado",
+      "lost": "En el paso 0 (criterio D4) se regeneró data/context_v1/ en su sitio con estadísticos de v7; el vocab.json original pasó de 945b7884… a 0ddcff91…. Buscado en D:/data/anestesia_world/, backups, papelera y el repo sin éxito.",
+      "substitute": "data/context_v1/ queda como está (estadísticos v7). La lista de 86 item_id es idéntica a la original (congelada en tests/test_paso0_reproduccion.py, FROZEN_ITEM_IDS); solo cambian los estadísticos. El sha original 945b7884… queda registrado en tokens_v1_manifest.json como sha256_context_vocab."
+    }
+  ]
+}

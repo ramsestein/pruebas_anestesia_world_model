@@ -1,0 +1,179 @@
+REPORT_gap_addendum.txt — mediciones adicionales de la brecha (P1)
+==============================================================================
+
+Complemento de REPORT_cohort_gap.txt. Antes de tocar el generador:
+P1a suelo lineal, P1b cuantización, P1c sonda no lineal, P1d recortes.
+
+0. Contexto y ficheros
+----------------------------------------
+  gap_addendum.py                sha256 b92e0a15ff74bb96e3b4a84cf55fc61ecdfa48e0f19e6a26c4ef3284febc21c1
+  cohort_gap.py                  sha256 6bbd8bcdc82a56abb5b21275efec4071598fa8d422038ef86134bf1104fa87c9
+  tokens_v1/manifest_tokens.json sha256 58d2923181bbdc53f74c9260861901bb245129caf76415621c8bd30f5b88942f
+  generado                       2026-09-30T04:49:19.811770+00:00
+  celdas val                     10023061
+  casos val                      4424
+  protocolo de sondeo: LogisticRegression(max_iter=5000) y HistGradientBoostingClassifier, GroupKFold 5 por caseid, estandarización por fold, 200000 celdas seed 9876, entrada cruda imputada
+
+1. Supuestos numerados
+----------------------------------------
+  1. P1a replica literalmente el protocolo del gate 6 del AE (200 000 celdas de val, 100 000 reales + 100 000 sintéticas, semilla 9876, GroupKFold(5) por caseid, StandardScaler por fold, LogisticRegression(max_iter=5000), AUC medio entre folds) pero restringido a las 11 variables que NO son BIS/EMG, Primus/PEEP_MBAR ni Primus/PIP_MBAR.
+  2. Las celdas con máscara m=0 se imputan con la media de la variable sobre celdas m=1 del split val (constante global, sin usar etiquetas), igual que en cohort_gap.
+  3. P1b se computa por cohorte (real, synthetic_v5, vaso_reinf_v5, cf_v5) y por variable sobre celdas de val con máscara 1 y valor finito. 'entero exacto' = |v - round(v)| <= 1e-6. 'incremento no nulo entre valores consecutivos' = diferencia temporal dentro del mismo caso (rejilla contigua de 5 s), ambas celdas con máscara 1. 'no cambia' = diferencia exactamente 0 respecto a la celda anterior válida del mismo caso.
+  4. P1c usa HistGradientBoostingClassifier(max_iter=300, learning_rate=0.1, max_leaf_nodes=31, random_state=0) con el MISMO GroupKFold, las mismas celdas del gate 6 y la misma imputación que la sonda lineal. Se reporta el AUC real vs unión de las 3 cohortes sintéticas y, además, real vs cada cohorte por separado.
+  5. P1d compara mín/máx por variable entre real y cada cohorte y cuantifica la fracción de celdas reales (máscara 1) que cae FUERA del rango alcanzable del generador: los topes value_range hardcodeados en simulate.py (_build_tracks, _obs_hr, _obs_art, _obs_bis, _obs_spo2), listados en GEN_CLIP. Un valor real dentro del rango nominal no implica que el generador lo produzca con probabilidad no nula, solo que el tope no lo excluye.
+  6. Exclusiones: caseids del manifest de tokens_v1 (35 sin marcas de fase + el caseid 4476 sin celdas, 36 en total); solo se retienen celdas phase_from_clinical=maintenance (idéntico a cohort_gap).
+
+2. Salida literal de pytest (ROJO)
+----------------------------------------
+
+=================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_gap_addendum.py _________________
+ImportError while importing test module 'C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\tests\test_gap_addendum.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.11_3.11.2544.0_x64__qbz5n2kfra8p0\Lib\importlib\__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_gap_addendum.py:22: in <module>
+    from diagnostics import gap_addendum as ga  # noqa: E402
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   ImportError: cannot import name 'gap_addendum' from 'diagnostics' (C:\Users\RamsÚs\Desktop\Proyectos\anestesia_world\src\diagnostics\__init__.py)
+=========================== short test summary info ===========================
+ERROR tests/test_gap_addendum.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.32s
+
+
+3. Salida literal de pytest (VERDE)
+----------------------------------------
+..........                                                               [100%]
+10 passed in 127.29s (0:02:07)
+
+
+4. P1a — Suelo alcanzable (sonda lineal, 11 variables sin EMG/PEEP/PIP)
+----------------------------------------
+  variables: BIS/BIS, Solar8000/HR, Solar8000/PLETH_SPO2, Primus/ETCO2, Primus/MV, Primus/TV, Primus/RR_CO2, Solar8000/BT, Solar8000/ART_MBP, Solar8000/ART_SBP, Solar8000/ART_DBP
+  n_variables = 11
+  AUC (lineal, 11 variables) =   0.7670
+  acc =   0.7049
+  (comparar con AUC 14 variables = 0.9734 de cohort_gap)
+
+5. P1c — Sonda no lineal de referencia (HistGradientBoosting)
+----------------------------------------
+  real vs unión sintética (14 valores): AUC =   0.9799
+  acc =   0.9229
+  folds = [0.9740945931431373, 0.9806334860015985, 0.9870780736743727, 0.9782346058529959, 0.9794611920432488]
+  real vs cada cohorte sintética:
+    real vs synthetic_v7     AUC =   0.9753
+    real vs vaso_reinf_v7    AUC =   0.9106
+    real vs cf_v7            AUC =   0.9884
+
+6. P1b — Cuantización por variable y cohorte
+----------------------------------------
+  (n_distinct: nº de valores distintos; frac_int: fracción de enteros
+   exactos; min_inc: mínimo incremento no nulo entre celdas consecutivas
+   del mismo caso; frac_nochg: fracción de celdas que no cambian)
+  --- real ---
+  variable                       n n_distinct  frac_int   min_inc  frac_nochg
+  BIS/BIS                  1430557        965   0.1230   0.1000   0.1257
+  Solar8000/HR             1494687        208   1.0000   1.0000   0.5234
+  Solar8000/PLETH_SPO2     1503472         47   1.0000   1.0000   0.9376
+  Primus/ETCO2             1501480         65   1.0000   1.0000   0.7376
+  Primus/PEEP_MBAR         1469788         24   1.0000   1.0000   0.9219
+  Primus/PIP_MBAR          1471312         52   1.0000   1.0000   0.7461
+  Primus/MV                1479189        175   0.1132   0.1000   0.8200
+  Primus/TV                1476631       1206   1.0000   1.0000   0.3212
+  Primus/RR_CO2            1506008         56   1.0000   1.0000   0.9772
+  Solar8000/BT             1398063        148   0.0931   0.1000   0.9733
+  Solar8000/ART_MBP        1496526        301   1.0000   1.0000   0.5436
+  Solar8000/ART_SBP        1482476        331   1.0000   1.0000   0.4389
+  Solar8000/ART_DBP        1482137        300   1.0000   1.0000   0.5283
+  BIS/EMG                  1401355       4843   0.0101   0.0100   0.0818
+
+  --- synthetic_v7 ---
+  variable                       n n_distinct  frac_int   min_inc  frac_nochg
+  BIS/BIS                  3365106        655   0.0999   0.1000   0.0505
+  Solar8000/HR             3651871        136   1.0000   1.0000   0.6372
+  Solar8000/PLETH_SPO2     3492153         16   1.0000   1.0000   0.7892
+  Primus/ETCO2             3338828         44   1.0000   1.0000   0.7189
+  Primus/PEEP_MBAR         3402022         15   1.0000   1.0000   0.9878
+  Primus/PIP_MBAR          3402082         37   1.0000   1.0000   0.7888
+  Primus/MV                3403415        115   0.1004   0.1000   0.7346
+  Primus/TV                3403389        815   1.0000   1.0000   0.4042
+  Primus/RR_CO2            3612434         23   1.0000   1.0000   0.9979
+  Solar8000/BT             3307386        101   0.1008   0.1000   0.9456
+  Solar8000/ART_MBP        3126828        156   1.0000   1.0000   0.6445
+  Solar8000/ART_SBP        3105342        164   1.0000   1.0000   0.6441
+  Solar8000/ART_DBP        3114639        157   1.0000   1.0000   0.6434
+  BIS/EMG                  3161957       6571   0.0101   0.0100   0.0199
+
+  --- vaso_reinf_v7 ---
+  variable                       n n_distinct  frac_int   min_inc  frac_nochg
+  BIS/BIS                   175592        599   0.1007   0.1000   0.0509
+  Solar8000/HR              172545        131   1.0000   1.0000   0.6374
+  Solar8000/PLETH_SPO2      165262         16   1.0000   1.0000   0.7909
+  Primus/ETCO2              158208         32   1.0000   1.0000   0.7205
+  Primus/PEEP_MBAR          171476         10   1.0000   1.0000   0.9883
+  Primus/PIP_MBAR           171473         31   1.0000   1.0000   0.7853
+  Primus/MV                 171468         63   0.1128   0.1000   0.7372
+  Primus/TV                 171467        459   1.0000   1.0000   0.4027
+  Primus/RR_CO2             171490         13   1.0000   1.0000   0.9979
+  Solar8000/BT              172903         74   0.1059   0.1000   0.9449
+  Solar8000/ART_MBP         168262        105   1.0000   1.0000   0.4830
+  Solar8000/ART_SBP         166008        106   1.0000   1.0000   0.4856
+  Solar8000/ART_DBP         166635        107   1.0000   1.0000   0.4848
+  BIS/EMG                   175605       3584   0.0101   0.0100   0.0205
+
+  --- cf_v7 ---
+  variable                       n n_distinct  frac_int   min_inc  frac_nochg
+  BIS/BIS                  4615336        659   0.0995   0.1000   0.0509
+  Solar8000/HR             4530066        143   1.0000   1.0000   0.6391
+  Solar8000/PLETH_SPO2     4330624         19   1.0000   1.0000   0.7373
+  Primus/ETCO2             4167844         67   1.0000   1.0000   0.7191
+  Primus/PEEP_MBAR         4511302         19   1.0000   1.0000   0.9868
+  Primus/PIP_MBAR          4511276         37   1.0000   1.0000   0.7893
+  Primus/MV                4511386        102   0.1122   0.1000   0.7350
+  Primus/TV                4511332        640   1.0000   1.0000   0.4045
+  Primus/RR_CO2            4511336         22   1.0000   1.0000   0.9963
+  Solar8000/BT             4540072         96   0.1020   0.1000   0.9456
+  Solar8000/ART_MBP        4415124        157   1.0000   1.0000   0.4860
+  Solar8000/ART_SBP        4428468        151   1.0000   1.0000   0.4854
+  Solar8000/ART_DBP        4411430        157   1.0000   1.0000   0.4861
+  BIS/EMG                  4615828       6363   0.0099   0.0100   0.0200
+
+7. P1d — Recortes de rango (mín/máx por variable y cohorte)
+----------------------------------------
+  variable                real_min  real_max synth_min synth_max  vaso_min  vaso_max    cf_min    cf_max
+  BIS/BIS                  0.0000  97.7000  29.7000  95.3000  29.9000  95.3000  29.3000  95.3000
+  Solar8000/HR            10.0000 240.0000  38.0000 176.0000  39.0000 175.0000  31.0000 175.0000
+  Solar8000/PLETH_SPO2    47.0000 100.0000  85.0000 100.0000  85.0000 100.0000  82.0000 100.0000
+  Primus/ETCO2            10.0000  74.0000  14.0000  57.0000  19.0000  50.0000  14.0000  80.0000
+  Primus/PEEP_MBAR         0.0000  25.0000   0.0000  22.0000   0.0000   9.0000   0.0000  18.0000
+  Primus/PIP_MBAR          5.0000  57.0000   6.0000  42.0000   7.0000  37.0000   6.0000  42.0000
+  Primus/MV                0.0000  18.7000   2.2000  15.6000   2.7000   9.2000   1.3000  11.6000
+  Primus/TV               50.0000 1499.0000 161.0000 1004.0000 172.0000 637.0000  94.0000 746.0000
+  Primus/RR_CO2            2.0000  60.0000   6.0000  30.0000  10.0000  22.0000   6.0000  27.0000
+  Solar8000/BT            25.0000  45.0000  25.0000  37.8000  27.3000  37.5000  25.4000  37.7000
+  Solar8000/ART_MBP        0.0000 300.0000  41.0000 240.0000  46.0000 240.0000  44.0000 240.0000
+  Solar8000/ART_SBP        0.0000 345.0000  68.0000 240.0000  80.0000 233.0000  79.0000 239.0000
+  Solar8000/ART_DBP        0.0000 300.0000  24.0000 239.0000  25.0000 226.0000  22.0000 240.0000
+  BIS/EMG                  0.0000  84.1000  21.4200 100.0000  22.0000 100.0000  21.0900 100.0000
+
+  Fracción de celdas REALES (máscara 1) fuera del rango alcanzable
+  del generador (topes value_range de simulate.py):
+  variable                             clip    n_real  n_outside  frac_outside
+  BIS/BIS                          [0, 100]   1430557          0   0.0000
+  Solar8000/HR                    [30, 300]   1494687        151   0.0001
+  Solar8000/PLETH_SPO2            [60, 100]   1503472         16   0.0000
+  Primus/ETCO2                     [22, 52]   1501480      11113   0.0074
+  Primus/PEEP_MBAR                  [0, 15]   1469788         31   0.0000
+  Primus/PIP_MBAR                   [5, 40]   1471312        692   0.0005
+  Primus/MV                         [1, 20]   1479189       2164   0.0015
+  Primus/TV                     [100, 1500]   1476631       5521   0.0037
+  Primus/RR_CO2                     [4, 40]   1506008       1075   0.0007
+  Solar8000/BT                     [15, 40]   1398063          5   0.0000
+  Solar8000/ART_MBP             [-100, 350]   1496526          0   0.0000
+  Solar8000/ART_SBP             [-100, 350]   1482476          0   0.0000
+  Solar8000/ART_DBP             [-100, 350]   1482137          0   0.0000
+  BIS/EMG                          [0, 100]   1401355          0   0.0000
+

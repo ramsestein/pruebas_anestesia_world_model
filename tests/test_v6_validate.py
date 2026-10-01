@@ -18,6 +18,8 @@ if str(SRC) not in sys.path:
 
 from diagnostics import v6_validate as vv  # noqa: E402
 
+import paths  # noqa: E402
+
 
 def test_a_split_real_caseids_deterministic():
     excluded = frozenset()
@@ -69,7 +71,8 @@ def test_e_load_cells_from_windows_v2():
 
 @pytest.mark.integration
 def test_f_report_written():
-    if not vv.REPORT_PATH.exists():
-        pytest.skip("REPORT_generator_validation.txt no generado (falta run)")
-    txt = vv.REPORT_PATH.read_text(encoding="utf-8")
+    path = paths.REPORTS_DIR / "REPORT_generator_validation_v7.txt"
+    if not path.exists():
+        pytest.skip("REPORT_generator_validation_v7.txt no generado (falta run)")
+    txt = path.read_text(encoding="utf-8")
     assert "V1" in txt and "V2" in txt and "V3" in txt
