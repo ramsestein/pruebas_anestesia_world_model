@@ -601,20 +601,22 @@ def compute_results() -> dict:
     return results
 
 
-def run_all(use_cache: bool = True) -> dict:
-    if use_cache and CACHE_PATH.exists():
-        cached = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+def run_all(use_cache: bool = True,
+            cache_path: Path = CACHE_PATH,
+            report_path: Path = REPORT_PATH) -> dict:
+    if use_cache and cache_path.exists():
+        cached = json.loads(cache_path.read_text(encoding="utf-8"))
         sha = cached.get("meta", {}).get("sha256_cohort_gap_py")
         if sha and sha == sha256(Path(__file__)):
             print("[cohort_gap] reutilizando cache", flush=True)
-            write_report(cached)
+            write_report(cached, report_path)
             return cached
         print("[cohort_gap] cache obsoleta, recomputando", flush=True)
     results = compute_results()
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    CACHE_PATH.write_text(json.dumps(results, indent=2, ensure_ascii=False),
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    cache_path.write_text(json.dumps(results, indent=2, ensure_ascii=False),
                           encoding="utf-8")
-    write_report(results)
+    write_report(results, report_path)
     return results
 
 
@@ -638,7 +640,7 @@ def _track_name(track: str) -> str:
     return track
 
 
-def write_report(results: dict) -> Path:
+def write_report(results: dict, report_path: Path = REPORT_PATH) -> Path:
     lines: list[str] = []
     add = lines.append
     meta = results["meta"]
@@ -756,8 +758,8 @@ def write_report(results: dict) -> Path:
     add(_render_conclusion(results))
     add("")
 
-    REPORT_PATH.write_text("\n".join(lines), encoding="utf-8")
-    return REPORT_PATH
+    report_path.write_text("\n".join(lines), encoding="utf-8")
+    return report_path
 
 
 ASSUMPTIONS: list[str] = [

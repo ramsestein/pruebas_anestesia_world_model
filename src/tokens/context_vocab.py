@@ -836,7 +836,7 @@ def tokens_per_case(tokens: pd.DataFrame, cases: pd.DataFrame) -> pd.DataFrame:
 # Vocab.json
 # --------------------------------------------------------------------------
 
-def write_vocab(vocab: dict, tokens: pd.DataFrame) -> None:
+def write_vocab(vocab: dict, tokens: pd.DataFrame, out_dir: Path = OUT_DIR) -> None:
     items = vocab["items"]
     ejes: dict = {}
     for it in items:
@@ -863,8 +863,8 @@ def write_vocab(vocab: dict, tokens: pd.DataFrame) -> None:
         "ejes": ejes,
         "items": items,
     }
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "vocab.json").write_text(
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "vocab.json").write_text(
         json.dumps(doc, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
@@ -977,7 +977,7 @@ def build_report(summary: dict) -> str:
 # Ejecución completa
 # --------------------------------------------------------------------------
 
-def run() -> dict:
+def run(out_dir: Path = OUT_DIR) -> dict:
     t0 = _time.time()
     cases = load_cases()
     clin_by_source = load_all_clinical(cases)
@@ -988,10 +988,10 @@ def run() -> dict:
     tokens = emit_tokens(all_df, vocab, scope="v1")
     coverage = build_coverage(tokens, cases, null_frac)
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    write_tokens(tokens, OUT_DIR / "tokens.parquet")
-    write_coverage(coverage, OUT_DIR / "coverage.parquet")
-    write_vocab(vocab, tokens)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    write_tokens(tokens, out_dir / "tokens.parquet")
+    write_coverage(coverage, out_dir / "coverage.parquet")
+    write_vocab(vocab, tokens, out_dir)
 
     # gates
     gate4 = {

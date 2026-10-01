@@ -88,8 +88,9 @@ def test_e_hgb_probe_chance_on_random_labels():
 # --------------------------------------------------------------------------
 
 @pytest.fixture(scope="module")
-def results():
-    return ga.run_all()
+def results(tmp_path_factory):
+    d = tmp_path_factory.mktemp("gap_addendum")
+    return ga.run_all(cache_path=d / "cache.json", report_path=d / "report.txt")
 
 
 @pytest.mark.integration

@@ -205,12 +205,13 @@ def test_i_determinism_identical_bytes(tmp_path):
 # --------------------------------------------------------------------------
 
 @pytest.fixture(scope="session")
-def built():
+def built(tmp_path_factory):
     """Ejecuta el build completo una vez y devuelve el resumen + datos cargados."""
-    summary = cv.run()
-    tokens = pq.read_table(cv.OUT_DIR / "tokens.parquet").to_pandas()
-    coverage = pq.read_table(cv.OUT_DIR / "coverage.parquet").to_pandas()
-    vocab = json.loads((cv.OUT_DIR / "vocab.json").read_text(encoding="utf-8"))
+    out_dir = tmp_path_factory.mktemp("context_vocab")
+    summary = cv.run(out_dir)
+    tokens = pq.read_table(out_dir / "tokens.parquet").to_pandas()
+    coverage = pq.read_table(out_dir / "coverage.parquet").to_pandas()
+    vocab = json.loads((out_dir / "vocab.json").read_text(encoding="utf-8"))
     cases = cv.load_cases()
     return dict(summary=summary, tokens=tokens, coverage=coverage, vocab=vocab, cases=cases)
 

@@ -194,10 +194,10 @@ FROZEN_ITEM_IDS = [
 
 
 @INTEGRATION
-def test_d4_context_vocab_86_items_same_item_ids():
+def test_d4_context_vocab_86_items_same_item_ids(tmp_path):
     from tokens import context_vocab as cv
 
-    summary = cv.run()
+    summary = cv.run(tmp_path)
     vocab = summary["items"]
     item_ids = [it["item_id"] for it in vocab]
 

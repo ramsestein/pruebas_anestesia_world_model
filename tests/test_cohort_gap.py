@@ -11,6 +11,7 @@ LogisticRegression), pero sobre la ENTRADA CRUDA. No toca el AE.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -22,6 +23,8 @@ if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
 from diagnostics import cohort_gap as cg  # noqa: E402
+
+import paths  # noqa: E402
 
 
 # --------------------------------------------------------------------------
@@ -92,8 +95,9 @@ def test_f_probe_chance_on_random_labels():
 # --------------------------------------------------------------------------
 
 @pytest.fixture(scope="module")
-def results():
-    return cg.run_all()
+def results(tmp_path_factory):
+    d = tmp_path_factory.mktemp("cohort_gap")
+    return cg.run_all(cache_path=d / "cache.json", report_path=d / "report.txt")
 
 
 @pytest.mark.integration
@@ -117,15 +121,22 @@ def test_h_d3_controls_near_chance(results):
 
 
 @pytest.mark.integration
-def test_i_d1_full14_auc_high(results):
-    """La sonda de 14 valores sobre la entrada cruda debe separar (AUC > 0.60).
+def test_i_d1_full14_reproduces_manifest(results):
+    """Reproducción: una ejecución nueva reproduce el AUC de 14 variables
+    registrado en manifests/cohort_gap_v7_results.json con |diff| < 1e-6, y la
+    estructura de D1 (univariante, acumulativo, ablación) está completa.
 
-    El umbral se re-calibró al repuntar a v7: en v5 el AUC era 0.9734; en v7 la
-    brecha LINEAL se cerró (objetivo de la recalibración) y el AUC queda ~0.765,
-    aún claramente por encima del azar (0.50) y de los controles de cordura (< 0.60).
+    NOTA: el 0.9734 de v5 (protocolo cohort_gap, val completo) y el 0.7654 de
+    v7 (V1, real_holdout) son protocolos DISTINTOS y no se comparan.
     """
+    ref = json.loads((paths.MANIFESTS_DIR / "cohort_gap_v7_results.json")
+                     .read_text(encoding="utf-8"))
     d1 = results["d1"]
-    assert d1["cumulative"][-1]["auc"] > 0.60
+    assert abs(d1["cumulative"][-1]["auc"] - ref["d1"]["cumulative"][-1]["auc"]) < 1e-6
+    assert len(d1["univariate"]) == 14
+    assert len(d1["cumulative"]) == 14
+    assert len(d1["ablation"]) == 14
+    assert "full14_auc" in d1
 
 
 @pytest.mark.integration
