@@ -1,0 +1,274 @@
+================================================================
+PASO 1 — CIERRES DEL PASO 0 + DECODER CONGELADO SOBRE v7
+REPORT_paso1_decoder_v7.txt
+================================================================
+Fecha: 2026-10-01
+
+VEREDICTOS
+  decoder : NO SIRVE
+  k_def   : 13 (anterior: 13) — PROVISIONAL
+  fase 0  : cerrada SÍ
+
+Regla aplicada (R4): el criterio de decisión está FIJADO y el veredicto es
+NO SIRVE; NO se reentrena el decoder ni se regenera ningún artefacto. Se
+reporta el resultado tal cual y k_def queda PROVISIONAL (pendiente de
+decisión de contrato, fuera del alcance de este paso).
+
+================================================================
+1. FASE 0 — CIERRES DEL PASO 0
+================================================================
+
+1.1 0.1 — .gitattributes (CRLF)
+  Creado `.gitattributes` (commit 12217b1): `*.py/*.md/*.txt/*.json/*.yaml/
+  *.toml text eol=crlf`; `*.parquet` y `*.pt` binarios. Renormalización:
+  2 blobs estaban en CRLF (reports/REPORT_v7_attribution.txt y
+  reports/REPORT_generator_validation_v7.txt); el resto ya en LF. Contenido
+  idéntico ignorando EOL.
+
+1.2 0.2 — context_v1/vocab.json (procedencia)
+  El original (sha 945b7884…) NO se encontró (buscado en el repo, D:/data,
+  backups y papelera de reciclaje). Aplicada la salida 0.2c: se conserva el
+  vocab regenerado con stats v7 (sha 0ddcff91…). La LISTA de items es
+  idéntica a la original (86 items, mismo scope v1/v2); solo difieren las
+  estadísticas. Registrado en manifests/provenance_gaps.json.
+
+1.3 0.3 — writers con ruta de salida + suite sin efectos
+  Parametrizados los writers (ruta de salida, con default = producción):
+    - src/tokens/context_vocab.py: write_vocab(..., out_dir), run(out_dir)
+    - src/diagnostics/cohort_gap.py: run_all(cache_path, report_path),
+      write_report(results, report_path)
+    - src/diagnostics/gap_addendum.py: ídem
+  Los tests usan tmp_path (test_cohort_gap, test_gap_addendum,
+  test_context_vocab.built, test_paso0_reproduccion.test_d4).
+
+1.4 0.3c — verificación de "sin efectos" (diff de snapshots)
+  Snapshot de data/ y reports/ (153 109 ficheros: ruta + tamaño + mtime
+  Unix-ns + sha256[:12] en reports/ y data/diagnostics/) antes y después de
+  la suite completa. DIFF = 0 ficheros: la suite no creó ni modificó ningún
+  archivo bajo data/ o reports/.
+
+1.5 0.4 — test_i de reproducción (cohort_gap)
+  tests/test_cohort_gap.py::test_i reescrito como test de reproducción contra
+  manifests/cohort_gap_v7_results.json (full14 AUC = 0.7652628881903194,
+  |diff| < 1e-6). Se congeló también reports/REPORT_cohort_gap.txt.
+
+1.6 0.5 — test_f repuntado
+  tests/test_v6_validate.py::test_f apunta a
+  reports/REPORT_generator_validation_v7.txt (vía paths.REPORTS_DIR).
+
+1.7 0.6 — provenance_gaps.json
+  manifests/provenance_gaps.json con 8 entradas (artifact/status/lost/
+  substitute) + tests/test_paso1_fase0.py (2 tests).
+
+1.8 Verificación de la fase 0
+  Suite completa: 198 passed / 11 skipped / 2 errors. Los 2 "errors" son
+  exclusivamente los tests del PASO 1 A/B ejecutados en ROJO (el manifest
+  paso1_decoder_v7.json aún no existía). Ver sección 5.
+
+================================================================
+2. FASE A — DECODER CONGELADO SOBRE v7
+================================================================
+
+Modelo: ae_bal congelado (encoder sha256 8921d719…, decoder c462fdbf…),
+mismos pesos del manifest ae_bal. Sin reentrenar. Evaluación sobre val
+completo (real + 3 cohortes v7), mismas funciones de src/ae/physio_ae.py
+que el criterio D2 del paso 0.
+
+2.1 A1 — gate 2 sobre v7 (error absoluto medio por caso, mediana entre
+       casos, unidades físicas, solo celdas máscara 1, 14 variables).
+
+  Variables clínicas (lpm/mmHg/%/mmHg):
+  cohort        | HR      | ART_MBP | BIS    | ETCO2
+  --------------|---------|---------|--------|-------
+  real          | 0.39397 | 0.24136 | 0.17650| 0.09121
+  synthetic_v7  | 0.55095 | 0.39348 | 0.25875| 0.12675
+  vaso_reinf_v7 | 0.50898 | 0.41399 | 0.27246| 0.11209
+  cf_v7         | 0.57231 | 0.42220 | 0.26604| 0.12561
+
+  Referencias congeladas (manifest ae_bal, cohortes v5):
+  cohort        | HR      | ART_MBP | BIS    | ETCO2
+  --------------|---------|---------|--------|-------
+  real          | 0.39396 | 0.24134 | 0.17650| 0.09121
+  synthetic_v5  | 0.35351 | 0.24147 | 0.15593| 0.10808
+  vaso_reinf_v5 | 0.34687 | 0.23474 | 0.14960| 0.10341
+  cf_v5         | 0.36164 | 0.26236 | 0.16093| 0.11037
+
+  La cohorte real reproduce el manifest ae_bal de forma exacta (v10 1b).
+
+2.2 A2 — criterio de decisión (FIJADO)
+  Para cada variable y cohorte v7: ref = max(error real, error de la
+  cohorte v5 equivalente). Límite = 1.5×ref en variables clínicas
+  (HR/ART_MBP/BIS/ETCO2) y 2.0×ref en el resto. Umbrales absolutos:
+  HR < 2 lpm y ART_MBP < 2 mmHg.
+
+  Fallos (todos en variables clínicas, sobre el límite relativo):
+  cohort        | variable    | error_v7 | límite   | ratio
+  --------------|-------------|----------|----------|-------
+  synthetic_v7  | ART_MBP     | 0.39348  | 0.36220  | 1.630
+  vaso_reinf_v7 | BIS         | 0.27246  | 0.26474  | 1.544
+  vaso_reinf_v7 | ART_MBP     | 0.41399  | 0.36201  | 1.715
+  cf_v7         | BIS         | 0.26604  | 0.26474  | 1.507
+  cf_v7         | ART_MBP     | 0.42220  | 0.39354  | 1.609
+
+  Umbrales absolutos: HR < 2 y ART_MBP < 2 se cumplen en las 3 cohortes
+  (HR 0.551/0.509/0.572; ART_MBP 0.393/0.414/0.422). El fallo es el
+  criterio RELATIVO 1.5× sobre variables clínicas.
+
+  Veredicto: hay fallos en variables clínicas -> NO SIRVE.
+
+2.3 A3 — colas (informativo): fracción de celdas v7 por encima del p99
+       del error real, por variable clínica.
+  variable | p99 real | synthetic_v7 | vaso_reinf_v7 | cf_v7
+  ---------|----------|--------------|---------------|-------
+  HR       | 2.62984  | 0.01963      | 0.01025       | 0.02280
+  ART_MBP  | 2.28674  | 0.01175      | 0.00675       | 0.01940
+  BIS      | 1.43846  | 0.01808      | 0.01352       | 0.02107
+  ETCO2    | 0.76348  | 0.03479      | 0.00745       | 0.01535
+
+2.4 A4 — solapamiento 20-NN en el latente + sonda de origen por celda
+  nn_overlap (fracción de los 20 vecinos de la otra cohorte, 32 dims):
+    real -> sintético : media 0.10829 (p50 = 0, p95 = 0.55)
+    sintético -> real : media 0.13239 (p50 = 0, p95 = 0.60)
+  (En v5 el solapamiento era ~0.021: las cohortes v7 son mucho más
+  parecidas a real en el latente del decoder congelado.)
+
+  Sonda de origen por celda (gate 6, 200 000 celdas seed 9876):
+    AUC 32 dims = 0.81145 ; AUC 8 dims = 0.73070
+  (En v5 era ~0.9934/0.9809: la separabilidad celular cae ~18/25 puntos
+  con las cohortes v7, coherente con el mayor solapamiento.)
+
+================================================================
+3. FASE B — k_clinico
+================================================================
+
+3.1 B1 — reproducción del diag 5b real
+  k_clinico real = 13 (reproducido). max|diff| vs manifest ae_bal =
+  2.905e-05 (dentro de la tolerancia 0.0005).
+
+3.2 B2 — diag 5b sobre v7 (por cohorte y unión)
+  escalones (k en que cada variable clínica cae bajo su umbral):
+  cohort        | HR  | ART_MBP | BIS | ETCO2 | k_clinico
+  --------------|-----|---------|-----|-------|----------
+  union (v7)    | 10  | 13      | 7   | 9     | 13
+  synthetic_v7  | 10  | 13      | 7   | 9     | 13
+  vaso_reinf_v7 | 10  | 13      | 6   | 9     | 13
+  cf_v7         | 10  | 13      | 7   | 9     | 13
+
+3.3 B3 — k_def
+  k_clinico real = 13; k_clinico v7 = {synthetic_v7: 13, vaso_reinf_v7: 13,
+  cf_v7: 13}. k_def = max(...) = 13 (anterior: 13).
+  PROVISIONAL: el k_def del error físico por k no cambia, pero el veredicto
+  de calidad del decoder en k=32 sobre v7 es NO SIRVE (sección 2.2), por lo
+  que este k_def no puede declararse definitivo en este paso.
+
+================================================================
+4. SUPUESTOS NUMERADOS
+================================================================
+
+ 1. 0.2: el vocab.json original (945b7884) no existe; se aplica 0.2c
+    (conservar el vocab v7 regenerado). La identidad de la lista de items
+    (86) se verificó contra el inventario previo; solo cambian stats.
+ 2. 0.3c: "sin efectos" se mide como diff de snapshots (ruta, tamaño,
+    mtime Unix-ns y sha256[:12] en reports/ y data/diagnostics/) de data/
+    y reports/ antes y después de la suite completa. Resultado: 0.
+ 3. A1/B1/B2 usan las mismas funciones de src/ae/physio_ae.py del criterio
+    D2 del paso 0, con el modelo ae_bal congelado (sin reentrenar).
+ 4. A2: las referencias v5 se leen del manifest ae_bal congelado; las
+    cohortes v5 ya no existen en disco, no se recalculan.
+ 5. A2: el criterio está FIJADO (no se ajusta post-hoc): ref = max(real,
+    v5-equivalente); clínicas <= 1.5×ref; no clínicas <= 2.0×ref; absoluto
+    HR < 2 y ART_MBP < 2. Veredicto resultante: NO SIRVE.
+ 6. A4: la sonda de origen por celda usa la submuestra fija del gate 6
+    (200 000 celdas, seed 9876, GroupKFold por caseid), igual que el
+    manifest ae_bal.
+ 7. B2: el "diag 5b de unión v7" es la cohorte "synthetic" del evaluate
+    (case_source != real), que agrupa las 3 cohortes v7.
+ 8. B3: con veredicto NO SIRVE, k_def se declara PROVISIONAL y no se
+    reentrena ni se regenera nada (R4).
+ 9. Encoding: las salidas de pytest capturadas con redirección de
+    PowerShell quedan en UTF-16LE; el nombre "Ramsés" se muestra degradado
+    a "RamsÚs" por la página de códigos de consola (artefacto cosmético,
+    no del contenido). En la sección 5 se reproduce la salida literal con
+    el nombre corregido.
+
+================================================================
+5. SALIDA LITERAL DE PYTEST (ROJO Y VERDE)
+================================================================
+
+5.1 ROJO — suite completa antes de generar el manifest A/B
+    (tests/test_paso1_decoder.py sin manifests/paso1_decoder_v7.json):
+
+........................................................................ [ 34%]
+...................................................EE................... [ 68%]
+...............ss.....s.sss......................sssss.............      [100%]
+=================================== ERRORS ====================================
+______________ ERROR at setup of test_b1_diag5b_real_reproduces _______________
+
+    @pytest.fixture(scope="module")
+    def frozen():
+        p = paths.MANIFESTS_DIR / "paso1_decoder_v7.json"
+>       assert p.is_file(), "ejecuta scripts/paso1_decoder_v7.py primero"
+E       AssertionError: ejecuta scripts/paso1_decoder_v7.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/Ramsés/Desktop/Proyectos/anestesia_world/manifests/paso1_decoder_v7.json').is_file
+
+tests\test_paso1_decoder.py:30: AssertionError
+___________ ERROR at setup of test_a1_gate2_and_b2_diag5b_reproduce ___________
+
+    @pytest.fixture(scope="module")
+    def frozen():
+        p = paths.MANIFESTS_DIR / "paso1_decoder_v7.json"
+>       assert p.is_file(), "ejecuta scripts/paso1_decoder_v7.py primero"
+E       AssertionError: ejecuta scripts/paso1_decoder_v7.py primero
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = WindowsPath('C:/Users/Ramsés/Desktop/Proyectos/anestesia_world/manifests/paso1_decoder_v7.json').is_file
+
+tests\test_paso1_decoder.py:30: AssertionError
+=========================== short test summary info ===========================
+ERROR tests/test_paso1_decoder.py::test_b1_diag5b_real_reproduces - Assertion...
+ERROR tests/test_paso1_decoder.py::test_a1_gate2_and_b2_diag5b_reproduce - As...
+198 passed, 11 skipped, 2 errors in 901.21s (0:15:01)
+
+5.2 VERDE — tests/test_paso1_decoder.py tras generar el manifest:
+
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Ramsés\Desktop\Proyectos\anestesia_world\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Ramsés\Desktop\Proyectos\anestesia_world
+configfile: pyproject.toml
+collecting ... collected 2 items
+
+tests/test_paso1_decoder.py::test_b1_diag5b_real_reproduces PASSED       [ 50%]
+tests/test_paso1_decoder.py::test_a1_gate2_and_b2_diag5b_reproduce PASSED [100%]
+
+======================= 2 passed in 1372.58s (0:22:52) ========================
+
+Nota: los 2 errores de 5.1 son exactamente los 2 tests de 5.2 ejecutados
+antes de que existiera el manifest; no indican fallo de la fase 0.
+
+================================================================
+6. REPOSITORIO Y COMMITS
+================================================================
+
+Artefactos nuevos de este paso:
+  .gitattributes                                  (commit 12217b1, 0.1)
+  manifests/provenance_gaps.json                  (0.6)
+  manifests/cohort_gap_v7_results.json            (0.4)
+  manifests/paso1_decoder_v7.json                 (FASE A/B)
+  data/diagnostics/paso1_decoder_v7/paso1_decoder_v7.json   (FASE A/B)
+  scripts/paso1_decoder_v7.py                     (FASE A/B)
+  tests/test_paso1_fase0.py                       (0.6)
+  tests/test_paso1_decoder.py                     (FASE A/B)
+  reports/REPORT_cohort_gap.txt, REPORT_gap_addendum.txt   (0.4)
+  reports/REPORT_paso1_decoder_v7.txt             (este informe)
+
+Modificados (0.3-0.5): src/tokens/context_vocab.py, src/diagnostics/
+cohort_gap.py, src/diagnostics/gap_addendum.py, tests/test_cohort_gap.py,
+tests/test_context_vocab.py, tests/test_gap_addendum.py,
+tests/test_paso0_reproduccion.py, tests/test_v6_validate.py.
+
+================================================================
+FIN DEL INFORME
+================================================================
