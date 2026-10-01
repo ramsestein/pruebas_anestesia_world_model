@@ -1,7 +1,7 @@
-REPORT_gap_addendum.txt — mediciones adicionales de la brecha (P1)
+REPORT_gap_addendum_v7.txt — mediciones adicionales de la brecha (P1)
 ==============================================================================
 
-Complemento de REPORT_cohort_gap.txt. Antes de tocar el generador:
+Complemento de REPORT_cohort_gap_v7.txt. Antes de tocar el generador:
 P1a suelo lineal, P1b cuantización, P1c sonda no lineal, P1d recortes.
 
 0. Contexto y ficheros

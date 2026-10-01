@@ -41,9 +41,17 @@ WINDOWS_DIR = DATA_ROOT / "windows_v4"   # ventanas vigentes (cohortes v7)
 TOKENS_DIR = DATA_ROOT / "tokens_v1"
 PK_DIR = DATA_ROOT / "pk_v1"
 CONTEXT_DIR = DATA_ROOT / "context_v1"
+# AE vigente del proyecto. En el paso 2 (fase D) se repunta a ae_v2; antes
+# apunta a ae_v1 (histórico). Véanse AE_V1_DIR y AE_V2_DIR más abajo.
 AE_DIR = DATA_ROOT / "ae_v1"
 DIAGNOSTICS_DIR = DATA_ROOT / "diagnostics"
 AUDIT_DIR = DATA_ROOT / "audit"
+
+# Artefactos de autoencoder con nombre explícito (independientes del repunte
+# de AE_DIR): ae_v1 es el histórico (ae_bal/ae_real congelados, snapshots),
+# ae_v2 es el nuevo AE entrenado sobre real + v7 en el paso 2.
+AE_V1_DIR = DATA_ROOT / "ae_v1"
+AE_V2_DIR = DATA_ROOT / "ae_v2"
 
 # Directorios del repo (no de datos).
 MANIFESTS_DIR = REPO_ROOT / "manifests"

@@ -1,4 +1,4 @@
-REPORT_cohort_gap.txt — caracterización de la brecha real/sintético
+REPORT_cohort_gap_v7.txt — caracterización de la brecha real/sintético
 ==============================================================================
 
 Diagnóstico independiente del autoencoder (contrato_ae_v1.md, diag A4).
