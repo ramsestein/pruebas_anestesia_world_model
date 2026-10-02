@@ -49,11 +49,11 @@ CONTEXT_V2_DIR = DATA_ROOT / "context_v2"
 TOKENS_V1_DIR = DATA_ROOT / "tokens_v1"
 TOKENS_V2_DIR = DATA_ROOT / "tokens_v2"
 
-# Vigentes (paso 3b / fase 0): pk_v2 adoptado; context_v2 se adopta en 0.2 y
-# tokens sigue en v1 hasta la fase D (donde se repunta a v2).
+# Vigentes (paso 3b / fase 0): pk_v2 y context_v2 adoptados; tokens sigue en
+# v1 hasta la fase D (donde se repunta a v2).
 TOKENS_DIR = TOKENS_V1_DIR
 PK_DIR = PK_V2_DIR
-CONTEXT_DIR = CONTEXT_V1_DIR
+CONTEXT_DIR = CONTEXT_V2_DIR
 
 # AE vigente del proyecto. En el paso 2 (fase D) se repunta a ae_v2; antes
 # apunta a ae_v1 (histórico). Véanse AE_V1_DIR y AE_V2_DIR más abajo.

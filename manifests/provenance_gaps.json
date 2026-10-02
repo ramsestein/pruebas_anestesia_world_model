@@ -48,9 +48,10 @@
     },
     {
       "artifact": "context_v1/vocab.json original (sha 945b7884…)",
-      "status": "no_encontrado",
+      "status": "sustituido por context_v2",
       "lost": "En el paso 0 (criterio D4) se regeneró data/context_v1/ en su sitio con estadísticos de v7; el vocab.json original pasó de 945b7884… a 0ddcff91…. Buscado en D:/data/anestesia_world/, backups, papelera y el repo sin éxito.",
-      "substitute": "data/context_v1/ queda como está (estadísticos v7). La lista de 86 item_id es idéntica a la original (congelada en tests/test_paso0_reproduccion.py, FROZEN_ITEM_IDS); solo cambian los estadísticos. El sha original 945b7884… queda registrado en tokens_v1_manifest.json como sha256_context_vocab."
+      "substitute": "data/context_v2/ (adoptado en el paso 3, fase 0). Resultado B3 del paso 3: context_v2/vocab.json tiene el MISMO contenido que el context_v1 sobrescrito (misma lista de 86 item_id, mismos estadísticos); solo difieren la fecha, el sha256 del módulo y las claves nuevas (windows_manifest_path, sha256_windows_manifest, split_parquet_path). El sha original 945b7884… queda registrado en tokens_v1_manifest.json como sha256_context_vocab.",
+      "superseded_by": "data/context_v2/vocab.json"
     },
     {
       "artifact": "ae_v2 / clave sha256_windows_v2_manifest",
