@@ -61,6 +61,7 @@ COPY_ORIGINALS = {
     "pk_v2_manifest.json": "data/pk_v2/manifest_pk.json",
     "context_v2_vocab.json": "data/context_v2/vocab.json",
     "tokens_v1_manifest.json": "data/tokens_v1/manifest_tokens.json",
+    "tokens_v2_manifest.json": "data/tokens_v2/manifest_tokens.json",
     "ae_v2_manifest.json": "data/ae_v2/manifest_ae.json",
     "ae_v2_norm_stats.json": "data/ae_v2/norm_stats.json",
     "ae_bal_manifest.json": "data/ae_v1/ae_bal/manifest_ae.json",

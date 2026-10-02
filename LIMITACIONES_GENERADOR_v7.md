@@ -110,3 +110,71 @@ Estos valores salen de `v7_validate_results.json`, cache generada con el
 de windows_v4 (equivalente) y las cohortes v7: los valores coinciden
 exactamente (ver `REPORT_v9_datos.txt` 1.3). Quedan registrados como son, con
 la nota de que la cache no es reproducible por sí sola sin la reconstrucción.
+
+## 8. Pares CF: retraso de la acción y divergencia no resuelta (paso 3b)
+
+El paso 3b anota los 6345 pares CF con `t_action`, `t_divergence_raw`,
+`effect_lag_windows` y `lever_effective` (ver `REPORT_paso3b_pares_cf.txt` y
+`data/tokens_v2/pairs_annotated.parquet`). El generador aplica las
+intervenciones en `t_action = split_t + 10 s` (las Actions) o `t_action =
+split_t` (overrides de ventilación); el criterio corregido es
+`post_action = t1 > t_action` refinado a la rejilla de tokens.
+
+### 8.1 Cuantización de la capa de tokens (5 s)
+
+`pk_v2` reporta en el inicio de la celda `[5k, 5k+5)` el efecto de las acciones
+que caen dentro de ella: en el par 171501 la acción está en 6781.7 s y
+`ce_efedrina` ya salta en el punto de rejilla 6780. Por eso la identidad de la
+intervención puede aparecer en las features hasta 5 s ANTES de `t_action` y el
+prefijo idéntico (C4) debe medirse como `t1 < floor(t_action/5)·5`. Sin este
+refinamiento, 120 pares aparecían con divergencia en el prefijo.
+
+### 8.2 Palancas de consigna persistente (overrides de ventilación)
+
+`simulate.py` aplica los overrides de ventilación como un delta acumulativo
+sobre la señal (`peep_arr[post] = clip(peep_arr[post] + delta, ...)`, línea
+346), NO como un evento puntual. Consecuencia: la consigna observada
+(`Primus/SET_INTER_PEEP`, `SET_RR_IPPV`, `SET_TV_L`, `SET_FIO2`) no cambia en
+`t_action` sino cuando el plan base cambia esa consigna. Ejemplo: el par
+180319 (`peep_down`) tiene PEEP base 0 en `t_action` (recorte a 0, sin cambio) y
+la divergencia observada aparece 45 s después, cuando el plan base sube la PEEP
+a 4 y la rama de intervención la deja en 0.
+
+Por eso los criterios C1 (`|t_divergence_raw − t_action| <= 30 s`) y C2
+(efecto en la ventana de `t_action` o la siguiente) se evalúan sobre las
+ACCIONES PUNTUALES (pharma/learning/sevo) y las consignas persistentes se
+reportan aparte. Medido: C1 pasa en el 100 % de las acciones puntuales (0/4380
+fallos) y falla en 78/1797 consignas persistentes; C2 da 99.93 % en acciones
+puntuales (>= 99 %) y 94.94 % en consignas persistentes. Para estas últimas el
+efecto existe pero llega con la cadencia del plan.
+
+### 8.3 Pares sin efecto observable
+
+Los pares con `lever_effective = False` (sin efecto en las features del
+`lever_group` tras `t_action`) se clasifican con evidencia en
+`manifests/tokens_v2_cf_pairs_annotation.json`. Causas:
+
+- `clip_bound` — el cambio pedido queda anulado por un recorte del simulador.
+  Afecta a PEEP: `peep_down` (delta −5) y `set_peep` (delta uniforme(−5,5))
+  con PEEP base 0 se recortan al mínimo del clip `[0, 25]`, de modo que la
+  PEEP aplicada no cambia (≈ 46 % de los casos tras la recalibración v6 parten
+  de PEEP 0).
+- `below_resolution` — la intervención SÍ cambia la VERDAD, pero la diferencia
+  no se resuelve en la variable observada que alimenta las features:
+  (a) tasas `rftn20_rate`, `ppf20_rate`, `remi_up`: la acción de mantenimiento
+  de la base sobrescribe la infusión a ~1.5 s de `t_action` (la verdad, p. ej.
+  `remifentanil_rate`, difiere durante un tramo de ~1.5 s) y la cadencia
+  irregular del track observado `Orchestra/*_RATE` no captura ese tramo, por lo
+  que la Ce recalculada por `pk_tokens.py` es idéntica; (b) `set_rr` con
+  `|rr_delta|` por debajo de la resolución del setpoint RR entero; (c)
+  `set_peep` con `|peep_delta|` por debajo del escalón del setpoint (step 1).
+- `no_change_requested` — el valor pedido coincide con el valor base en
+  `t_action` (tolerancia 5 % relativa): no se pide cambio alguno.
+- `case_ends` — el par termina antes de que exista una ventana con
+  `t1 > t_action`.
+
+Estas limitaciones son del GENERADOR (capa de observación, cadencia del plan
+base y cuantización de las consignas), no del tokenizador. Se documentan, NO se
+corrigen en esta iteración: el conjunto CF de entrenamiento se define como los
+pares con `lever_effective = True` de `pairs_annotated.parquet`.
+

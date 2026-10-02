@@ -49,9 +49,8 @@ CONTEXT_V2_DIR = DATA_ROOT / "context_v2"
 TOKENS_V1_DIR = DATA_ROOT / "tokens_v1"
 TOKENS_V2_DIR = DATA_ROOT / "tokens_v2"
 
-# Vigentes (paso 3b / fase 0): pk_v2 y context_v2 adoptados; tokens sigue en
-# v1 hasta la fase D (donde se repunta a v2).
-TOKENS_DIR = TOKENS_V1_DIR
+# Vigentes (paso 3b): pk_v2, context_v2 y tokens_v2 adoptados.
+TOKENS_DIR = TOKENS_V2_DIR
 PK_DIR = PK_V2_DIR
 CONTEXT_DIR = CONTEXT_V2_DIR
 
