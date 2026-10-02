@@ -1,0 +1,721 @@
+{
+  "date": "2026-10-02T19:52:00.241492",
+  "pairs_parquet_sha256": "5ec3eb8a27b13bd296b4906c7eb5086ff33ad663e66011296e5a4cf01fa482ba",
+  "pairs_annotated_parquet": "data\\tokens_v2\\pairs_annotated.parquet",
+  "n_pairs": 6345,
+  "n_effective": 6177,
+  "n_null": 168,
+  "null_causes": {
+    "below_resolution": 31,
+    "clip_bound": 135,
+    "no_change_requested": 2
+  },
+  "criterios_alcance": "C1 y C2 se evalúan sobre las ACCIONES PUNTUALES (one_shot: eventos de la colección pharma/learning/sevo, con t_action en intervention_a). Las palancas de CONSIGNA PERSISTENTE (overrides de ventilación: el simulador aplica un delta acumulativo sobre la señal) divergen cuando el plan base cambia la consigna, no en t_action, y se reportan aparte.",
+  "criteria": {
+    "C1_divergencia_cruda_cerca_de_t_action": {
+      "umbral_s": 30.0,
+      "n_failures": 0,
+      "ok": true,
+      "n_effective_one_shot": 4380,
+      "failures": [],
+      "persistent_consigna": {
+        "n_effective": 1797,
+        "n_failures": 78,
+        "nota": "no aplicable: la consigna persistente sólo diverge cuando el plan base la cambia"
+      }
+    },
+    "C2_efecto_en_ventana_de_t_action_o_siguiente": {
+      "umbral_lag": 1,
+      "pct_lag_le_1": 99.9315,
+      "ok": true,
+      "n_effective_one_shot": 4380,
+      "hist_lag": {
+        "0": 4069,
+        "1": 308,
+        "2": 2,
+        "3": 1
+      },
+      "persistent_consigna": {
+        "n_effective": 1797,
+        "pct_lag_le_1": 94.8804,
+        "hist_lag": {
+          "0": 1449,
+          "1": 256,
+          "2": 11,
+          "3": 8,
+          "4": 3,
+          "5": 2,
+          "6": 3,
+          "7": 2,
+          "8": 1,
+          "9": 3,
+          "10": 6,
+          "11": 5,
+          "12": 1,
+          "13": 4,
+          "14": 2,
+          "16": 1,
+          "17": 2,
+          "18": 2,
+          "19": 1,
+          "23": 1,
+          "24": 3,
+          "26": 1,
+          "27": 1,
+          "28": 1,
+          "29": 1,
+          "31": 2,
+          "39": 1,
+          "41": 1,
+          "42": 1,
+          "46": 1,
+          "48": 1,
+          "49": 1,
+          "50": 2,
+          "52": 1,
+          "53": 1,
+          "54": 2,
+          "58": 1,
+          "59": 1,
+          "66": 1,
+          "73": 1,
+          "84": 2,
+          "92": 1,
+          "93": 1,
+          "95": 1,
+          "117": 1,
+          "166": 1,
+          "181": 1,
+          "209": 1
+        }
+      }
+    },
+    "C3_sin_nulos_sin_explicar": {
+      "ok": true,
+      "n_unexplained": 0
+    },
+    "C4_prefijo_identico_hasta_t_action": {
+      "ok": true,
+      "n_failures": 0,
+      "nota": "prefijo medido sobre la rejilla de tokens (cf_pairs.pre_action): ventanas con t1 <= floor(t_action/5)*5 - 2*5 s, que no pueden ver la intervención ni por la cuantización de pk_v2 ni por la atribución temprana de los tracks de evento discreto",
+      "failures": []
+    }
+  },
+  "per_lever": [
+    {
+      "lever": "eph_bolus",
+      "lever_group": "efedrina",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "ephedrine",
+      "lever_group": "efedrina",
+      "n": 120,
+      "effective": 120,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "fio2_down",
+      "lever_group": "ventilacion",
+      "n": 150,
+      "effective": 150,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "nepi_rate",
+      "lever_group": "noradrenalina",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "noradrenaline",
+      "lever_group": "noradrenalina",
+      "n": 250,
+      "effective": 250,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "peep_down",
+      "lever_group": "ventilacion",
+      "n": 150,
+      "effective": 93,
+      "pct_effective": 62.0,
+      "nulls": {
+        "clip_bound": 57
+      }
+    },
+    {
+      "lever": "peep_up",
+      "lever_group": "ventilacion",
+      "n": 150,
+      "effective": 150,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "phen_bolus",
+      "lever_group": "fenilefrina",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "phen_rate",
+      "lever_group": "fenilefrina",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "ppf20_rate",
+      "lever_group": "propofol",
+      "n": 375,
+      "effective": 371,
+      "pct_effective": 98.9333,
+      "nulls": {
+        "below_resolution": 2,
+        "no_change_requested": 2
+      }
+    },
+    {
+      "lever": "ppf_bolus",
+      "lever_group": "propofol",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "propofol_bolus",
+      "lever_group": "propofol",
+      "n": 250,
+      "effective": 250,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "remi_bolus",
+      "lever_group": "remifentanilo",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "remi_up",
+      "lever_group": "remifentanilo",
+      "n": 250,
+      "effective": 247,
+      "pct_effective": 98.8,
+      "nulls": {
+        "below_resolution": 3
+      }
+    },
+    {
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "n": 375,
+      "effective": 367,
+      "pct_effective": 97.8667,
+      "nulls": {
+        "below_resolution": 8
+      }
+    },
+    {
+      "lever": "set_fio2",
+      "lever_group": "ventilacion",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "n": 375,
+      "effective": 291,
+      "pct_effective": 77.6,
+      "nulls": {
+        "clip_bound": 78,
+        "below_resolution": 6
+      }
+    },
+    {
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "n": 375,
+      "effective": 363,
+      "pct_effective": 96.8,
+      "nulls": {
+        "below_resolution": 12
+      }
+    },
+    {
+      "lever": "set_tv",
+      "lever_group": "ventilacion",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "sevo_mac",
+      "lever_group": "sevoflurano",
+      "n": 375,
+      "effective": 375,
+      "pct_effective": 100.0,
+      "nulls": {}
+    },
+    {
+      "lever": "sevo_up",
+      "lever_group": "sevoflurano",
+      "n": 150,
+      "effective": 150,
+      "pct_effective": 100.0,
+      "nulls": {}
+    }
+  ],
+  "nulls_non_peep": [
+    {
+      "pair_id": 171181,
+      "lever": "remi_up",
+      "lever_group": "remifentanilo",
+      "caseid_base": 171182,
+      "caseid_intervencion": 171181,
+      "t_action": 14364.7,
+      "requested_change": "INFUSION_CHANGE remifentanil 16.1mcg/min",
+      "base_value_at_action": 21.402529,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 171217,
+      "lever": "remi_up",
+      "lever_group": "remifentanilo",
+      "caseid_base": 171218,
+      "caseid_intervencion": 171217,
+      "t_action": 5780.5,
+      "requested_change": "INFUSION_CHANGE remifentanil 12mcg/min",
+      "base_value_at_action": 26.314878,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 171473,
+      "lever": "remi_up",
+      "lever_group": "remifentanilo",
+      "caseid_base": 171474,
+      "caseid_intervencion": 171473,
+      "t_action": 3768.5,
+      "requested_change": "INFUSION_CHANGE remifentanil 9.97mcg/min",
+      "base_value_at_action": 5.411762,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 190207,
+      "lever": "ppf20_rate",
+      "lever_group": "propofol",
+      "caseid_base": 190208,
+      "caseid_intervencion": 190207,
+      "t_action": 4429.3,
+      "requested_change": "INFUSION_CHANGE propofol 9.96mg/min",
+      "base_value_at_action": 7.559936,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 190231,
+      "lever": "ppf20_rate",
+      "lever_group": "propofol",
+      "caseid_base": 190232,
+      "caseid_intervencion": 190231,
+      "t_action": 8004.0,
+      "requested_change": "INFUSION_CHANGE propofol 7.43mg/min",
+      "base_value_at_action": 22.181519,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "no_change_requested"
+    },
+    {
+      "pair_id": 190567,
+      "lever": "ppf20_rate",
+      "lever_group": "propofol",
+      "caseid_base": 190568,
+      "caseid_intervencion": 190567,
+      "t_action": 4788.4,
+      "requested_change": "INFUSION_CHANGE propofol 4.31mg/min",
+      "base_value_at_action": 13.190063,
+      "truth_diff_after_action": false,
+      "has_post_window": true,
+      "null_cause": "no_change_requested"
+    },
+    {
+      "pair_id": 190739,
+      "lever": "ppf20_rate",
+      "lever_group": "propofol",
+      "caseid_base": 190740,
+      "caseid_intervencion": 190739,
+      "t_action": 4150.8,
+      "requested_change": "INFUSION_CHANGE propofol 3.4mg/min",
+      "base_value_at_action": 11.995111,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 190811,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 190812,
+      "caseid_intervencion": 190811,
+      "t_action": 3544.9,
+      "requested_change": "INFUSION_CHANGE remifentanil 13.7mcg/min",
+      "base_value_at_action": 14.892371,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 190827,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 190828,
+      "caseid_intervencion": 190827,
+      "t_action": 4560.3,
+      "requested_change": "INFUSION_CHANGE remifentanil 5.54mcg/min",
+      "base_value_at_action": 8.612339,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 190913,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 190914,
+      "caseid_intervencion": 190913,
+      "t_action": 2636.9,
+      "requested_change": "INFUSION_CHANGE remifentanil 3.48mcg/min",
+      "base_value_at_action": 7.803138,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 190975,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 190976,
+      "caseid_intervencion": 190975,
+      "t_action": 12306.2,
+      "requested_change": "INFUSION_CHANGE remifentanil 8.57mcg/min",
+      "base_value_at_action": 9.182626,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 191359,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 191360,
+      "caseid_intervencion": 191359,
+      "t_action": 4739.7,
+      "requested_change": "INFUSION_CHANGE remifentanil 13.7mcg/min",
+      "base_value_at_action": 21.680494,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 191381,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 191382,
+      "caseid_intervencion": 191381,
+      "t_action": 3127.9,
+      "requested_change": "INFUSION_CHANGE remifentanil 1.04mcg/min",
+      "base_value_at_action": 4.045472,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 191423,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 191424,
+      "caseid_intervencion": 191423,
+      "t_action": 4174.1,
+      "requested_change": "INFUSION_CHANGE remifentanil 6.26mcg/min",
+      "base_value_at_action": 14.976771,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 191477,
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "caseid_base": 191478,
+      "caseid_intervencion": 191477,
+      "t_action": 3078.8,
+      "requested_change": "INFUSION_CHANGE remifentanil 2.48mcg/min",
+      "base_value_at_action": 20.93474,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 196773,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 196774,
+      "caseid_intervencion": 196773,
+      "t_action": 4070.882,
+      "requested_change": "{\"rr_delta\": 0.056499299859009255}",
+      "base_value_at_action": 17.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 196909,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 196910,
+      "caseid_intervencion": 196909,
+      "t_action": 6426.376,
+      "requested_change": "{\"rr_delta\": 0.1374838122296298}",
+      "base_value_at_action": 11.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197123,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197124,
+      "caseid_intervencion": 197123,
+      "t_action": 3136.694,
+      "requested_change": "{\"rr_delta\": -0.043692250462976645}",
+      "base_value_at_action": 15.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197127,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197128,
+      "caseid_intervencion": 197127,
+      "t_action": 8189.685,
+      "requested_change": "{\"rr_delta\": 0.05161203699119454}",
+      "base_value_at_action": 14.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197137,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197138,
+      "caseid_intervencion": 197137,
+      "t_action": 8081.827,
+      "requested_change": "{\"rr_delta\": 0.04048488124168781}",
+      "base_value_at_action": 13.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197289,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197290,
+      "caseid_intervencion": 197289,
+      "t_action": 5369.065,
+      "requested_change": "{\"rr_delta\": 0.12060072885802953}",
+      "base_value_at_action": 16.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197307,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197308,
+      "caseid_intervencion": 197307,
+      "t_action": 9096.634,
+      "requested_change": "{\"rr_delta\": 0.08864324747016905}",
+      "base_value_at_action": 17.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197343,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197344,
+      "caseid_intervencion": 197343,
+      "t_action": 10315.811,
+      "requested_change": "{\"rr_delta\": -0.07528415801953248}",
+      "base_value_at_action": 23.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197391,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197392,
+      "caseid_intervencion": 197391,
+      "t_action": 4134.484,
+      "requested_change": "{\"rr_delta\": -0.026510931336666488}",
+      "base_value_at_action": 16.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197409,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197410,
+      "caseid_intervencion": 197409,
+      "t_action": 6175.14,
+      "requested_change": "{\"rr_delta\": 0.044446488254973104}",
+      "base_value_at_action": 10.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197441,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197442,
+      "caseid_intervencion": 197441,
+      "t_action": 6102.802,
+      "requested_change": "{\"rr_delta\": -0.10071390645266476}",
+      "base_value_at_action": 12.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 197483,
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "caseid_base": 197484,
+      "caseid_intervencion": 197483,
+      "t_action": 4375.497,
+      "requested_change": "{\"rr_delta\": -0.023248324083263938}",
+      "base_value_at_action": 16.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 198325,
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "caseid_base": 198326,
+      "caseid_intervencion": 198325,
+      "t_action": 4207.262,
+      "requested_change": "{\"fio2_set\": 0.35, \"peep_delta\": 0.026912248243622372}",
+      "base_value_at_action": 0.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 198461,
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "caseid_base": 198462,
+      "caseid_intervencion": 198461,
+      "t_action": 3998.49,
+      "requested_change": "{\"fio2_set\": 0.35, \"peep_delta\": 0.17331680285990814}",
+      "base_value_at_action": 0.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 198707,
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "caseid_base": 198708,
+      "caseid_intervencion": 198707,
+      "t_action": 6288.694,
+      "requested_change": "{\"fio2_set\": 0.35, \"peep_delta\": 0.02933478315766269}",
+      "base_value_at_action": 0.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 198721,
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "caseid_base": 198722,
+      "caseid_intervencion": 198721,
+      "t_action": 5698.097,
+      "requested_change": "{\"fio2_set\": 0.35, \"peep_delta\": -0.31891201848601014}",
+      "base_value_at_action": 0.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 198783,
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "caseid_base": 198784,
+      "caseid_intervencion": 198783,
+      "t_action": 5582.389,
+      "requested_change": "{\"fio2_set\": 0.35, \"peep_delta\": 0.020365813878976624}",
+      "base_value_at_action": 5.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    },
+    {
+      "pair_id": 198811,
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "caseid_base": 198812,
+      "caseid_intervencion": 198811,
+      "t_action": 9596.66,
+      "requested_change": "{\"fio2_set\": 0.35, \"peep_delta\": -0.21501041091833795}",
+      "base_value_at_action": 0.0,
+      "truth_diff_after_action": true,
+      "has_post_window": true,
+      "null_cause": "below_resolution"
+    }
+  ],
+  "n_nulls_non_peep": 33,
+  "elapsed_s": 340.14
+}
