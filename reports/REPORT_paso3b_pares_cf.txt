@@ -1,0 +1,174 @@
+REPORT_paso3b_pares_cf.txt
+========================================================================
+PASO 3b — anotación de los pares contrafactuales y adopción v2
+fecha: 2026-10-02T19:52:00.241492
+
+Artefactos
+------------------------------------------------------------------------
+  pairs.parquet (NO reescrito, R2)  C:\Users\Ramsés\Desktop\Proyectos\anestesia_world\data\tokens_v2\pairs.parquet
+    sha256 = 5ec3eb8a27b13bd296b4906c7eb5086ff33ad663e66011296e5a4cf01fa482ba
+  pairs_annotated.parquet          data\tokens_v2\pairs_annotated.parquet
+    sha256 = 1257a088f759cb52fb0fa4f1d6c73074c76eab22b155131f28b3e213a73ccd06
+  manifiesto de anotación          manifests\tokens_v2_cf_pairs_annotation.json
+  módulo                           src/tokens/cf_pairs.py
+  script                           scripts/paso3b_annotate_cf_pairs.py
+
+1. Criterio corregido (B1)
+------------------------------------------------------------------------
+  El generador aplica las Actions en t_action = split_t + 10 s
+  (src/anessim/generate_f2_cf.py) y los overrides de ventilación en
+  t_action = split_t (simulate.py, post = t > counterfactual_split_t).
+  El paso 3 medía el efecto con post_split = t1 > split_t (la ventana que
+  CONTIENE split_t, es decir ANTES de la acción), de ahí sus 6 palancas por
+  debajo del 99 %.
+
+  post_action(t1, t_action) = t1 >= floor(t_action / 5) * 5
+  El redondeo a la rejilla de 5 s es necesario porque pk_v2 reporta en el
+  inicio de la celda [5k, 5k+5) el efecto de las acciones que caen dentro
+  (par 171501: acción en 6781.7 s, ce_efedrina ya salta en 6780).
+
+  Alcance de C1/C2: ACCIONES PUNTUALES (pharma/learning/sevo).
+  Las CONSIGNAS PERSISTENTES (overrides de ventilación: simulate.py aplica
+  un delta acumulativo) sólo divergen cuando el plan base cambia la
+  consigna, así que la ventana de t_action no puede contener el efecto.
+
+2. Recuento
+------------------------------------------------------------------------
+  pares anotados .......................... 6345
+  pares efectivos (conjunto CF) ........... 6177
+  pares nulos ............................. 168
+      below_resolution      ............. 31
+      clip_bound            ............. 135
+      no_change_requested   ............. 2
+
+2.1 Por palanca
+------------------------------------------------------------------------
+  palanca              n  efect.        %  nulos
+  eph_bolus          375     375  100.000  -
+  ephedrine          120     120  100.000  -
+  fio2_down          150     150  100.000  -
+  nepi_rate          375     375  100.000  -
+  noradrenaline      250     250  100.000  -
+  peep_down          150      93   62.000  clip_bound:57
+  peep_up            150     150  100.000  -
+  phen_bolus         375     375  100.000  -
+  phen_rate          375     375  100.000  -
+  ppf20_rate         375     371   98.933  below_resolution:2, no_change_requested:2
+  ppf_bolus          375     375  100.000  -
+  propofol_bolus     250     250  100.000  -
+  remi_bolus         375     375  100.000  -
+  remi_up            250     247   98.800  below_resolution:3
+  rftn20_rate        375     367   97.867  below_resolution:8
+  set_fio2           375     375  100.000  -
+  set_peep           375     291   77.600  below_resolution:6, clip_bound:78
+  set_rr             375     363   96.800  below_resolution:12
+  set_tv             375     375  100.000  -
+  sevo_mac           375     375  100.000  -
+  sevo_up            150     150  100.000  -
+
+3. Criterios
+------------------------------------------------------------------------
+  C1  |t_divergence_raw - t_action| <= 30 s
+      acciones puntuales: 4380 efectivos, 0 fallos -> PASA
+      consigna persistente (fuera de alcance): 1797 efectivos, 78 fallos
+      no aplicable: la consigna persistente sólo diverge cuando el plan base la cambia
+  C2  efecto en la ventana de t_action o la siguiente (lag<=1) en >= 99 % de los pares
+      acciones puntuales: 99.9315 % -> PASA
+      consigna persistente: 94.8804 %
+      histograma de lag (acciones puntuales): 0:4069, 1:308, 2:2, 3:1
+  C3  ningún null_cause = unexplained ............ 0 -> PASA
+  C4  prefijo idéntico (features y máscaras) ..... 0 fallos -> PASA
+      prefijo medido sobre la rejilla de tokens (cf_pairs.pre_action): ventanas con t1 <= floor(t_action/5)*5 - 2*5 s, que no pueden ver la intervención ni por la cuantización de pk_v2 ni por la atribución temprana de los tracks de evento discreto
+
+4. Nulos no-PEEP documentados con evidencia
+------------------------------------------------------------------------
+  n = 33
+  palanca          pair     t_action causa             verdad?       base  petición
+  remi_up        171181     14364.70 below_resolution  True       21.4025  INFUSION_CHANGE remifentanil 16.1mcg/min
+  remi_up        171217      5780.50 below_resolution  True       26.3149  INFUSION_CHANGE remifentanil 12mcg/min
+  remi_up        171473      3768.50 below_resolution  True        5.4118  INFUSION_CHANGE remifentanil 9.97mcg/min
+  ppf20_rate     190207      4429.30 below_resolution  True        7.5599  INFUSION_CHANGE propofol 9.96mg/min
+  ppf20_rate     190231      8004.00 no_change_requested True       22.1815  INFUSION_CHANGE propofol 7.43mg/min
+  ppf20_rate     190567      4788.40 no_change_requested False      13.1901  INFUSION_CHANGE propofol 4.31mg/min
+  ppf20_rate     190739      4150.80 below_resolution  True       11.9951  INFUSION_CHANGE propofol 3.4mg/min
+  rftn20_rate    190811      3544.90 below_resolution  True       14.8924  INFUSION_CHANGE remifentanil 13.7mcg/min
+  rftn20_rate    190827      4560.30 below_resolution  True        8.6123  INFUSION_CHANGE remifentanil 5.54mcg/min
+  rftn20_rate    190913      2636.90 below_resolution  True        7.8031  INFUSION_CHANGE remifentanil 3.48mcg/min
+  rftn20_rate    190975     12306.20 below_resolution  True        9.1826  INFUSION_CHANGE remifentanil 8.57mcg/min
+  rftn20_rate    191359      4739.70 below_resolution  True       21.6805  INFUSION_CHANGE remifentanil 13.7mcg/min
+  rftn20_rate    191381      3127.90 below_resolution  True        4.0455  INFUSION_CHANGE remifentanil 1.04mcg/min
+  rftn20_rate    191423      4174.10 below_resolution  True       14.9768  INFUSION_CHANGE remifentanil 6.26mcg/min
+  rftn20_rate    191477      3078.80 below_resolution  True       20.9347  INFUSION_CHANGE remifentanil 2.48mcg/min
+  set_rr         196773      4070.88 below_resolution  True       17.0000  {"rr_delta": 0.056499299859009255}
+  set_rr         196909      6426.38 below_resolution  True       11.0000  {"rr_delta": 0.1374838122296298}
+  set_rr         197123      3136.69 below_resolution  True       15.0000  {"rr_delta": -0.043692250462976645}
+  set_rr         197127      8189.69 below_resolution  True       14.0000  {"rr_delta": 0.05161203699119454}
+  set_rr         197137      8081.83 below_resolution  True       13.0000  {"rr_delta": 0.04048488124168781}
+  set_rr         197289      5369.06 below_resolution  True       16.0000  {"rr_delta": 0.12060072885802953}
+  set_rr         197307      9096.63 below_resolution  True       17.0000  {"rr_delta": 0.08864324747016905}
+  set_rr         197343     10315.81 below_resolution  True       23.0000  {"rr_delta": -0.07528415801953248}
+  set_rr         197391      4134.48 below_resolution  True       16.0000  {"rr_delta": -0.026510931336666488}
+  set_rr         197409      6175.14 below_resolution  True       10.0000  {"rr_delta": 0.044446488254973104}
+  set_rr         197441      6102.80 below_resolution  True       12.0000  {"rr_delta": -0.10071390645266476}
+  set_rr         197483      4375.50 below_resolution  True       16.0000  {"rr_delta": -0.023248324083263938}
+  set_peep       198325      4207.26 below_resolution  True        0.0000  {"fio2_set": 0.35, "peep_delta": 0.026912248243622372}
+  set_peep       198461      3998.49 below_resolution  True        0.0000  {"fio2_set": 0.35, "peep_delta": 0.17331680285990814}
+  set_peep       198707      6288.69 below_resolution  True        0.0000  {"fio2_set": 0.35, "peep_delta": 0.02933478315766269}
+  set_peep       198721      5698.10 below_resolution  True        0.0000  {"fio2_set": 0.35, "peep_delta": -0.31891201848601014}
+  set_peep       198783      5582.39 below_resolution  True        5.0000  {"fio2_set": 0.35, "peep_delta": 0.020365813878976624}
+  set_peep       198811      9596.66 below_resolution  True        0.0000  {"fio2_set": 0.35, "peep_delta": -0.21501041091833795}
+
+5. Adopción por artefacto
+------------------------------------------------------------------------
+  paths.PK_DIR       = pk_v2  (== PK_V2_DIR: True)
+  paths.CONTEXT_DIR  = context_v2  (== CONTEXT_V2_DIR: True)
+  paths.TOKENS_DIR   = tokens_v2  (== TOKENS_V2_DIR: True)
+
+  Fase 0.4 (¿se mezclan versiones?):
+    - src/tokens/pk_tokens.py  escribe en paths.PK_DIR  -> pk_v2 (adoptado).
+    - src/tokens/context_vocab.py escribe en paths.CONTEXT_DIR -> context_v2.
+    - src/tokens/tokenize.py LEE pk_v2 + context_v2 y ESCRIBE en
+      paths.TOKENS_DIR. Esa es la ÚNICA ruta que mezcla versiones y queda
+      cerrada en la fase D, cuando TOKENS_DIR pasa a tokens_v2. Como el
+      tokenizador NO se re-ejecuta en el paso 3b (R1: no se regenera nada),
+      ningún artefacto en disco mezcla versiones.
+
+6. Conjunto CF de entrenamiento
+------------------------------------------------------------------------
+  El conjunto CF son los pares con lever_effective = True de
+  data/tokens_v2/pairs_annotated.parquet (cf_pairs.effective_pair_ids).
+  post_split = t1 > split_t se mantiene tal cual en el contrato
+  (contrato_tokens_v1.md); post_action es una anotación ADICIONAL.
+
+7. Resumen de nulos
+------------------------------------------------------------------------
+  clip_bound     : la petición queda anulada por el clip del simulador
+                   (PEEP con base 0 y delta negativo -> clip [0,25]).
+  below_resolution: la verdad difiere pero la variable observada no lo
+                   resuelve (tramo de ~1.5 s de las tasas sobrescrito por
+                   el mantenimiento base y no muestreado; rr_delta por
+                   debajo del escalón entero del setpoint; peep_delta por
+                   debajo del escalón del setpoint).
+  no_change_requested: el valor pedido coincide con el base (<= 5 %).
+  case_ends      : no hay ninguna ventana con t1 > t_action.
+  unexplained    : ninguna.
+
+  tiempo de anotación: 340.14 s
+
+  Efectivos por palanca y lag (acciones puntuales vs consigna persistente)
+  --------------------------------------------------------------------
+  acciones puntuales     n= 4380  lag p50=   0.0 p90=   0.0 max=     3 lag<=1=99.9315 %
+  consigna persistente   n= 1797  lag p50=   0.0 p90=   1.0 max=   209 lag<=1=94.8804 %
+
+  Nulos por grupo de palanca
+  --------------------------------------------------------------------
+  lever_group       pares  nulos  causas
+  propofol           1000      4  {'below_resolution': 2, 'no_change_requested': 2}
+  remifentanilo      1000     11  {'below_resolution': 11}
+  ventilacion        1950    153  {'clip_bound': 135, 'below_resolution': 18}
+
+  Uso de post_action en el pipeline de entrenamiento
+  --------------------------------------------------------------------
+    from tokens.cf_pairs import load_pairs_annotated, effective_pair_ids
+    n_efectivos = 6177
+
