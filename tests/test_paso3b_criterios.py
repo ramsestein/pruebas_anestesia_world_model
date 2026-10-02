@@ -179,10 +179,12 @@ def test_paso3b_below_resolution_es_tasa_o_cuantizacion():
     assert r["null_causes"]["below_resolution"] == sum(br.values())
     for lv in ("rftn20_rate", "ppf20_rate", "remi_up", "set_rr"):
         assert br.get(lv, 0) > 0, lv
-    # todos los nulos no-PEEP son below_resolution con la verdad divergente
+    # todos los nulos no-PEEP son below_resolution (verdad divergente) o
+    # no_change_requested (petición ≈ base)
     for e in r["nulls_non_peep"]:
-        assert e["null_cause"] == "below_resolution", e
-        assert e["truth_diff_after_action"] is True, e
+        assert e["null_cause"] in ("below_resolution", "no_change_requested"), e
+        if e["null_cause"] == "below_resolution":
+            assert e["truth_diff_after_action"] is True, e
 
 
 # ---------------------------------------------------------------------------
