@@ -1,0 +1,86 @@
+{
+  "date": "2026-10-02T12:21:32.354739",
+  "pk_tokens_py_sha256": "f1294ad7a3d83753520c022ab2fecfed4bd45dcb1e22652c24f72d86156a13dd",
+  "contract_sha256": "e2bd1dfa42a24e43edbfdb91460ccc187feae56ba3277166f91f1fee2cabf21e",
+  "windows_manifest_path": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4\\manifest.json",
+  "sha256_windows_manifest": "68097ce410f97320308a625867679c76ffd92afb786f47d1f9fa9f021b2a203f",
+  "parameters": {
+    "propofol": {
+      "model": "Schnider 3 comp + Ce",
+      "ke0_per_min": 0.456
+    },
+    "remifentanilo": {
+      "model": "Minto 3 comp + Ce",
+      "ke0_per_min": 0.6
+    },
+    "sevoflurano": {
+      "model": "passthrough MAC"
+    },
+    "fenilefrina": {
+      "model": "bolo exponencial + infusión",
+      "ke0_per_s": 0.0023104906018664843
+    },
+    "efedrina": {
+      "model": "bolo exponencial",
+      "ke0_per_s": 0.0011552453009332421
+    },
+    "noradrenalina": {
+      "model": "ganancia directa"
+    },
+    "rocuronio": {
+      "model": "Wierda 2 comp + Ce",
+      "V1_L_per_kg": 0.07,
+      "Cl_mL_per_kg_per_min": 3.7,
+      "ke0_per_min": 0.105,
+      "V2_L_per_kg": 0.13,
+      "k12_per_min": 0.093,
+      "k21_per_min": "k12*V1/V2"
+    }
+  },
+  "bolus_source_by_cohort": {
+    "propofol": "PPF20_RATE + ppf_bolus (sint); en real solo RATE (bolus=0)",
+    "remifentanilo": "RFTN20_RATE + remi_bolus (sint); en real solo RATE (bolus=0)",
+    "sevoflurano": "Primus/MAC (sin bolo)",
+    "fenilefrina": "PHEN_RATE + phen_bolus (sint); en real solo RATE (bolus=0)",
+    "noradrenalina": "NEPI_RATE (sin bolo)",
+    "efedrina": "eph_bolus (solo bolo); inobservable en real (m_ce=1)",
+    "rocuronio": "roc_bolus (sint); ROC_RATE como perfusión (real)"
+  },
+  "iiv_note": {
+    "aplica_a": [
+      "propofol",
+      "remifentanilo"
+    ],
+    "sigma_k": 0.2,
+    "sigma_v": 0.15,
+    "sigma_ke0": 0.15,
+    "registrada_en_metadata": false,
+    "consecuencia": "la Ce poblacional del token se desvía ~20-25 % de la Ce individual del generador (aceptado como ruido realista)"
+  },
+  "n_rows": 73797114,
+  "n_rows_by_source_split": {
+    "source=cf_v7/split=train": 27863930,
+    "source=cf_v7/split=val": 4845942,
+    "source=real/split=train": 12061757,
+    "source=real/split=val": 2063800,
+    "source=synthetic_v7/split=train": 21728215,
+    "source=synthetic_v7/split=val": 3896864,
+    "source=vaso_reinf_v7/split=train": 1151944,
+    "source=vaso_reinf_v7/split=val": 184662
+  },
+  "n_partitions": 369,
+  "elapsed_s": 1554.54,
+  "assumptions": [
+    "Wierda: V1=0.07 L/kg, Cl=3.7 mL/kg/min, ke0=0.105 min-1, V2=0.13 L/kg, k12=0.093 min-1 y k21=k12*V1/V2 son del contrato v2 (Wierda publicado).",
+    "Fenilefrina: la infusión se integra con la misma ODE de un compartimento del bolo, convergiendo al estado estacionario R/ke0 (ke0=ln2/300 s-1); el generador usa la tasa directamente (sin dinámica).",
+    "dose_cum se acumula desde el inicio de la rejilla (anestart=0 en sintéticos; en real la dosis anterior al inicio de la rejilla no se contabiliza).",
+    "Forward-fill de tasas SIN tope de edad para Ce y dose_cum (un hueco en el registro no es una parada de bomba); el max_age=30 s se usa SOLO para m_ce.",
+    "m_ce_<d> usa la columna fuente de dosis por fármaco y cohorte: RATE (o Primus/MAC) para la mayoría; eph_bolus/roc_bolus para efedrina y rocuronio en sintéticos; ROC_RATE para rocuronio en real.",
+    "dose_cum_sevoflurano = 0 (sin PK); dose_cum_noradrenalina en ug/kg (integral de ug/kg/min).",
+    "Rocuronio en real: ROC_RATE está en mL/h; la conversión a mg/min usa la concentración estándar de 10 mg/mL (SUPUESTO documentado; no está en el contrato v2).",
+    "En real no se infieren bolos desde VOL (contrato v2): bolus_*=0 y bolus_obs_*=0 para todos los fármacos; los bolos por bomba quedan en RATE como picos de tasa.",
+    "El bolo se aplica al inicio de la celda de 5 s en la que cae (la columna *_bolus de windows_v2 suma en (t-5, t]).",
+    "Integración: RK4 de orden 4 en forma cerrada (sistema lineal) con paso de 5 s; fenilefrina/efedrina con solución analítica exacta (recursiva).",
+    "El parquet de salida incluye las columnas source y split además de (caseid, t) para trazabilidad y conteos."
+  ]
+}
