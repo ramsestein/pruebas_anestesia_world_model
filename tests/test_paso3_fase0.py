@@ -58,6 +58,7 @@ COPY_ORIGINALS = {
     "windows_v4_manifest.json": "data/windows_v4/manifest.json",
     "windows_v4_split.parquet": "data/windows_v4/split.parquet",
     "pk_v1_manifest.json": "data/pk_v1/manifest_pk.json",
+    "pk_v2_manifest.json": "data/pk_v2/manifest_pk.json",
     "tokens_v1_manifest.json": "data/tokens_v1/manifest_tokens.json",
     "ae_v2_manifest.json": "data/ae_v2/manifest_ae.json",
     "ae_v2_norm_stats.json": "data/ae_v2/norm_stats.json",
