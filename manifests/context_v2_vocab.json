@@ -1,0 +1,1269 @@
+{
+  "version": 3,
+  "date": "2026-10-02T12:03:40.203126",
+  "sha256_contract": "e2bd1dfa42a24e43edbfdb91460ccc187feae56ba3277166f91f1fee2cabf21e",
+  "sha256_module": "125bd2b56c7ff520fa52a941536e04eb76e70f9abdde1b89e7c6c9d3a5c5a3ce",
+  "windows_manifest_path": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4\\manifest.json",
+  "sha256_windows_manifest": "68097ce410f97320308a625867679c76ffd92afb786f47d1f9fa9f021b2a203f",
+  "split_parquet_path": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4\\split.parquet",
+  "sha256_split_parquet": "6d952d0313e39401bb47c7389bd932fce5ace3a146a6a7647b41e56e13f3b5c3",
+  "n_items": 86,
+  "n_items_v1": 12,
+  "n_items_v2": 74,
+  "n_token_rows": 192774,
+  "counts": {
+    "total": 86,
+    "por_scope": {
+      "v1": 12,
+      "v2": 74
+    },
+    "por_tipo": {
+      "continuo": 23,
+      "binario": 5,
+      "categorico": 58
+    },
+    "por_eje": {
+      "demografia": 5,
+      "metabolico": 2,
+      "respiratorio": 4,
+      "renal_electrolitos": 4,
+      "hepatico_coagulacion": 7,
+      "acido_base": 3,
+      "via_aerea": 7,
+      "cardiovascular": 2,
+      "riesgo_global": 7,
+      "procedimiento": 28,
+      "diagnostico": 17
+    }
+  },
+  "ejes": {
+    "demografia": [
+      {
+        "item_id": "age",
+        "scope": "v1"
+      },
+      {
+        "item_id": "height",
+        "scope": "v1"
+      },
+      {
+        "item_id": "weight",
+        "scope": "v1"
+      },
+      {
+        "item_id": "bmi",
+        "scope": "v1"
+      },
+      {
+        "item_id": "sex:F",
+        "scope": "v1"
+      }
+    ],
+    "metabolico": [
+      {
+        "item_id": "preop_gluc",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_dm",
+        "scope": "v2"
+      }
+    ],
+    "respiratorio": [
+      {
+        "item_id": "preop_pao2",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_paco2",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_sao2",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_pft:anormal",
+        "scope": "v2"
+      }
+    ],
+    "renal_electrolitos": [
+      {
+        "item_id": "preop_cr",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_bun",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_na",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_k",
+        "scope": "v2"
+      }
+    ],
+    "hepatico_coagulacion": [
+      {
+        "item_id": "preop_alb",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_ast",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_alt",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_pt",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_aptt",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_plt",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_hb",
+        "scope": "v2"
+      }
+    ],
+    "acido_base": [
+      {
+        "item_id": "preop_ph",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_hco3",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_be",
+        "scope": "v2"
+      }
+    ],
+    "via_aerea": [
+      {
+        "item_id": "tubesize",
+        "scope": "v2"
+      },
+      {
+        "item_id": "airway:oral",
+        "scope": "v2"
+      },
+      {
+        "item_id": "airway:otros",
+        "scope": "v2"
+      },
+      {
+        "item_id": "cormack:i",
+        "scope": "v2"
+      },
+      {
+        "item_id": "cormack:ii",
+        "scope": "v2"
+      },
+      {
+        "item_id": "cormack:iiia",
+        "scope": "v2"
+      },
+      {
+        "item_id": "cormack:otros",
+        "scope": "v2"
+      }
+    ],
+    "cardiovascular": [
+      {
+        "item_id": "preop_htn",
+        "scope": "v2"
+      },
+      {
+        "item_id": "preop_ecg:anormal",
+        "scope": "v2"
+      }
+    ],
+    "riesgo_global": [
+      {
+        "item_id": "asa:1",
+        "scope": "v1"
+      },
+      {
+        "item_id": "asa:2",
+        "scope": "v1"
+      },
+      {
+        "item_id": "asa:3",
+        "scope": "v1"
+      },
+      {
+        "item_id": "asa:4",
+        "scope": "v1"
+      },
+      {
+        "item_id": "asa:otros",
+        "scope": "v1"
+      },
+      {
+        "item_id": "emop:0",
+        "scope": "v1"
+      },
+      {
+        "item_id": "emop:1",
+        "scope": "v1"
+      }
+    ],
+    "procedimiento": [
+      {
+        "item_id": "optype:biliary_pancreas",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:breast",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:colorectal",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:general",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:hepatic",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:major_resection",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:minor_resection",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:others",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:stomach",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:thyroid",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:transplantation",
+        "scope": "v2"
+      },
+      {
+        "item_id": "optype:vascular",
+        "scope": "v2"
+      },
+      {
+        "item_id": "approach:open",
+        "scope": "v2"
+      },
+      {
+        "item_id": "approach:robotic",
+        "scope": "v2"
+      },
+      {
+        "item_id": "approach:videoscopic",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:left_lateral_decubitus",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:lithotomy",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:otros",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:prone",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:reverse_trendelenburg",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:right_lateral_decubitus",
+        "scope": "v2"
+      },
+      {
+        "item_id": "position:supine",
+        "scope": "v2"
+      },
+      {
+        "item_id": "ane_type:general",
+        "scope": "v2"
+      },
+      {
+        "item_id": "ane_type:mac",
+        "scope": "v2"
+      },
+      {
+        "item_id": "ane_type:neuraxial",
+        "scope": "v2"
+      },
+      {
+        "item_id": "ane_type:otros",
+        "scope": "v2"
+      },
+      {
+        "item_id": "ane_type:sedationalgesia",
+        "scope": "v2"
+      },
+      {
+        "item_id": "ane_type:spinal",
+        "scope": "v2"
+      }
+    ],
+    "diagnostico": [
+      {
+        "item_id": "top_diagnosis_chapter:c",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:d",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:e",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:g",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:h",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:i",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:j",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:k",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:l",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:m",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:n",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:o",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:otros",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:r",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:s",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:t",
+        "scope": "v2"
+      },
+      {
+        "item_id": "top_diagnosis_chapter:z",
+        "scope": "v2"
+      }
+    ]
+  },
+  "items": [
+    {
+      "item_id": "age",
+      "tipo": "continuo",
+      "eje": "demografia",
+      "columna": "age",
+      "scope": "v1",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 57.31321663343135,
+      "std": 15.646552794714966
+    },
+    {
+      "item_id": "height",
+      "tipo": "continuo",
+      "eje": "demografia",
+      "columna": "height",
+      "scope": "v1",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 162.0851087661577,
+      "std": 9.476288408027651
+    },
+    {
+      "item_id": "weight",
+      "tipo": "continuo",
+      "eje": "demografia",
+      "columna": "weight",
+      "scope": "v1",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 62.7908285868536,
+      "std": 12.712727752384117
+    },
+    {
+      "item_id": "bmi",
+      "tipo": "continuo",
+      "eje": "demografia",
+      "columna": "bmi",
+      "scope": "v1",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 23.84819949115624,
+      "std": 4.139550135886484
+    },
+    {
+      "item_id": "preop_gluc",
+      "tipo": "continuo",
+      "eje": "metabolico",
+      "columna": "preop_gluc",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 115.235070288553,
+      "std": 41.371632885060045
+    },
+    {
+      "item_id": "preop_pao2",
+      "tipo": "continuo",
+      "eje": "respiratorio",
+      "columna": "preop_pao2",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 101.34126637554586,
+      "std": 45.391746793871164
+    },
+    {
+      "item_id": "preop_paco2",
+      "tipo": "continuo",
+      "eje": "respiratorio",
+      "columna": "preop_paco2",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 39.94628820960699,
+      "std": 6.774644271096797
+    },
+    {
+      "item_id": "preop_sao2",
+      "tipo": "continuo",
+      "eje": "respiratorio",
+      "columna": "preop_sao2",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 92.21607929515419,
+      "std": 14.954853691870548
+    },
+    {
+      "item_id": "preop_cr",
+      "tipo": "continuo",
+      "eje": "renal_electrolitos",
+      "columna": "preop_cr",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 1.0304597451257842,
+      "std": 1.288168686105992
+    },
+    {
+      "item_id": "preop_bun",
+      "tipo": "continuo",
+      "eje": "renal_electrolitos",
+      "columna": "preop_bun",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 16.09909244406923,
+      "std": 10.99453005041347
+    },
+    {
+      "item_id": "preop_na",
+      "tipo": "continuo",
+      "eje": "renal_electrolitos",
+      "columna": "preop_na",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 139.83630952380952,
+      "std": 3.1674657798949055
+    },
+    {
+      "item_id": "preop_k",
+      "tipo": "continuo",
+      "eje": "renal_electrolitos",
+      "columna": "preop_k",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 4.197672060565905,
+      "std": 0.42982224930205765
+    },
+    {
+      "item_id": "preop_alb",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_alb",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 4.0597766352613585,
+      "std": 0.5323416570607661
+    },
+    {
+      "item_id": "preop_ast",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_ast",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 29.25366677218529,
+      "std": 110.12260483626801
+    },
+    {
+      "item_id": "preop_alt",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_alt",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 28.72753164556962,
+      "std": 79.98901244050212
+    },
+    {
+      "item_id": "preop_pt",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_pt",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 62.69524113023157,
+      "std": 42.56334916372797
+    },
+    {
+      "item_id": "preop_aptt",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_aptt",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 32.78635953505383,
+      "std": 7.386576762211389
+    },
+    {
+      "item_id": "preop_plt",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_plt",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 241.43540921523248,
+      "std": 86.12003915856427
+    },
+    {
+      "item_id": "preop_hb",
+      "tipo": "continuo",
+      "eje": "hepatico_coagulacion",
+      "columna": "preop_hb",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 12.785436543892509,
+      "std": 2.033040834027235
+    },
+    {
+      "item_id": "preop_ph",
+      "tipo": "continuo",
+      "eje": "acido_base",
+      "columna": "preop_ph",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 7.3876860215053775,
+      "std": 0.16802231136497808
+    },
+    {
+      "item_id": "preop_hco3",
+      "tipo": "continuo",
+      "eje": "acido_base",
+      "columna": "preop_hco3",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 24.037224669603525,
+      "std": 2.6971435792275695
+    },
+    {
+      "item_id": "preop_be",
+      "tipo": "continuo",
+      "eje": "acido_base",
+      "columna": "preop_be",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": -0.4143487858719647,
+      "std": 3.053336297399139
+    },
+    {
+      "item_id": "tubesize",
+      "tipo": "continuo",
+      "eje": "via_aerea",
+      "columna": "tubesize",
+      "scope": "v2",
+      "regla": "valor normalizado (media/std calculadas solo sobre split=train)",
+      "mean": 7.213810316139767,
+      "std": 0.49382390015299965
+    },
+    {
+      "item_id": "sex:F",
+      "tipo": "binario",
+      "eje": "demografia",
+      "columna": "sex",
+      "scope": "v1",
+      "regla": "columna sex; positivo (token emitido) si el valor es femenino ('F')",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "preop_htn",
+      "tipo": "binario",
+      "eje": "cardiovascular",
+      "columna": "preop_htn",
+      "scope": "v2",
+      "regla": "columna preop_htn; positivo si == 1",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "preop_dm",
+      "tipo": "binario",
+      "eje": "metabolico",
+      "columna": "preop_dm",
+      "scope": "v2",
+      "regla": "columna preop_dm; positivo si == 1",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "preop_ecg:anormal",
+      "tipo": "binario",
+      "eje": "cardiovascular",
+      "columna": "preop_ecg",
+      "scope": "v2",
+      "regla": "columna preop_ecg; anormal si el valor está en el inventario de hallazgos anormales (no 'Normal Sinus Rhythm'); valor desconocido o vacío -> no emitido",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "preop_pft:anormal",
+      "tipo": "binario",
+      "eje": "respiratorio",
+      "columna": "preop_pft",
+      "scope": "v2",
+      "regla": "columna preop_pft; anormal si el valor está en el inventario de hallazgos anormales (no 'Normal'); valor desconocido o vacío -> no emitido",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "asa:1",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "asa",
+      "scope": "v1",
+      "regla": "categoría 1",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "asa:2",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "asa",
+      "scope": "v1",
+      "regla": "categoría 2",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "asa:3",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "asa",
+      "scope": "v1",
+      "regla": "categoría 3",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "asa:4",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "asa",
+      "scope": "v1",
+      "regla": "categoría 4",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "asa:otros",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "asa",
+      "scope": "v1",
+      "regla": "categoría otros",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "emop:0",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "emop",
+      "scope": "v1",
+      "regla": "categoría 0",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "emop:1",
+      "tipo": "categorico",
+      "eje": "riesgo_global",
+      "columna": "emop",
+      "scope": "v1",
+      "regla": "categoría 1",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:biliary_pancreas",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría biliary_pancreas",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:breast",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría breast",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:colorectal",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría colorectal",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:general",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría general",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:hepatic",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría hepatic",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:major_resection",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría major_resection",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:minor_resection",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría minor_resection",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:others",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría others",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:stomach",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría stomach",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:thyroid",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría thyroid",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:transplantation",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría transplantation",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "optype:vascular",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "optype",
+      "scope": "v2",
+      "regla": "categoría vascular",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "approach:open",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "approach",
+      "scope": "v2",
+      "regla": "categoría open",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "approach:robotic",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "approach",
+      "scope": "v2",
+      "regla": "categoría robotic",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "approach:videoscopic",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "approach",
+      "scope": "v2",
+      "regla": "categoría videoscopic",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:left_lateral_decubitus",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría left_lateral_decubitus",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:lithotomy",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría lithotomy",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:otros",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría otros",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:prone",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría prone",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:reverse_trendelenburg",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría reverse_trendelenburg",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:right_lateral_decubitus",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría right_lateral_decubitus",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "position:supine",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "position",
+      "scope": "v2",
+      "regla": "categoría supine",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "ane_type:general",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "ane_type",
+      "scope": "v2",
+      "regla": "categoría general",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "ane_type:mac",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "ane_type",
+      "scope": "v2",
+      "regla": "categoría mac",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "ane_type:neuraxial",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "ane_type",
+      "scope": "v2",
+      "regla": "categoría neuraxial",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "ane_type:otros",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "ane_type",
+      "scope": "v2",
+      "regla": "categoría otros",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "ane_type:sedationalgesia",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "ane_type",
+      "scope": "v2",
+      "regla": "categoría sedationalgesia",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "ane_type:spinal",
+      "tipo": "categorico",
+      "eje": "procedimiento",
+      "columna": "ane_type",
+      "scope": "v2",
+      "regla": "categoría spinal",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:c",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría c",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:d",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría d",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:e",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría e",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:g",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría g",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:h",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría h",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:i",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría i",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:j",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría j",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:k",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría k",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:l",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría l",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:m",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría m",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:n",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría n",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:o",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría o",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:otros",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría otros",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:r",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría r",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:s",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría s",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:t",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría t",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "top_diagnosis_chapter:z",
+      "tipo": "categorico",
+      "eje": "diagnostico",
+      "columna": "top_diagnosis_chapter",
+      "scope": "v2",
+      "regla": "categoría z",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "airway:oral",
+      "tipo": "categorico",
+      "eje": "via_aerea",
+      "columna": "airway",
+      "scope": "v2",
+      "regla": "categoría oral",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "airway:otros",
+      "tipo": "categorico",
+      "eje": "via_aerea",
+      "columna": "airway",
+      "scope": "v2",
+      "regla": "categoría otros",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "cormack:i",
+      "tipo": "categorico",
+      "eje": "via_aerea",
+      "columna": "cormack",
+      "scope": "v2",
+      "regla": "categoría i",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "cormack:ii",
+      "tipo": "categorico",
+      "eje": "via_aerea",
+      "columna": "cormack",
+      "scope": "v2",
+      "regla": "categoría ii",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "cormack:iiia",
+      "tipo": "categorico",
+      "eje": "via_aerea",
+      "columna": "cormack",
+      "scope": "v2",
+      "regla": "categoría iiia",
+      "mean": null,
+      "std": null
+    },
+    {
+      "item_id": "cormack:otros",
+      "tipo": "categorico",
+      "eje": "via_aerea",
+      "columna": "cormack",
+      "scope": "v2",
+      "regla": "categoría otros",
+      "mean": null,
+      "std": null
+    }
+  ]
+}
