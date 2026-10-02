@@ -51,6 +51,43 @@
       "status": "no_encontrado",
       "lost": "En el paso 0 (criterio D4) se regeneró data/context_v1/ en su sitio con estadísticos de v7; el vocab.json original pasó de 945b7884… a 0ddcff91…. Buscado en D:/data/anestesia_world/, backups, papelera y el repo sin éxito.",
       "substitute": "data/context_v1/ queda como está (estadísticos v7). La lista de 86 item_id es idéntica a la original (congelada en tests/test_paso0_reproduccion.py, FROZEN_ITEM_IDS); solo cambian los estadísticos. El sha original 945b7884… queda registrado en tokens_v1_manifest.json como sha256_context_vocab."
+    },
+    {
+      "artifact": "ae_v2 / clave sha256_windows_v2_manifest",
+      "status": "clave_heredada",
+      "lost": "La clave sha256_windows_v2_manifest del manifiesto de ae_v2 es un nombre heredado de physio_ae.py.",
+      "substitute": "Su valor es el sha256 de data/windows_v4/manifest.json (68097ce410f97320308a625867679c76ffd92afb786f47d1f9fa9f021b2a203f). No se edita el manifiesto de ae_v2 (artefacto cerrado); se documenta aquí.",
+      "superseded_by": "A partir de los manifiestos v2 (pk_v2/context_v2/tokens_v2) las claves son honestas: windows_manifest_path + sha256_windows_manifest."
+    },
+    {
+      "artifact": "ae_v2 / reproducibilidad",
+      "status": "no_bit_a_bit",
+      "lost": "ae_v2 se entrenó en GPU con cudnn_deterministic=False.",
+      "substitute": "Reentrenable con el mismo código, datos y semilla, pero NO bit a bit. Los gates del manifiesto son una reevaluación en CPU, que SÍ es reproducible bit a bit. El campo device = \"cpu\" del manifiesto se refiere a esa reevaluación."
+    },
+    {
+      "artifact": "manifests/cohort_gap_results.json",
+      "status": "original_regenerado",
+      "lost": "data/diagnostics/cohort_gap_results.json se regeneró tras la copia (cache de cohort_gap.py invalidada por cambio del módulo).",
+      "substitute": "Se conserva la copia versionada (sha ee61c3fd43a6536e…) como instantánea histórica; el original actual es aa167dd2b641e411…."
+    },
+    {
+      "artifact": "manifests/gap_addendum_results.json",
+      "status": "original_regenerado",
+      "lost": "data/diagnostics/gap_addendum_results.json se regeneró tras la copia.",
+      "substitute": "Se conserva la copia versionada (sha 766f7be70a6ea298…) como instantánea histórica; el original actual es e6f6afa5c22d7a32…."
+    },
+    {
+      "artifact": "manifests/v7_attribution_results.json",
+      "status": "original_regenerado",
+      "lost": "data/diagnostics/v7_attribution_results.json se regeneró tras la copia.",
+      "substitute": "Se conserva la copia versionada (sha 604c58d6452f81f2…) como instantánea histórica; el original actual es 2271aa121d032e79…."
+    },
+    {
+      "artifact": "manifests/cohort_gap_v7_results.json",
+      "status": "original_perdido",
+      "lost": "No existe data/diagnostics/cohort_gap_v7_results.json: el resultado v7 de cohort_gap se sobrescribió en data/diagnostics/cohort_gap_results.json.",
+      "substitute": "Se conserva la copia versionada (sha a63fb7a38d2d2a17…) como única instantánea del resultado v7."
     }
   ]
 }

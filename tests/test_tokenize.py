@@ -1,7 +1,7 @@
-"""Tests del tokenizador v1 (src/tokens/tokenize.py).
+"""Tests del tokenizador (src/tokens/tokenize.py).
 
 Unitarios (a-h) sobre datos construidos; integración (i-p) sobre
-data/tokens_v1/ (generado con `python -m tokens.tokenize run`).
+data/tokens_v2/ (generado con `python -m tokens.tokenize run --out-root data/tokens_v2`).
 """
 
 from __future__ import annotations
@@ -21,17 +21,8 @@ import paths
 from tokens import tokenize as tk
 
 ROOT = Path(__file__).resolve().parents[1]
-TOKENS_DIR = paths.TOKENS_DIR / "windows"
-MANIFEST = paths.TOKENS_DIR / "manifest_tokens.json"
-
-# Artefactos generados desde las cohortes v5 (windows_v2): la salida tokens_v1
-# en disco es de v5 y su regeneración con v7 es el paso siguiente a esta tarea.
-LOST_V5_OUTPUT = pytest.mark.skip(reason=(
-    "requiere artefactos generados desde las cohortes v5 (cf_v5/synthetic_v5 en "
-    "windows_v2 y su salida tokens_v1) — paths.LOST_COHORTS"))
-LOST_PK_V7 = pytest.mark.skip(reason=(
-    "requiere pk_v1 de las cohortes v7 (no regenerado; data/pk_v1 en disco es "
-    "de windows_v2/v5) — regeneración prevista en el paso siguiente"))
+TOKENS_DIR = paths.TOKENS_V2_DIR / "windows"
+MANIFEST = paths.TOKENS_V2_DIR / "manifest_tokens.json"
 
 
 # --------------------------------------------------------------------------
@@ -258,10 +249,10 @@ def test_h_determinism_bytes_identical():
 
 def _require_output():
     if not TOKENS_DIR.exists() or not MANIFEST.exists():
-        raise AssertionError("data/tokens_v1 no existe: ejecuta 'python -m tokens.tokenize run'")
+        raise AssertionError("data/tokens_v2 no existe: ejecuta 'python -m tokens.tokenize run --out-root data/tokens_v2'")
     parts = sorted(TOKENS_DIR.glob("source=*/split=*/part-*.parquet"))
     if not parts:
-        raise AssertionError("data/tokens_v1 vacío")
+        raise AssertionError("data/tokens_v2 vacío")
     return parts
 
 
@@ -289,7 +280,7 @@ def _aeq(a, b) -> bool:
 
 
 def _cf_case_map(parts):
-    """Mapea caseid -> partición de salida escaneando las particiones cf_v5.
+    """Mapea caseid -> partición de salida escaneando las particiones cf_v7.
 
     El mapeo caseid -> partición no se puede derivar con la fórmula de suma
     acumulada de celdas: window.py hace flush cuando el buffer supera 200 000
@@ -299,7 +290,7 @@ def _cf_case_map(parts):
     caseids: set[int] = set()
     case_to_part: dict[int, Path] = {}
     for part in parts:
-        if "source=cf_v5" not in str(part):
+        if "source=cf_v7" not in str(part):
             continue
         df = pq.ParquetFile(part).read(columns=["caseid"]).to_pandas()
         for cid in df.caseid.unique():
@@ -314,8 +305,6 @@ def _load_case_tokens_from_map(caseid: int, case_to_part: dict) -> pd.DataFrame:
     return tbl[tbl.caseid == caseid].sort_values("t0", kind="stable").reset_index(drop=True)
 
 
-@pytest.mark.requires_lost_data
-@LOST_V5_OUTPUT
 def test_i_gate5_split_matches():
     parts = _require_output()
     cases = pq.read_table(paths.WINDOWS_DIR / "cases.parquet").to_pandas()
@@ -336,8 +325,6 @@ def test_i_gate5_split_matches():
             assert case_expected.get(cid) == split, f"split incorrecto para {cid}"
 
 
-@pytest.mark.requires_lost_data
-@LOST_V5_OUTPUT
 def test_j_gate2_cf_prefix():
     parts = _require_output()
     cf_meta = tk.load_cf_meta()
@@ -497,7 +484,7 @@ def test_n_gate7_ks_informative():
     for part in train_parts:
         df = pq.read_table(part, columns=cols).to_pandas()
         real = df[df.source == "real"]
-        synth = df[df.source == "synthetic_v5"]
+        synth = df[df.source == "synthetic_v7"]
         for d in tk.DRUGS:
             r = real[real[f"drug_{d}_mask"] == 0][f"drug_{d}_ce_t0"].to_numpy()
             s = synth[synth[f"drug_{d}_mask"] == 0][f"drug_{d}_ce_t0"].to_numpy()
@@ -592,15 +579,13 @@ def test_o_gate1_coverage():
             print(f"  ctx  {i:12s} {src:14s} {key:24s} emitido={frac:.3f}")
 
 
-@pytest.mark.requires_lost_data
-@LOST_V5_OUTPUT
 def test_p_cf_metadata():
     parts = _require_output()
     cf_meta = tk.load_cf_meta()
     roles_by_pair: dict[int, set] = {}
     cols = ["caseid", "t0", "t1", "pair_id", "cf_role", "split_t", "lever", "post_split"]
     for part in parts:
-        if "source=cf_v5" not in str(part):
+        if "source=cf_v7" not in str(part):
             continue
         df = pq.read_table(part, columns=cols).to_pandas()
         for _, r in df.iterrows():
@@ -612,7 +597,7 @@ def test_p_cf_metadata():
             assert r.lever == meta["lever"]
             # contrato v4: post_split = t1 > split_t
             assert bool(r.post_split) == (int(r.t1) > float(meta["split_t"]))
-    assert roles_by_pair, "no se encontraron filas cf_v5"
+    assert roles_by_pair, "no se encontraron filas cf_v7"
     for pair, roles in roles_by_pair.items():
         assert roles == {"base", "intervencion"}, f"par {pair}: roles {roles}"
 
@@ -633,8 +618,6 @@ def test_q_no_phase_marks_real_cases_excluded():
         f"casos sin marcas de fase en la salida: {sorted(excluded & found)}"
 
 
-@pytest.mark.requires_lost_data
-@LOST_V5_OUTPUT
 def test_cf_branch_pairing():
     """Corrección 2: las ramas base e intervención tienen el mismo conjunto de
     t0 dense=False (sin eso no se puede emparejar ventana a ventana)."""
@@ -671,11 +654,9 @@ def test_cf_branch_pairing():
         assert ta == tb, f"par {p}: t0 dense=False distintos ({len(ta)} vs {len(tb)})"
 
 
-@pytest.mark.requires_lost_data
-@LOST_V5_OUTPUT
 def test_pairs_parquet():
-    """Corrección 2: data/tokens_v1/pairs.parquet, una fila por par CF."""
-    path = ROOT / "data" / "tokens_v1" / "pairs.parquet"
+    """Corrección 2: data/tokens_v2/pairs.parquet, una fila por par CF."""
+    path = paths.TOKENS_V2_DIR / "pairs.parquet"
     assert path.exists(), "pairs.parquet no existe"
     df = pq.read_table(path).to_pandas()
     assert list(df.columns) == [
@@ -707,8 +688,6 @@ def test_pairs_parquet():
     assert set(df.lever_group.unique()) == set(tk.LEVER_GROUP.values())
 
 
-@pytest.mark.requires_lost_data
-@LOST_PK_V7
 def test_gate4_mechanical_read_columns(tmp_path, monkeypatch):
     """Corrección 3: ninguna lectura de parquet omite columns= y la unión de
     columnas solicitadas no intersecta con la tabla Excluidas (salvo caseid,
@@ -736,10 +715,14 @@ def test_gate4_mechanical_read_columns(tmp_path, monkeypatch):
 
     monkeypatch.setattr(pq, "read_table", spy_read_table)
     monkeypatch.setattr(pq.ParquetFile, "read", spy_pf_read)
+    monkeypatch.setattr(tk, "PK_DIR", paths.PK_V2_DIR / "windows")
+    monkeypatch.setattr(tk, "CTX_TOKENS", paths.CONTEXT_V2_DIR / "tokens.parquet")
+    monkeypatch.setattr(tk, "CTX_VOCAB", paths.CONTEXT_V2_DIR / "vocab.json")
     monkeypatch.setattr(tk, "OUT_DIR", tmp_path / "windows")
     monkeypatch.setattr(tk, "OUT_ROOT", tmp_path)
 
-    for fn in (tk.load_cases, tk.load_context_map, tk.load_cases_without_phase_marks):
+    for fn in (tk.load_cases, tk.load_context_map, tk.load_cases_without_phase_marks,
+               tk.load_vocab_v1):
         fn.cache_clear()
     tk.run_full(verbose=False, limit_parts_per_group=1)
     tk.verify_output()

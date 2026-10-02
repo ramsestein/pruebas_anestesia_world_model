@@ -224,7 +224,7 @@ def test_d5_tokenizer_smoke_50_real_val_cases():
     from tokens import tokenize as tk
 
     manifest = json.loads(
-        (paths.TOKENS_DIR / "manifest_tokens.json").read_text(encoding="utf-8"))
+        (paths.TOKENS_V1_DIR / "manifest_tokens.json").read_text(encoding="utf-8"))
     frozen_stats = manifest["normalization_stats"]
     dense_val = manifest["dense_val_enabled"]
 
@@ -240,7 +240,7 @@ def test_d5_tokenizer_smoke_50_real_val_cases():
     sel = set(int(c) for c in rng.choice(real_val_ids, 50, replace=False))
 
     # filas vigentes en data/tokens_v1 para esos 50 casos
-    out_val = paths.TOKENS_DIR / "windows" / "source=real" / "split=val"
+    out_val = paths.TOKENS_V1_DIR / "windows" / "source=real" / "split=val"
     existing = pd.concat(
         [pq.read_table(p).to_pandas() for p in sorted(out_val.glob("part-*.parquet"))],
         ignore_index=True)

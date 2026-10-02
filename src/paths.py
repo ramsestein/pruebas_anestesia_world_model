@@ -38,9 +38,22 @@ DATA_ROOT = _resolve_data_root()
 # Directorios de artefactos vigentes (bajo DATA_ROOT)
 # ---------------------------------------------------------------------------
 WINDOWS_DIR = DATA_ROOT / "windows_v4"   # ventanas vigentes (cohortes v7)
-TOKENS_DIR = DATA_ROOT / "tokens_v1"
-PK_DIR = DATA_ROOT / "pk_v1"
-CONTEXT_DIR = DATA_ROOT / "context_v1"
+
+# Artefactos de tokens con nombre explícito por versión (paso 3). *_DIR
+# apunta a la versión vigente; las constantes *_V1_DIR / *_V2_DIR son
+# explícitas e independientes del repunte.
+PK_V1_DIR = DATA_ROOT / "pk_v1"
+PK_V2_DIR = DATA_ROOT / "pk_v2"
+CONTEXT_V1_DIR = DATA_ROOT / "context_v1"
+CONTEXT_V2_DIR = DATA_ROOT / "context_v2"
+TOKENS_V1_DIR = DATA_ROOT / "tokens_v1"
+TOKENS_V2_DIR = DATA_ROOT / "tokens_v2"
+
+# Vigentes: v1 hasta la fase D del paso 3 (donde se repunta a v2).
+TOKENS_DIR = TOKENS_V1_DIR
+PK_DIR = PK_V1_DIR
+CONTEXT_DIR = CONTEXT_V1_DIR
+
 # AE vigente del proyecto. En el paso 2 (fase D) se repunta a ae_v2; antes
 # apunta a ae_v1 (histórico). Véanse AE_V1_DIR y AE_V2_DIR más abajo.
 AE_DIR = DATA_ROOT / "ae_v2"

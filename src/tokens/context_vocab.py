@@ -849,6 +849,9 @@ def write_vocab(vocab: dict, tokens: pd.DataFrame, out_dir: Path = OUT_DIR) -> N
         "date": pd.Timestamp.now().isoformat(),
         "sha256_contract": _sha256(CONTRACT_PATH),
         "sha256_module": _sha256(Path(__file__).resolve()),
+        "windows_manifest_path": str(WINDOWS_ROOT / "manifest.json"),
+        "sha256_windows_manifest": _sha256(WINDOWS_ROOT / "manifest.json"),
+        "split_parquet_path": str(SPLIT_PATH),
         "sha256_split_parquet": _sha256(SPLIT_PATH),
         "n_items": len(items),
         "n_items_v1": n_v1,
@@ -1172,9 +1175,12 @@ def run(out_dir: Path = OUT_DIR) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Context vocab v1")
     ap.add_argument("command", choices=["run", "report"], nargs="?", default="run")
+    ap.add_argument("--out-dir", default=None,
+                    help="directorio de salida (por defecto paths.CONTEXT_DIR)")
     args = ap.parse_args(argv)
+    out_dir = Path(args.out_dir) if args.out_dir else OUT_DIR
     if args.command == "run":
-        summary = run()
+        summary = run(out_dir)
         report = build_report(summary)
         REPORT_PATH.write_text(report, encoding="utf-8")
         print(json.dumps({
@@ -1186,7 +1192,7 @@ def main(argv=None) -> int:
             "elapsed_s": summary["elapsed_s"],
         }, indent=2))
     elif args.command == "report":
-        summary = run()
+        summary = run(out_dir)
         REPORT_PATH.write_text(build_report(summary), encoding="utf-8")
         print(REPORT_PATH)
     return 0

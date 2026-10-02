@@ -588,15 +588,15 @@ def process_partition(part_path: Path, out_path: Path, max_cases: int | None = N
     return dict(n_rows=len(out), n_cases=len(caseids))
 
 
-def run_all() -> dict:
-    """Ejecuta sobre todo data/windows_v2 y escribe data/pk_v1/. Devuelve resumen."""
+def run_all(out_dir: Path = OUT_DIR) -> dict:
+    """Ejecuta sobre todo data/windows_v4 y escribe a out_dir. Devuelve resumen."""
     t0 = _time.time()
     parts = sorted(WINDOWS_DIR.glob("source=*/split=*/part-*.parquet"))
     counts: dict[str, int] = {}
     total = 0
     for i, part in enumerate(parts):
         rel = part.relative_to(WINDOWS_DIR)
-        out_path = OUT_DIR / rel
+        out_path = out_dir / rel
         res = process_partition(part, out_path)
         key = str(rel.parent).replace("\\", "/")
         counts[key] = counts.get(key, 0) + res["n_rows"]
@@ -612,6 +612,8 @@ def build_manifest(summary: dict, assumptions: list[str]) -> dict:
         "date": pd.Timestamp.now().isoformat(),
         "pk_tokens_py_sha256": _sha256(ROOT / "src" / "tokens" / "pk_tokens.py"),
         "contract_sha256": _sha256(CONTRACT_PATH),
+        "windows_manifest_path": str(paths.WINDOWS_DIR / "manifest.json"),
+        "sha256_windows_manifest": _sha256(paths.WINDOWS_DIR / "manifest.json"),
         "parameters": {
             "propofol": {"model": "Schnider 3 comp + Ce", "ke0_per_min": 0.456},
             "remifentanilo": {"model": "Minto 3 comp + Ce", "ke0_per_min": 0.6},
@@ -677,19 +679,19 @@ ASSUMPTIONS = [
 ]
 
 
-def verify_output() -> dict:
-    """Verifica filas, duplicados y conteos por fuente/split frente a windows_v2."""
+def verify_output(out_dir: Path = OUT_DIR) -> dict:
+    """Verifica filas, duplicados y conteos por fuente/split frente a windows_v4."""
     win_manifest = json.loads((paths.WINDOWS_DIR / "manifest.json").read_text())
     expected_counts = win_manifest["n_windows_by_source_split"]
     total = 0
     dup = 0
     counts: dict[str, int] = {}
-    parts = sorted(OUT_DIR.glob("source=*/split=*/part-*.parquet"))
+    parts = sorted(out_dir.glob("source=*/split=*/part-*.parquet"))
     for part in parts:
         tbl = pq.ParquetFile(part).read(columns=["caseid", "t"])
         df = tbl.to_pandas()
         total += len(df)
-        key = str(part.parent.relative_to(OUT_DIR)).replace("\\", "/")
+        key = str(part.parent.relative_to(out_dir)).replace("\\", "/")
         counts[key] = counts.get(key, 0) + len(df)
         dup += int(df.duplicated(subset=["caseid", "t"]).sum())
     mismatches = {k: (counts.get(k, 0), expected_counts.get(k))
@@ -708,20 +710,24 @@ def verify_output() -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="PK tokens v1")
     ap.add_argument("command", choices=["run", "verify", "manifest"], nargs="?", default="run")
+    ap.add_argument("--out-root", default=None,
+                    help="raíz de salida (por defecto paths.PK_DIR); parquets en "
+                         "<root>/windows/ y manifiesto en <root>/manifest_pk.json")
     args = ap.parse_args(argv)
+    out_root = Path(args.out_root) if args.out_root else paths.PK_DIR
+    out_dir = out_root / "windows"
     if args.command == "run":
-        summary = run_all()
-        summary["verify"] = verify_output()
+        summary = run_all(out_dir)
+        summary["verify"] = verify_output(out_dir)
         manifest = build_manifest(summary, ASSUMPTIONS)
-        out_root = ROOT / "data" / "pk_v1"
         out_root.mkdir(parents=True, exist_ok=True)
         (out_root / "manifest_pk.json").write_text(
             json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
         print(json.dumps(summary, indent=2))
     elif args.command == "verify":
-        print(json.dumps(verify_output(), indent=2))
+        print(json.dumps(verify_output(out_dir), indent=2))
     elif args.command == "manifest":
-        print((ROOT / "data" / "pk_v1" / "manifest_pk.json").read_text(encoding="utf-8"))
+        print((out_root / "manifest_pk.json").read_text(encoding="utf-8"))
     return 0
 
 

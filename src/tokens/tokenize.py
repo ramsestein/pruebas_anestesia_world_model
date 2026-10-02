@@ -1068,9 +1068,13 @@ def build_manifest(summary: dict) -> dict:
         "date": pd.Timestamp.now().isoformat(),
         "sha256_contract": _sha256(CONTRACT_PATH),
         "sha256_tokenize_py": _sha256(Path(__file__).resolve()),
-        "sha256_windows_v2_manifest": _sha256(WINDOWS_ROOT / "manifest.json"),
-        "sha256_pk_v1_manifest": _sha256(paths.PK_DIR / "manifest_pk.json"),
+        "windows_manifest_path": str(WINDOWS_ROOT / "manifest.json"),
+        "sha256_windows_manifest": _sha256(WINDOWS_ROOT / "manifest.json"),
+        "pk_manifest_path": str(PK_DIR.parent / "manifest_pk.json"),
+        "sha256_pk_manifest": _sha256(PK_DIR.parent / "manifest_pk.json"),
+        "context_vocab_path": str(CTX_VOCAB),
         "sha256_context_vocab": _sha256(CTX_VOCAB),
+        "split_parquet_path": str(WINDOWS_ROOT / "split.parquet"),
         "sha256_split_parquet": _sha256(WINDOWS_ROOT / "split.parquet"),
         "normalization_stats": summary["stats"],
         "feature_columns": feature_columns(),
@@ -1087,7 +1091,7 @@ def build_manifest(summary: dict) -> dict:
         "n_rows": summary["n_rows"],
         "n_partitions": summary["n_partitions"],
         "elapsed_s": summary["elapsed_s"],
-        "windows_v2_n_cells_by_source_split": win_manifest["n_windows_by_source_split"],
+        "windows_n_cells_by_source_split": win_manifest["n_windows_by_source_split"],
     }
 
 
@@ -1096,7 +1100,26 @@ def main(argv=None) -> int:
     ap.add_argument("command", choices=["run", "verify", "manifest", "report"],
                     nargs="?", default="run")
     ap.add_argument("--smoke", action="store_true", help="subconjunto determinista")
+    ap.add_argument("--pk-root", default=None,
+                    help="raíz de pk (por defecto paths.PK_DIR); parquets en <root>/windows/")
+    ap.add_argument("--ctx-root", default=None,
+                    help="raíz de contexto (por defecto paths.CONTEXT_DIR)")
+    ap.add_argument("--out-root", default=None,
+                    help="raíz de salida (por defecto paths.TOKENS_DIR)")
     args = ap.parse_args(argv)
+
+    global PK_DIR, CTX_TOKENS, CTX_VOCAB, OUT_DIR, OUT_ROOT, MANIFEST_PATH
+    if args.pk_root:
+        PK_DIR = Path(args.pk_root) / "windows"
+    if args.ctx_root:
+        CTX_TOKENS = Path(args.ctx_root) / "tokens.parquet"
+        CTX_VOCAB = Path(args.ctx_root) / "vocab.json"
+    if args.out_root:
+        OUT_ROOT = Path(args.out_root)
+        OUT_DIR = OUT_ROOT / "windows"
+        MANIFEST_PATH = OUT_ROOT / "manifest_tokens.json"
+    load_vocab_v1.cache_clear()
+    load_context_map.cache_clear()
 
     if args.command == "run":
         limit = 2 if args.smoke else None
@@ -1131,9 +1154,9 @@ def write_report() -> None:
     L.append("-" * 40)
     L.append(f"  contrato_tokens_v1.md             sha256 {m['sha256_contract']}")
     L.append(f"  tokenize.py                       sha256 {m['sha256_tokenize_py']}")
-    L.append(f"  windows_v4/manifest.json          sha256 {m['sha256_windows_v2_manifest']}")
-    L.append(f"  pk_v1/manifest_pk.json            sha256 {m['sha256_pk_v1_manifest']}")
-    L.append(f"  context_v1/vocab.json             sha256 {m['sha256_context_vocab']}")
+    L.append(f"  windows_v4/manifest.json          sha256 {m['sha256_windows_manifest']}")
+    L.append(f"  pk/manifest_pk.json               sha256 {m['sha256_pk_manifest']}")
+    L.append(f"  context/vocab.json                sha256 {m['sha256_context_vocab']}")
     L.append(f"  windows_v4/split.parquet          sha256 {m['sha256_split_parquet']}")
     L.append(f"  fecha                             {m['date']}")
     L.append("")
