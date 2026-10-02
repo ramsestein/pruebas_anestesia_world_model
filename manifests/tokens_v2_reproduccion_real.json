@@ -1,0 +1,848 @@
+{
+  "date": "2026-10-02T12:30:58.071005",
+  "splits": {
+    "train": {
+      "n_rows_old": 734663,
+      "n_rows_new": 734663,
+      "n_dense_old": 0,
+      "n_dense_new": 0,
+      "counts_match": true,
+      "max_abs_diff_exact": 0.0,
+      "exact_diffs": {},
+      "checksums": {
+        "drug_propofol_ce_t0": {
+          "n": 734663,
+          "sum": 4620.233946858207,
+          "sumsq": 341106.5814856307
+        },
+        "drug_propofol_ce_t1": {
+          "n": 734663,
+          "sum": -10048.370912011693,
+          "sumsq": 393152.75689732714
+        },
+        "drug_propofol_ce_max": {
+          "n": 734663,
+          "sum": -30689.10663575557,
+          "sumsq": 361020.8574044559
+        },
+        "drug_propofol_bolo": {
+          "n": 734663,
+          "sum": -26445.51698540896,
+          "sumsq": 1753.687637132561
+        },
+        "drug_propofol_dose_cum": {
+          "n": 734663,
+          "sum": 64924.00171012926,
+          "sumsq": 351403.076556845
+        },
+        "drug_propofol_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_propofol_mask": {
+          "n": 734663,
+          "sum": 671732.0,
+          "sumsq": 1343464.0
+        },
+        "drug_remifentanilo_ce_t0": {
+          "n": 734663,
+          "sum": 195202.8213097314,
+          "sumsq": 1164907.3491722704
+        },
+        "drug_remifentanilo_ce_t1": {
+          "n": 734663,
+          "sum": 190114.9824031336,
+          "sumsq": 1232003.4859297879
+        },
+        "drug_remifentanilo_ce_max": {
+          "n": 734663,
+          "sum": 174320.45530008487,
+          "sumsq": 1226600.5868702522
+        },
+        "drug_remifentanilo_bolo": {
+          "n": 734663,
+          "sum": -43533.54907684028,
+          "sumsq": 3235.790085583946
+        },
+        "drug_remifentanilo_dose_cum": {
+          "n": 734663,
+          "sum": 167911.52033789613,
+          "sumsq": 538438.4232177457
+        },
+        "drug_remifentanilo_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_remifentanilo_mask": {
+          "n": 734663,
+          "sum": 297946.0,
+          "sumsq": 595892.0
+        },
+        "drug_sevoflurano_ce_t0": {
+          "n": 734663,
+          "sum": 361763.8629511744,
+          "sumsq": 1710849.7434296785
+        },
+        "drug_sevoflurano_ce_t1": {
+          "n": 734663,
+          "sum": 357351.7675508037,
+          "sumsq": 1702365.4684726312
+        },
+        "drug_sevoflurano_ce_max": {
+          "n": 734663,
+          "sum": 320307.86292144377,
+          "sumsq": 1714272.8528261562
+        },
+        "drug_sevoflurano_bolo": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_sevoflurano_dose_cum": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_sevoflurano_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_sevoflurano_mask": {
+          "n": 734663,
+          "sum": 14148.0,
+          "sumsq": 28296.0
+        },
+        "drug_fenilefrina_ce_t0": {
+          "n": 734663,
+          "sum": 11586.859671464772,
+          "sumsq": 12779.81595797299
+        },
+        "drug_fenilefrina_ce_t1": {
+          "n": 734663,
+          "sum": 11552.358022133703,
+          "sumsq": 12611.673919018345
+        },
+        "drug_fenilefrina_ce_max": {
+          "n": 734663,
+          "sum": 11523.210609769187,
+          "sumsq": 12513.006158641794
+        },
+        "drug_fenilefrina_bolo": {
+          "n": 734663,
+          "sum": -1433.0872090905905,
+          "sumsq": 142.40319989315336
+        },
+        "drug_fenilefrina_dose_cum": {
+          "n": 734663,
+          "sum": 11848.994223072812,
+          "sumsq": 12434.195622496745
+        },
+        "drug_fenilefrina_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_fenilefrina_mask": {
+          "n": 734663,
+          "sum": 1440482.0,
+          "sumsq": 2880964.0
+        },
+        "drug_noradrenalina_ce_t0": {
+          "n": 734663,
+          "sum": 168230.36807131767,
+          "sumsq": 3409317.4260337213
+        },
+        "drug_noradrenalina_ce_t1": {
+          "n": 734663,
+          "sum": 168358.59922868013,
+          "sumsq": 3412062.270425014
+        },
+        "drug_noradrenalina_ce_max": {
+          "n": 734663,
+          "sum": 169028.2202900648,
+          "sumsq": 3416055.7459650524
+        },
+        "drug_noradrenalina_bolo": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_noradrenalina_dose_cum": {
+          "n": 734663,
+          "sum": 45939.442408545874,
+          "sumsq": 214695.13444471383
+        },
+        "drug_noradrenalina_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_noradrenalina_mask": {
+          "n": 734663,
+          "sum": 1447632.0,
+          "sumsq": 2895264.0
+        },
+        "drug_efedrina_ce_t0": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_ce_t1": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_ce_max": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_bolo": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_dose_cum": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_mask": {
+          "n": 734663,
+          "sum": 734663.0,
+          "sumsq": 734663.0
+        },
+        "drug_rocuronio_ce_t0": {
+          "n": 734663,
+          "sum": 159126.92859855926,
+          "sumsq": 444411.96200180193
+        },
+        "drug_rocuronio_ce_t1": {
+          "n": 734663,
+          "sum": 159764.0990603023,
+          "sumsq": 446722.90383198205
+        },
+        "drug_rocuronio_ce_max": {
+          "n": 734663,
+          "sum": 157797.5437581172,
+          "sumsq": 436286.8147344749
+        },
+        "drug_rocuronio_bolo": {
+          "n": 734663,
+          "sum": -4457.525143556297,
+          "sumsq": 308.37506255236576
+        },
+        "drug_rocuronio_dose_cum": {
+          "n": 734663,
+          "sum": 133710.8852225922,
+          "sumsq": 418715.0978740486
+        },
+        "drug_rocuronio_bolo_obs": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_rocuronio_mask": {
+          "n": 734663,
+          "sum": 1340460.0,
+          "sumsq": 2680920.0
+        },
+        "vent_fio2_t0": {
+          "n": 734663,
+          "sum": -142905.19706128538,
+          "sumsq": 987299.674754824
+        },
+        "vent_fio2_t1": {
+          "n": 734663,
+          "sum": -134372.25824456848,
+          "sumsq": 1009843.7690796889
+        },
+        "vent_fio2_proxy": {
+          "n": 734663,
+          "sum": 9184.0,
+          "sumsq": 9184.0
+        },
+        "vent_fio2_mask": {
+          "n": 734663,
+          "sum": 8778.0,
+          "sumsq": 17556.0
+        },
+        "vent_tv_t0": {
+          "n": 734663,
+          "sum": 120452.74967428576,
+          "sumsq": 4220829.495484035
+        },
+        "vent_tv_t1": {
+          "n": 734663,
+          "sum": 120427.46135482425,
+          "sumsq": 4219121.507115631
+        },
+        "vent_tv_proxy": {
+          "n": 734663,
+          "sum": 5260.0,
+          "sumsq": 5260.0
+        },
+        "vent_tv_mask": {
+          "n": 734663,
+          "sum": 31852.0,
+          "sumsq": 63704.0
+        },
+        "vent_rr_t0": {
+          "n": 734663,
+          "sum": 287000.04237508774,
+          "sumsq": 3616485.7893996513
+        },
+        "vent_rr_t1": {
+          "n": 734663,
+          "sum": 289695.13455055654,
+          "sumsq": 3615085.6848705723
+        },
+        "vent_rr_proxy": {
+          "n": 734663,
+          "sum": 13722.0,
+          "sumsq": 13722.0
+        },
+        "vent_rr_mask": {
+          "n": 734663,
+          "sum": 10628.0,
+          "sumsq": 21256.0
+        },
+        "vent_pip_t0": {
+          "n": 734663,
+          "sum": -40584.82503181696,
+          "sumsq": 813591.4785559599
+        },
+        "vent_pip_t1": {
+          "n": 734663,
+          "sum": -40862.940623380244,
+          "sumsq": 814003.1573755005
+        },
+        "vent_pip_proxy": {
+          "n": 734663,
+          "sum": 4802.0,
+          "sumsq": 4802.0
+        },
+        "vent_pip_mask": {
+          "n": 734663,
+          "sum": 32954.0,
+          "sumsq": 65908.0
+        },
+        "vent_peep_t0": {
+          "n": 734663,
+          "sum": -656039.5189187676,
+          "sumsq": 1280517.9982093328
+        },
+        "vent_peep_t1": {
+          "n": 734663,
+          "sum": -655819.3818778396,
+          "sumsq": 1279819.9945064732
+        },
+        "vent_peep_proxy": {
+          "n": 734663,
+          "sum": 1860.0,
+          "sumsq": 1860.0
+        },
+        "vent_peep_mask": {
+          "n": 734663,
+          "sum": 34538.0,
+          "sumsq": 69076.0
+        },
+        "n_ctx": {
+          "n": 734663,
+          "sum": 4712391.0,
+          "sumsq": 30420761.0
+        },
+        "time_t_since_opstart": {
+          "n": 734663,
+          "sum": -166426.7474346375,
+          "sumsq": 703234.8416603764
+        },
+        "t1": {
+          "n": 734663,
+          "sum": 6575860759.0,
+          "sumsq": 86898248572495.0
+        },
+        "dense": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "pair_id": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "split_t": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "post_split": {
+          "n": 734663,
+          "sum": 0.0,
+          "sumsq": 0.0
+        }
+      },
+      "ctx_binary_mismatch": 0,
+      "ctx_continuous_affine": {
+        "age": {
+          "scale": 1.0011213083383774,
+          "offset": 0.003535774195351199,
+          "max_residual": 2.0857483562508605e-07,
+          "n": 734663
+        },
+        "height": {
+          "scale": 1.002739285181422,
+          "offset": -0.007460502080902681,
+          "max_residual": 4.098167174504397e-07,
+          "n": 734663
+        },
+        "weight": {
+          "scale": 0.9998561966907279,
+          "offset": -0.005962818121045876,
+          "max_residual": 2.2693514445393248e-07,
+          "n": 734663
+        },
+        "bmi": {
+          "scale": 0.9979679455438285,
+          "offset": -0.002060799367434807,
+          "max_residual": 3.812866653518654e-07,
+          "n": 734663
+        }
+      }
+    },
+    "val": {
+      "n_rows_old": 1501733,
+      "n_rows_new": 1501733,
+      "n_dense_old": 1376544,
+      "n_dense_new": 1376544,
+      "counts_match": true,
+      "max_abs_diff_exact": 0.0,
+      "exact_diffs": {},
+      "checksums": {
+        "drug_propofol_ce_t0": {
+          "n": 1501733,
+          "sum": -6954.125975496055,
+          "sumsq": 813030.582632484
+        },
+        "drug_propofol_ce_t1": {
+          "n": 1501733,
+          "sum": -40185.59668996302,
+          "sumsq": 938016.4988398075
+        },
+        "drug_propofol_ce_max": {
+          "n": 1501733,
+          "sum": -83668.1173750594,
+          "sumsq": 864787.2208621453
+        },
+        "drug_propofol_bolo": {
+          "n": 1501733,
+          "sum": -56316.90803331137,
+          "sumsq": 3734.5560472136203
+        },
+        "drug_propofol_dose_cum": {
+          "n": 1501733,
+          "sum": 145795.58771009336,
+          "sumsq": 763984.2106768542
+        },
+        "drug_propofol_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_propofol_mask": {
+          "n": 1501733,
+          "sum": 1304954.0,
+          "sumsq": 2609908.0
+        },
+        "drug_remifentanilo_ce_t0": {
+          "n": 1501733,
+          "sum": 417850.9836225499,
+          "sumsq": 2319328.7535486366
+        },
+        "drug_remifentanilo_ce_t1": {
+          "n": 1501733,
+          "sum": 405839.20826867,
+          "sumsq": 2451257.2800291376
+        },
+        "drug_remifentanilo_ce_max": {
+          "n": 1501733,
+          "sum": 374089.8704050412,
+          "sumsq": 2436300.409844354
+        },
+        "drug_remifentanilo_bolo": {
+          "n": 1501733,
+          "sum": -91847.54550445825,
+          "sumsq": 6826.904385947608
+        },
+        "drug_remifentanilo_dose_cum": {
+          "n": 1501733,
+          "sum": 359413.7679795368,
+          "sumsq": 1133096.7347629564
+        },
+        "drug_remifentanilo_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_remifentanilo_mask": {
+          "n": 1501733,
+          "sum": 532076.0,
+          "sumsq": 1064152.0
+        },
+        "drug_sevoflurano_ce_t0": {
+          "n": 1501733,
+          "sum": 655745.1929086074,
+          "sumsq": 3323848.2376767285
+        },
+        "drug_sevoflurano_ce_t1": {
+          "n": 1501733,
+          "sum": 646050.811440032,
+          "sumsq": 3305697.9504873557
+        },
+        "drug_sevoflurano_ce_max": {
+          "n": 1501733,
+          "sum": 569368.5368734999,
+          "sumsq": 3336007.5329546016
+        },
+        "drug_sevoflurano_bolo": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_sevoflurano_dose_cum": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_sevoflurano_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_sevoflurano_mask": {
+          "n": 1501733,
+          "sum": 12354.0,
+          "sumsq": 24708.0
+        },
+        "drug_fenilefrina_ce_t0": {
+          "n": 1501733,
+          "sum": 25660.28288483247,
+          "sumsq": 27612.79795872312
+        },
+        "drug_fenilefrina_ce_t1": {
+          "n": 1501733,
+          "sum": 25674.722498396528,
+          "sumsq": 27251.36017841527
+        },
+        "drug_fenilefrina_ce_max": {
+          "n": 1501733,
+          "sum": 25583.872801817663,
+          "sumsq": 27041.289664584314
+        },
+        "drug_fenilefrina_bolo": {
+          "n": 1501733,
+          "sum": -2935.434006638825,
+          "sumsq": 291.6885957595093
+        },
+        "drug_fenilefrina_dose_cum": {
+          "n": 1501733,
+          "sum": 21074.309404130443,
+          "sumsq": 21532.078406735884
+        },
+        "drug_fenilefrina_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_fenilefrina_mask": {
+          "n": 1501733,
+          "sum": 2944384.0,
+          "sumsq": 5888768.0
+        },
+        "drug_noradrenalina_ce_t0": {
+          "n": 1501733,
+          "sum": 298681.34505423903,
+          "sumsq": 6227127.839696337
+        },
+        "drug_noradrenalina_ce_t1": {
+          "n": 1501733,
+          "sum": 298540.79908037186,
+          "sumsq": 6222805.239944568
+        },
+        "drug_noradrenalina_ce_max": {
+          "n": 1501733,
+          "sum": 298779.3331518173,
+          "sumsq": 6204056.721899761
+        },
+        "drug_noradrenalina_bolo": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_noradrenalina_dose_cum": {
+          "n": 1501733,
+          "sum": 72694.5767297271,
+          "sumsq": 340700.66579814674
+        },
+        "drug_noradrenalina_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_noradrenalina_mask": {
+          "n": 1501733,
+          "sum": 2968926.0,
+          "sumsq": 5937852.0
+        },
+        "drug_efedrina_ce_t0": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_ce_t1": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_ce_max": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_bolo": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_dose_cum": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_efedrina_mask": {
+          "n": 1501733,
+          "sum": 1501733.0,
+          "sumsq": 1501733.0
+        },
+        "drug_rocuronio_ce_t0": {
+          "n": 1501733,
+          "sum": 282937.55972408096,
+          "sumsq": 733642.1698664891
+        },
+        "drug_rocuronio_ce_t1": {
+          "n": 1501733,
+          "sum": 284166.5728550911,
+          "sumsq": 737534.0542791869
+        },
+        "drug_rocuronio_ce_max": {
+          "n": 1501733,
+          "sum": 280510.18334983743,
+          "sumsq": 719485.7562579355
+        },
+        "drug_rocuronio_bolo": {
+          "n": 1501733,
+          "sum": -8480.802536331117,
+          "sumsq": 586.7085273575958
+        },
+        "drug_rocuronio_dose_cum": {
+          "n": 1501733,
+          "sum": 241454.26550212305,
+          "sumsq": 667833.2973521645
+        },
+        "drug_rocuronio_bolo_obs": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "drug_rocuronio_mask": {
+          "n": 1501733,
+          "sum": 2758288.0,
+          "sumsq": 5516576.0
+        },
+        "vent_fio2_t0": {
+          "n": 1501733,
+          "sum": -283312.4489989951,
+          "sumsq": 2041441.7668050828
+        },
+        "vent_fio2_t1": {
+          "n": 1501733,
+          "sum": -262297.71730298176,
+          "sumsq": 2099109.847777406
+        },
+        "vent_fio2_proxy": {
+          "n": 1501733,
+          "sum": 27018.0,
+          "sumsq": 27018.0
+        },
+        "vent_fio2_mask": {
+          "n": 1501733,
+          "sum": 4640.0,
+          "sumsq": 9280.0
+        },
+        "vent_tv_t0": {
+          "n": 1501733,
+          "sum": 539422.4220973807,
+          "sumsq": 17835519.05397384
+        },
+        "vent_tv_t1": {
+          "n": 1501733,
+          "sum": 538990.0900585192,
+          "sumsq": 17811428.995911352
+        },
+        "vent_tv_proxy": {
+          "n": 1501733,
+          "sum": 20163.0,
+          "sumsq": 20163.0
+        },
+        "vent_tv_mask": {
+          "n": 1501733,
+          "sum": 62618.0,
+          "sumsq": 125236.0
+        },
+        "vent_rr_t0": {
+          "n": 1501733,
+          "sum": 441173.5037495494,
+          "sumsq": 7303680.1523829
+        },
+        "vent_rr_t1": {
+          "n": 1501733,
+          "sum": 447124.1944321096,
+          "sumsq": 7317534.95488935
+        },
+        "vent_rr_proxy": {
+          "n": 1501733,
+          "sum": 44816.0,
+          "sumsq": 44816.0
+        },
+        "vent_rr_mask": {
+          "n": 1501733,
+          "sum": 8170.0,
+          "sumsq": 16340.0
+        },
+        "vent_pip_t0": {
+          "n": 1501733,
+          "sum": -71158.15980359912,
+          "sumsq": 1795491.9906261107
+        },
+        "vent_pip_t1": {
+          "n": 1501733,
+          "sum": -71282.86815062165,
+          "sumsq": 1794972.0122411984
+        },
+        "vent_pip_proxy": {
+          "n": 1501733,
+          "sum": 14939.0,
+          "sumsq": 14939.0
+        },
+        "vent_pip_mask": {
+          "n": 1501733,
+          "sum": 72298.0,
+          "sumsq": 144596.0
+        },
+        "vent_peep_t0": {
+          "n": 1501733,
+          "sum": -1330225.0027206838,
+          "sumsq": 2584626.5461873626
+        },
+        "vent_peep_t1": {
+          "n": 1501733,
+          "sum": -1329914.1910851747,
+          "sumsq": 2583309.3914779387
+        },
+        "vent_peep_proxy": {
+          "n": 1501733,
+          "sum": 12760.0,
+          "sumsq": 12760.0
+        },
+        "vent_peep_mask": {
+          "n": 1501733,
+          "sum": 72282.0,
+          "sumsq": 144564.0
+        },
+        "n_ctx": {
+          "n": 1501733,
+          "sum": 9679682.0,
+          "sumsq": 62776348.0
+        },
+        "time_t_since_opstart": {
+          "n": 1501733,
+          "sum": -391918.40507634927,
+          "sumsq": 1233326.6878257417
+        },
+        "t1": {
+          "n": 1501733,
+          "sum": 13040377202.0,
+          "sumsq": 160249516841430.0
+        },
+        "dense": {
+          "n": 1501733,
+          "sum": 1376544.0,
+          "sumsq": 1376544.0
+        },
+        "pair_id": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "split_t": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        },
+        "post_split": {
+          "n": 1501733,
+          "sum": 0.0,
+          "sumsq": 0.0
+        }
+      },
+      "ctx_binary_mismatch": 0,
+      "ctx_continuous_affine": {
+        "age": {
+          "scale": 1.001121305078278,
+          "offset": 0.0035357731098547354,
+          "max_residual": 2.1376001813067091e-07,
+          "n": 1501733
+        },
+        "height": {
+          "scale": 1.0027392710534375,
+          "offset": -0.0074604993479926995,
+          "max_residual": 1.418703661215659e-07,
+          "n": 1501733
+        },
+        "weight": {
+          "scale": 0.9998561981440546,
+          "offset": -0.005962820839723118,
+          "max_residual": 1.5831655986175974e-07,
+          "n": 1501733
+        },
+        "bmi": {
+          "scale": 0.9979679465569365,
+          "offset": -0.0020608000043313424,
+          "max_residual": 2.2836995539066152e-07,
+          "n": 1501733
+        }
+      }
+    }
+  },
+  "verdict": {
+    "counts_match": true,
+    "exact_ok": true,
+    "ctx_affine_ok": true,
+    "ctx_binary_ok": true
+  },
+  "elapsed_s": 89.42
+}

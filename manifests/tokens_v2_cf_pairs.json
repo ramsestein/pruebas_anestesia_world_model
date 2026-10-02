@@ -1,0 +1,455 @@
+{
+  "date": "2026-10-02T12:55:19.621185",
+  "n_pairs": 6345,
+  "n_usable": 6345,
+  "n_unusable": 0,
+  "prefix_identical_all_pairs": true,
+  "n_prefix_failures": 0,
+  "prefix_failures": [],
+  "effect_ge_99pct_all_levers": false,
+  "lever_failures": [
+    {
+      "pair_id": 171181,
+      "lever": "remi_up",
+      "group": "remifentanilo"
+    },
+    {
+      "pair_id": 171217,
+      "lever": "remi_up",
+      "group": "remifentanilo"
+    },
+    {
+      "pair_id": 171473,
+      "lever": "remi_up",
+      "group": "remifentanilo"
+    },
+    {
+      "pair_id": 180301,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180303,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180309,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180311,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180315,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180325,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180335,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180343,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180355,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180357,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180365,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180373,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180385,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180395,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180397,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180401,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180403,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180405,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180409,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180413,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180421,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180427,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180439,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180447,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180449,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180453,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180455,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180475,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180479,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180481,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180485,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180489,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180503,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180505,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180513,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180521,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180525,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180527,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180531,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180533,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180537,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180543,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180545,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180551,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180555,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180557,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    },
+    {
+      "pair_id": 180559,
+      "lever": "peep_down",
+      "group": "ventilacion"
+    }
+  ],
+  "per_lever": [
+    {
+      "lever": "eph_bolus",
+      "lever_group": "efedrina",
+      "usable": 375,
+      "effect": 345,
+      "pct": 92.0,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "ephedrine",
+      "lever_group": "efedrina",
+      "usable": 120,
+      "effect": 106,
+      "pct": 88.3333,
+      "effect_any": 120,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "fio2_down",
+      "lever_group": "ventilacion",
+      "usable": 150,
+      "effect": 144,
+      "pct": 96.0,
+      "effect_any": 150,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "nepi_rate",
+      "lever_group": "noradrenalina",
+      "usable": 375,
+      "effect": 319,
+      "pct": 85.0667,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "noradrenaline",
+      "lever_group": "noradrenalina",
+      "usable": 250,
+      "effect": 205,
+      "pct": 82.0,
+      "effect_any": 250,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "peep_down",
+      "lever_group": "ventilacion",
+      "usable": 150,
+      "effect": 67,
+      "pct": 44.6667,
+      "effect_any": 93,
+      "pct_any": 62.0
+    },
+    {
+      "lever": "peep_up",
+      "lever_group": "ventilacion",
+      "usable": 150,
+      "effect": 133,
+      "pct": 88.6667,
+      "effect_any": 150,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "phen_bolus",
+      "lever_group": "fenilefrina",
+      "usable": 375,
+      "effect": 348,
+      "pct": 92.8,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "phen_rate",
+      "lever_group": "fenilefrina",
+      "usable": 375,
+      "effect": 349,
+      "pct": 93.0667,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "ppf20_rate",
+      "lever_group": "propofol",
+      "usable": 375,
+      "effect": 308,
+      "pct": 82.1333,
+      "effect_any": 371,
+      "pct_any": 98.9333
+    },
+    {
+      "lever": "ppf_bolus",
+      "lever_group": "propofol",
+      "usable": 375,
+      "effect": 310,
+      "pct": 82.6667,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "propofol_bolus",
+      "lever_group": "propofol",
+      "usable": 250,
+      "effect": 203,
+      "pct": 81.2,
+      "effect_any": 250,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "remi_bolus",
+      "lever_group": "remifentanilo",
+      "usable": 375,
+      "effect": 324,
+      "pct": 86.4,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "remi_up",
+      "lever_group": "remifentanilo",
+      "usable": 250,
+      "effect": 200,
+      "pct": 80.0,
+      "effect_any": 247,
+      "pct_any": 98.8
+    },
+    {
+      "lever": "rftn20_rate",
+      "lever_group": "remifentanilo",
+      "usable": 375,
+      "effect": 298,
+      "pct": 79.4667,
+      "effect_any": 367,
+      "pct_any": 97.8667
+    },
+    {
+      "lever": "set_fio2",
+      "lever_group": "ventilacion",
+      "usable": 375,
+      "effect": 355,
+      "pct": 94.6667,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "set_peep",
+      "lever_group": "ventilacion",
+      "usable": 375,
+      "effect": 231,
+      "pct": 61.6,
+      "effect_any": 291,
+      "pct_any": 77.6
+    },
+    {
+      "lever": "set_rr",
+      "lever_group": "ventilacion",
+      "usable": 375,
+      "effect": 317,
+      "pct": 84.5333,
+      "effect_any": 363,
+      "pct_any": 96.8
+    },
+    {
+      "lever": "set_tv",
+      "lever_group": "ventilacion",
+      "usable": 375,
+      "effect": 335,
+      "pct": 89.3333,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "sevo_mac",
+      "lever_group": "sevoflurano",
+      "usable": 375,
+      "effect": 290,
+      "pct": 77.3333,
+      "effect_any": 375,
+      "pct_any": 100.0
+    },
+    {
+      "lever": "sevo_up",
+      "lever_group": "sevoflurano",
+      "usable": 150,
+      "effect": 117,
+      "pct": 78.0,
+      "effect_any": 150,
+      "pct_any": 100.0
+    }
+  ],
+  "unusable": [],
+  "elapsed_s": 77.34
+}

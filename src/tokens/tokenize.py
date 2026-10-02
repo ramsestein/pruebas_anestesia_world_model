@@ -1141,6 +1141,14 @@ def main(argv=None) -> int:
     return 0
 
 
+def _mget(m: dict, *keys: str) -> str:
+    """Devuelve la primera clave presente (compatibilidad claves v1/v2)."""
+    for k in keys:
+        if k in m:
+            return str(m[k])
+    return "—"
+
+
 def write_report() -> None:
     """Escribe REPORT_tokens.txt a partir del manifest y del veredicto."""
     if not MANIFEST_PATH.exists():
@@ -1154,8 +1162,8 @@ def write_report() -> None:
     L.append("-" * 40)
     L.append(f"  contrato_tokens_v1.md             sha256 {m['sha256_contract']}")
     L.append(f"  tokenize.py                       sha256 {m['sha256_tokenize_py']}")
-    L.append(f"  windows_v4/manifest.json          sha256 {m['sha256_windows_manifest']}")
-    L.append(f"  pk/manifest_pk.json               sha256 {m['sha256_pk_manifest']}")
+    L.append(f"  windows_v4/manifest.json          sha256 {_mget(m, 'sha256_windows_manifest', 'sha256_windows_v2_manifest')}")
+    L.append(f"  pk/manifest_pk.json               sha256 {_mget(m, 'sha256_pk_manifest', 'sha256_pk_v1_manifest')}")
     L.append(f"  context/vocab.json                sha256 {m['sha256_context_vocab']}")
     L.append(f"  windows_v4/split.parquet          sha256 {m['sha256_split_parquet']}")
     L.append(f"  fecha                             {m['date']}")
