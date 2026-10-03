@@ -1,0 +1,137 @@
+==============================================================================
+PASO 3d — cf_v7_1: regeneración de los contrafactuales
+INFORME DE LA FASE 0 (diagnóstico). PUERTAS BLOQUEANTES.
+Fecha: 2026-10-03T16:40:49.953450
+==============================================================================
+
+Objetivo: corregir el muestreo de las palancas de consigna (set_rr, set_tv,
+set_peep) para que δ sea múltiplo entero no nulo del escalón de registro, y
+regenerar aguas abajo (cf_v7_1 -> windows_v4_1/pk_v2_1/tokens_v2_1).
+Antes de invertir en regenerar, la Fase 0 comprueba tres puertas bloqueantes.
+
+sha256 de los ficheros del núcleo del generador (para Fase 1):
+  src/anessim/simulate.py                       23fe6080c9c3b519f17503803dec100e6349972849db5ccad394e17c7c674dbd
+  src/anessim/sensors.py                        3549c034d2023d385e35db986e83ec4210f566d61acea6f52390a7631ab6a8d6
+  src/anessim/respiratory.py                    a30a8d87d6b9bff859760bc0ac01361933007fd9ac5407af8d0cfe6baf62db21
+  src/anessim/render.py                         0ac7c43173ea07ecbb8d64df6577a3cc72bdca7b580be2dc0082c162d11b9371
+  src/anessim/scripts/generate_f2_cf.py         9ca9cea279edd1a1ff164d85f84813cc04ef275b115ab7f39211eff3f2de4404
+  src/anessim/configs/synthetic_v7.yaml         de164be9491fb1b3a7a4fe65d9916fbed0bf3bcffa751d8b4d2e9850441d9057
+
+------------------------------------------------------------------------------
+G0a — reproducibilidad de cf_v7 desde el código del repo
+------------------------------------------------------------------------------
+  Pares probados: 21  idénticos: 0  solo-hueco-BT: 20
+  Veredicto: FALLA
+
+  Los pares NO idénticos difieren únicamente en ``Solar8000/BT`` (caso)
+  y en un artefacto nulo de ``truth/phase`` (el último muestreo, NaN en
+  ambas ramas). Ninguna otra columna del caso ni de la verdad difiere, y
+  los metadatos son idénticos.
+
+  CAUSA: el código actual de ``simulate.py`` tiene C3 REVERTIDO
+  (``_bt_start = uniform(36.5, 37.4)``), pero los datos v7 en disco se
+  generaron con la versión ensanchada ``normal(36.0, 0.9)`` que ya no
+  existe en el código. Es el hueco §6 de LIMITACIONES_GENERADOR_v7.md,
+  documentado en la v8 (decisión: documentar, no regenerar).
+
+  IMPLICACIÓN: con el código actual, CUALQUIER regeneración cambia BT en
+  todas las cohortes sintéticas. Por tanto las puertas G2a (18 palancas no
+  modificadas idénticas a cf_v7) y G2c (rama intervenida idéntica para
+  t <= split_t) son INALCANZABLES tal como están especificadas: no existe
+  ninguna configuración de solo ``generate_f2_cf.py`` que reproduzca el BT
+  de cf_v7.
+
+  Ejemplo (par 195251, eph_bolus): {"case_a": ["Solar8000/BT"], "case_b": ["Solar8000/BT"], "truth_a": ["phase"], "truth_b": ["phase"]}
+
+  ADEMÁS: 1 par(es) divergen más allá de BT, p. ej. el par 197501 (set_tv):
+    case_a: 82 col. (p. ej. ['BIS/BIS', 'BIS/EMG', 'BIS/SEF', 'BIS/SQI', 'BIS/SR'])
+    case_b: 82 col. (p. ej. ['BIS/BIS', 'BIS/EMG', 'BIS/SEF', 'BIS/SQI', 'BIS/SR'])
+    truth_a: 1 col. (p. ej. ['phase'])
+    truth_b: 1 col. (p. ej. ['phase'])
+  Comprobado en el par 197501: el TRUTH (fisiología) es IDÉNTICO (0/42
+  columnas) y los tracks OBSERVADOS difieren en 82 columnas desde t=0:
+  la divergencia está en la CAPA DE OBSERVACIÓN, no en la fisiología.
+  El generador SÍ es determinista (la regeneración del par 197501 coincide
+  100 % con una segunda regeneración independiente), de modo que el caso en
+  disco se generó con OTRA versión del código de observación. Causa:
+  el cambio de DISTRIBUCIÓN de BT (`normal(36.0,0.9)` vs `uniform(36.5,37.4)`)
+  altera el número de sorteos del muestreo ziggurat de `rng_sensor` en ~1
+  caso de cada 20 y desplaza TODA la capa de sensor posterior (la misma
+  raíz §6). Es decir: el 100 % del fallo de reproducibilidad se explica por el
+  hueco de BT.
+
+------------------------------------------------------------------------------
+G0b — cadencia real de las consignas en disco
+------------------------------------------------------------------------------
+  Palanca     Consigna                 sensor7s  n_pares  mediana   min     max     veredicto
+  set_rr      Primus/SET_RR_IPPV       True          375      7.0     7.0     7.0  PASA
+  set_tv      Primus/SET_TV_L          True          375      7.0     7.0     7.0  PASA
+  set_peep    Primus/SET_INTER_PEEP    True          375      7.0     7.0     7.0  PASA
+  set_fio2    Primus/SET_FIO2          True          375      7.0     7.0     7.0  PASA
+  peep_up     Primus/SET_INTER_PEEP    True          150      7.0     7.0     7.0  PASA
+  peep_down   Primus/SET_INTER_PEEP    True          150      7.0     7.0     7.0  PASA
+  fio2_down   Primus/SET_FIO2          True          150      7.0     7.0     7.0  PASA
+  sevo_mac    Primus/SET_MAC           False         375      0.5     0.5     0.5  N/A (no sensor)
+  sevo_up     Primus/SET_MAC           False         150      0.5     0.5     0.5  N/A (no sensor)
+
+  Par 196761 (set_rr): 1704 muestras, intervalo mediano 7.0 s. Primeras marcas de tiempo: [371.0, 378.0, 392.0, 399.0, 406.0, 413.0, 420.0, 434.0, 441.0, 448.0, 455.0, 462.0].
+
+  FE DE ERRATAS (§8.4 del informe 3c): la afirmación 'SET_RR_IPPV sólo
+  tiene muestra cada ~35 s (7875, 7910, 7945)' es incorrecta. La cadencia
+  real del sensor es 7.0 s en TODAS las palancas de ventilación (medido).
+  35 s es el mcm de 7 s (cadencia del sensor) y 5 s (rejilla de tokens):
+  al proyectar la consigna sobre la rejilla de 5 s sólo coinciden las
+  muestras que caen en un múltiplo común, i.e. cada 35 s. El error de 3c
+  fue inspeccionar la consigna en la rejilla de tokens (7 s ∩ 5 s) en lugar
+  de su cadencia nativa.
+
+  Alcance del criterio (corrección documentada): la instrucción incluía
+  'Primus/SET_MAC' en el criterio de 7 s, pero SET_MAC NO pasa por el sensor:
+  se escribe crudo en la rejilla de simulación (dt = 0.5 s). Se mide y se
+  informa aparte, sin aplicarle el criterio. La instrucción lo incluía por
+  error al asumir que era una consigna observada.
+
+------------------------------------------------------------------------------
+G0c — prueba de la hipótesis (δ no múltiplo del escalón)
+------------------------------------------------------------------------------
+  Tabla palanca x {es_multiplo} x {lag}:
+  Palanca    n     δ_min      δ_max    | multiplo(lag0-1/lag>=2/nulo) | no_multiplo(...)
+  fio2_down  150      -20.0      -20.0  |  150/  0/   0 |    0/  0/   0
+  peep_down  150       -5.0       -5.0  |   93/  0/  57 |    0/  0/   0
+  peep_up    150        5.0        5.0  |  150/  0/   0 |    0/  0/   0
+  set_fio2   375      -17.0      -17.0  |  375/  0/   0 |    0/  0/   0
+  set_peep   375    -4.9832     4.9886  |    0/  0/   0 |  275/ 16/  84
+  set_rr     375      -3.98     3.9728  |    0/  0/   0 |  341/ 22/  12
+  set_tv     375   -14.8445    14.9596  |    0/  0/   0 |  367/  8/   0
+
+  Pares con lag >= 2: 46 — {'set_peep': 16, 'set_rr': 22, 'set_tv': 8}
+  Criterio 1 (los pares de ventilación con lag>=2 son todos no_multiplo): PASA
+  Criterio 2 (ningún par efectivo con |k|>=1 tiene lag>=2): PASA
+
+  Confirmación del mecanismo: TODOS los pares de set_rr/set_tv/set_peep son
+  no_multiplo (δ uniforme continuo, casi nunca cae en un múltiplo entero del
+  escalón) y TODOS los de set_fio2/peep_up/peep_down/fio2_down son multiplo
+  con lag 0-1. Los 46 pares con lag>=2 son exactamente los de δ sub-escalón
+  (|δ| < 1 escalón): el registro cuantizado sólo parpadea esporádicamente.
+
+  Nota: el manifiesto v2 registra 49 pares con lag>=2 en total; los 46 de
+  arriba son las palancas de ventilación cubiertas por G0c y los otros 3 son
+  sevo_mac (no son consignas de ventilación; fuera del alcance de G0c).
+
+------------------------------------------------------------------------------
+VEREDICTO DE LA FASE 0
+------------------------------------------------------------------------------
+  PARA. La puerta G0a FALLA: cf_v7 no es reproducible bit a bit desde el
+  repo por el hueco de BT (§6 de LIMITACIONES_GENERADOR_v7.md). Como el
+  arreglo propuesto NO toca ``simulate.py``, no hay forma de que cf_v7_1
+  mantenga el BT de cf_v7, de modo que las puertas G2a/G2c de la Fase 2 son
+  inalcanzables. Se PARA aquí y se documenta (regla §1 del paso 3d).
+
+  Opciones para desbloquear (decisión del usuario):
+   (a) excluir 'Solar8000/BT' de las comparaciones G0a/G2a/G2c como hueco
+       conocido §6, y aceptar que cf_v7_1 corrige el BT (cambio de alcance);
+   (b) restaurar C3 en ``simulate.py`` para reproducir el BT de cf_v7 (viola
+       la regla 'no tocar simulate.py' del paso 3d, pero es la única forma de
+       que cf_v7_1 sea idéntico a cf_v7 fuera de las 3 palancas modificadas);
+   (c) no hacer el paso 3d.
+

@@ -1,0 +1,1246 @@
+{
+  "date": "2026-10-03T16:40:49.953450",
+  "core_shas": {
+    "src/anessim/simulate.py": "23fe6080c9c3b519f17503803dec100e6349972849db5ccad394e17c7c674dbd",
+    "src/anessim/sensors.py": "3549c034d2023d385e35db986e83ec4210f566d61acea6f52390a7631ab6a8d6",
+    "src/anessim/respiratory.py": "a30a8d87d6b9bff859760bc0ac01361933007fd9ac5407af8d0cfe6baf62db21",
+    "src/anessim/render.py": "0ac7c43173ea07ecbb8d64df6577a3cc72bdca7b580be2dc0082c162d11b9371",
+    "src/anessim/scripts/generate_f2_cf.py": "9ca9cea279edd1a1ff164d85f84813cc04ef275b115ab7f39211eff3f2de4404",
+    "src/anessim/configs/synthetic_v7.yaml": "de164be9491fb1b3a7a4fe65d9916fbed0bf3bcffa751d8b4d2e9850441d9057"
+  },
+  "n_pairs": 6345,
+  "n_levers": 21,
+  "G0a": {
+    "n_tested": 21,
+    "n_identical": 0,
+    "n_diff_only_bt_gap": 20,
+    "pass": false,
+    "per_lever": {
+      "eph_bolus": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "ephedrine": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "fio2_down": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "nepi_rate": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "noradrenaline": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "peep_down": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "peep_up": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "phen_bolus": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "phen_rate": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "ppf20_rate": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "ppf_bolus": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "propofol_bolus": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "remi_bolus": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "remi_up": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "rftn20_rate": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "set_fio2": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "set_peep": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "set_rr": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "set_tv": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 0
+      },
+      "sevo_mac": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      },
+      "sevo_up": {
+        "n": 1,
+        "ident": 0,
+        "diff_only_bt": 1
+      }
+    },
+    "failures": [
+      {
+        "pair_id": 195251,
+        "lever": "eph_bolus",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 171501,
+        "lever": "ephedrine",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 180601,
+        "lever": "fio2_down",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 193001,
+        "lever": "nepi_rate",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 170501,
+        "lever": "noradrenaline",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 180301,
+        "lever": "peep_down",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 180001,
+        "lever": "peep_up",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 194501,
+        "lever": "phen_bolus",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 193751,
+        "lever": "phen_rate",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 190001,
+        "lever": "ppf20_rate",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 191501,
+        "lever": "ppf_bolus",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 170001,
+        "lever": "propofol_bolus",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 192251,
+        "lever": "remi_bolus",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 171001,
+        "lever": "remi_up",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 190751,
+        "lever": "rftn20_rate",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 196001,
+        "lever": "set_fio2",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 198251,
+        "lever": "set_peep",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 196751,
+        "lever": "set_rr",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 197501,
+        "lever": "set_tv",
+        "diffs": {
+          "case_a": [
+            "BIS/BIS",
+            "BIS/EMG",
+            "BIS/SEF",
+            "BIS/SQI",
+            "BIS/SR",
+            "BIS/TOTPOW",
+            "Orchestra/PPF20_CE",
+            "Orchestra/PPF20_CP",
+            "Orchestra/PPF20_CT",
+            "Orchestra/PPF20_RATE",
+            "Orchestra/RFTN20_CE",
+            "Orchestra/RFTN20_CP",
+            "Orchestra/RFTN20_CT",
+            "Orchestra/RFTN20_RATE",
+            "Primus/COMPLIANCE",
+            "Primus/ETCO2",
+            "Primus/EXP_DES",
+            "Primus/EXP_SEVO",
+            "Primus/FEN2O",
+            "Primus/FEO2",
+            "Primus/FIN2O",
+            "Primus/FIO2",
+            "Primus/FLOW_AIR",
+            "Primus/FLOW_N2O",
+            "Primus/FLOW_O2",
+            "Primus/INCO2",
+            "Primus/INSP_DES",
+            "Primus/INSP_SEVO",
+            "Primus/MAC",
+            "Primus/MAWP_MBAR",
+            "Primus/MV",
+            "Primus/PAMB_MBAR",
+            "Primus/PEEP_MBAR",
+            "Primus/PIP_MBAR",
+            "Primus/PPLAT_MBAR",
+            "Primus/RR_CO2",
+            "Primus/SET_AGE",
+            "Primus/SET_FIO2",
+            "Primus/SET_FRESH_FLOW",
+            "Primus/SET_INSP_PAUSE",
+            "Primus/SET_INSP_TM",
+            "Primus/SET_INTER_PEEP",
+            "Primus/SET_PIP",
+            "Primus/SET_RR_IPPV",
+            "Primus/SET_TV_L",
+            "Primus/TV",
+            "Primus/VENT_LEAK",
+            "Solar8000/ART_DBP",
+            "Solar8000/ART_MBP",
+            "Solar8000/ART_SBP",
+            "Solar8000/BT",
+            "Solar8000/CVP",
+            "Solar8000/ETCO2",
+            "Solar8000/FEO2",
+            "Solar8000/FIO2",
+            "Solar8000/GAS2_EXPIRED",
+            "Solar8000/GAS2_INSPIRED",
+            "Solar8000/HR",
+            "Solar8000/INCO2",
+            "Solar8000/NIBP_DBP",
+            "Solar8000/NIBP_MBP",
+            "Solar8000/NIBP_SBP",
+            "Solar8000/PLETH_HR",
+            "Solar8000/PLETH_SPO2",
+            "Solar8000/RR",
+            "Solar8000/RR_CO2",
+            "Solar8000/ST_AVF",
+            "Solar8000/ST_AVL",
+            "Solar8000/ST_AVR",
+            "Solar8000/ST_I",
+            "Solar8000/ST_II",
+            "Solar8000/ST_III",
+            "Solar8000/VENT_INSP_TM",
+            "Solar8000/VENT_MAWP",
+            "Solar8000/VENT_MV",
+            "Solar8000/VENT_PIP",
+            "Solar8000/VENT_PPLAT",
+            "Solar8000/VENT_RR",
+            "Solar8000/VENT_SET_FIO2",
+            "Solar8000/VENT_SET_PCP",
+            "Solar8000/VENT_SET_TV",
+            "Solar8000/VENT_TV"
+          ],
+          "case_b": [
+            "BIS/BIS",
+            "BIS/EMG",
+            "BIS/SEF",
+            "BIS/SQI",
+            "BIS/SR",
+            "BIS/TOTPOW",
+            "Orchestra/PPF20_CE",
+            "Orchestra/PPF20_CP",
+            "Orchestra/PPF20_CT",
+            "Orchestra/PPF20_RATE",
+            "Orchestra/RFTN20_CE",
+            "Orchestra/RFTN20_CP",
+            "Orchestra/RFTN20_CT",
+            "Orchestra/RFTN20_RATE",
+            "Primus/COMPLIANCE",
+            "Primus/ETCO2",
+            "Primus/EXP_DES",
+            "Primus/EXP_SEVO",
+            "Primus/FEN2O",
+            "Primus/FEO2",
+            "Primus/FIN2O",
+            "Primus/FIO2",
+            "Primus/FLOW_AIR",
+            "Primus/FLOW_N2O",
+            "Primus/FLOW_O2",
+            "Primus/INCO2",
+            "Primus/INSP_DES",
+            "Primus/INSP_SEVO",
+            "Primus/MAC",
+            "Primus/MAWP_MBAR",
+            "Primus/MV",
+            "Primus/PAMB_MBAR",
+            "Primus/PEEP_MBAR",
+            "Primus/PIP_MBAR",
+            "Primus/PPLAT_MBAR",
+            "Primus/RR_CO2",
+            "Primus/SET_AGE",
+            "Primus/SET_FIO2",
+            "Primus/SET_FRESH_FLOW",
+            "Primus/SET_INSP_PAUSE",
+            "Primus/SET_INSP_TM",
+            "Primus/SET_INTER_PEEP",
+            "Primus/SET_PIP",
+            "Primus/SET_RR_IPPV",
+            "Primus/SET_TV_L",
+            "Primus/TV",
+            "Primus/VENT_LEAK",
+            "Solar8000/ART_DBP",
+            "Solar8000/ART_MBP",
+            "Solar8000/ART_SBP",
+            "Solar8000/BT",
+            "Solar8000/CVP",
+            "Solar8000/ETCO2",
+            "Solar8000/FEO2",
+            "Solar8000/FIO2",
+            "Solar8000/GAS2_EXPIRED",
+            "Solar8000/GAS2_INSPIRED",
+            "Solar8000/HR",
+            "Solar8000/INCO2",
+            "Solar8000/NIBP_DBP",
+            "Solar8000/NIBP_MBP",
+            "Solar8000/NIBP_SBP",
+            "Solar8000/PLETH_HR",
+            "Solar8000/PLETH_SPO2",
+            "Solar8000/RR",
+            "Solar8000/RR_CO2",
+            "Solar8000/ST_AVF",
+            "Solar8000/ST_AVL",
+            "Solar8000/ST_AVR",
+            "Solar8000/ST_I",
+            "Solar8000/ST_II",
+            "Solar8000/ST_III",
+            "Solar8000/VENT_INSP_TM",
+            "Solar8000/VENT_MAWP",
+            "Solar8000/VENT_MV",
+            "Solar8000/VENT_PIP",
+            "Solar8000/VENT_PPLAT",
+            "Solar8000/VENT_RR",
+            "Solar8000/VENT_SET_FIO2",
+            "Solar8000/VENT_SET_PCP",
+            "Solar8000/VENT_SET_TV",
+            "Solar8000/VENT_TV"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": false
+      },
+      {
+        "pair_id": 199001,
+        "lever": "sevo_mac",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ],
+          "truth_a": [
+            "phase"
+          ],
+          "truth_b": [
+            "phase"
+          ]
+        },
+        "only_known_bt_gap": true
+      },
+      {
+        "pair_id": 180901,
+        "lever": "sevo_up",
+        "diffs": {
+          "case_a": [
+            "Solar8000/BT"
+          ],
+          "case_b": [
+            "Solar8000/BT"
+          ]
+        },
+        "only_known_bt_gap": true
+      }
+    ],
+    "tmp_dir": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\paso3d_g0a_jiu9w0an",
+    "elapsed_s": 5.3
+  },
+  "G0b": {
+    "per_lever": {
+      "set_rr": {
+        "setpoint": "Primus/SET_RR_IPPV",
+        "sensor_observed_7s": true,
+        "n_pairs": 375,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "set_tv": {
+        "setpoint": "Primus/SET_TV_L",
+        "sensor_observed_7s": true,
+        "n_pairs": 375,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "set_peep": {
+        "setpoint": "Primus/SET_INTER_PEEP",
+        "sensor_observed_7s": true,
+        "n_pairs": 375,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "set_fio2": {
+        "setpoint": "Primus/SET_FIO2",
+        "sensor_observed_7s": true,
+        "n_pairs": 375,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "peep_up": {
+        "setpoint": "Primus/SET_INTER_PEEP",
+        "sensor_observed_7s": true,
+        "n_pairs": 150,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "peep_down": {
+        "setpoint": "Primus/SET_INTER_PEEP",
+        "sensor_observed_7s": true,
+        "n_pairs": 150,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "fio2_down": {
+        "setpoint": "Primus/SET_FIO2",
+        "sensor_observed_7s": true,
+        "n_pairs": 150,
+        "median_interval_s": 7.0,
+        "median_of_medians_min": 7.0,
+        "median_of_medians_max": 7.0,
+        "criterion_applicable": true,
+        "pass": true
+      },
+      "sevo_mac": {
+        "setpoint": "Primus/SET_MAC",
+        "sensor_observed_7s": false,
+        "n_pairs": 375,
+        "median_interval_s": 0.5,
+        "median_of_medians_min": 0.5,
+        "median_of_medians_max": 0.5,
+        "criterion_applicable": false,
+        "pass": false
+      },
+      "sevo_up": {
+        "setpoint": "Primus/SET_MAC",
+        "sensor_observed_7s": false,
+        "n_pairs": 150,
+        "median_interval_s": 0.5,
+        "median_of_medians_min": 0.5,
+        "median_of_medians_max": 0.5,
+        "criterion_applicable": false,
+        "pass": false
+      }
+    },
+    "criterion": "mediana = 7.0 s ± 0.5 s por palanca",
+    "criterion_scope": "El criterio se aplica a las consignas que pasan por el modelo de observación con cadencia de 7 s (SET_FIO2, SET_RR_IPPV, SET_TV_L, SET_INTER_PEEP). 'Primus/SET_MAC' NO se observa con sensor: se escribe crudo en la rejilla de simulación (dt = 0.5 s), por lo que se mide y se informa aparte SIN aplicarle el criterio de 7 s. La instrucción lo incluía por error al asumir que era una consigna observada; se documenta esta corrección de alcance.",
+    "pass": true,
+    "case_196761": {
+      "pair_id": 196761,
+      "lever": "set_rr",
+      "setpoint": "Primus/SET_RR_IPPV",
+      "caseid": 196761,
+      "n_samples": 1704,
+      "median_interval_s": 7.0,
+      "first_times": [
+        371.0,
+        378.0,
+        392.0,
+        399.0,
+        406.0,
+        413.0,
+        420.0,
+        434.0,
+        441.0,
+        448.0,
+        455.0,
+        462.0
+      ]
+    },
+    "explanation_35s": "35 s = mcm(7 s cadencia del sensor, 5 s rejilla de tokens). Las muestras de SET_* existen cada 7 s en el eje crudo de 0.5 s; al llevarlas a la rejilla de 5 s (p. ej. al inspeccionar la serie en la capa de tokens o al quedarse con las muestras que caen en puntos múltiplos de 5 s) sólo sobreviven las que caen en un múltiplo común, esto es, cada 35 s. La cadencia real del sensor es 7 s.",
+    "elapsed_s": 44.2
+  },
+  "G0c": {
+    "table": {
+      "fio2_down": {
+        "n": 150,
+        "multiplo": {
+          "lag_0_1": 150,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "no_multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "delta_min": -20.0,
+        "delta_max": -20.0
+      },
+      "peep_down": {
+        "n": 150,
+        "multiplo": {
+          "lag_0_1": 93,
+          "lag_ge_2": 0,
+          "nulo": 57
+        },
+        "no_multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "delta_min": -5.0,
+        "delta_max": -5.0
+      },
+      "peep_up": {
+        "n": 150,
+        "multiplo": {
+          "lag_0_1": 150,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "no_multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "delta_min": 5.0,
+        "delta_max": 5.0
+      },
+      "set_fio2": {
+        "n": 375,
+        "multiplo": {
+          "lag_0_1": 375,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "no_multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "delta_min": -17.0,
+        "delta_max": -17.0
+      },
+      "set_peep": {
+        "n": 375,
+        "multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "no_multiplo": {
+          "lag_0_1": 275,
+          "lag_ge_2": 16,
+          "nulo": 84
+        },
+        "delta_min": -4.9832,
+        "delta_max": 4.9886
+      },
+      "set_rr": {
+        "n": 375,
+        "multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "no_multiplo": {
+          "lag_0_1": 341,
+          "lag_ge_2": 22,
+          "nulo": 12
+        },
+        "delta_min": -3.98,
+        "delta_max": 3.9728
+      },
+      "set_tv": {
+        "n": 375,
+        "multiplo": {
+          "lag_0_1": 0,
+          "lag_ge_2": 0,
+          "nulo": 0
+        },
+        "no_multiplo": {
+          "lag_0_1": 367,
+          "lag_ge_2": 8,
+          "nulo": 0
+        },
+        "delta_min": -14.8445,
+        "delta_max": 14.9596
+      }
+    },
+    "n_lag_ge_2": 46,
+    "lag_ge_2_levers": {
+      "set_peep": 16,
+      "set_rr": 22,
+      "set_tv": 8
+    },
+    "lag_ge_2_pairs": [
+      {
+        "pair_id": 198277,
+        "lever": "set_peep",
+        "delta": -0.2889,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 198287,
+        "lever": "set_peep",
+        "delta": 0.5056,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 198289,
+        "lever": "set_peep",
+        "delta": -0.1732,
+        "es_multiplo": false,
+        "lag": 14.0
+      },
+      {
+        "pair_id": 198293,
+        "lever": "set_peep",
+        "delta": 0.1368,
+        "es_multiplo": false,
+        "lag": 40.0
+      },
+      {
+        "pair_id": 198439,
+        "lever": "set_peep",
+        "delta": -0.1353,
+        "es_multiplo": false,
+        "lag": 28.0
+      },
+      {
+        "pair_id": 198445,
+        "lever": "set_peep",
+        "delta": -0.1791,
+        "es_multiplo": false,
+        "lag": 4.0
+      },
+      {
+        "pair_id": 198453,
+        "lever": "set_peep",
+        "delta": 0.1537,
+        "es_multiplo": false,
+        "lag": 9.0
+      },
+      {
+        "pair_id": 198691,
+        "lever": "set_peep",
+        "delta": -0.2331,
+        "es_multiplo": false,
+        "lag": 8.0
+      },
+      {
+        "pair_id": 198701,
+        "lever": "set_peep",
+        "delta": 0.0922,
+        "es_multiplo": false,
+        "lag": 157.0
+      },
+      {
+        "pair_id": 198827,
+        "lever": "set_peep",
+        "delta": 0.2906,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 198903,
+        "lever": "set_peep",
+        "delta": 0.3414,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 198907,
+        "lever": "set_peep",
+        "delta": 0.0541,
+        "es_multiplo": false,
+        "lag": 5.0
+      },
+      {
+        "pair_id": 198953,
+        "lever": "set_peep",
+        "delta": -0.0794,
+        "es_multiplo": false,
+        "lag": 66.0
+      },
+      {
+        "pair_id": 198963,
+        "lever": "set_peep",
+        "delta": 0.1803,
+        "es_multiplo": false,
+        "lag": 15.0
+      },
+      {
+        "pair_id": 198967,
+        "lever": "set_peep",
+        "delta": 0.3421,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 198993,
+        "lever": "set_peep",
+        "delta": 0.2673,
+        "es_multiplo": false,
+        "lag": 17.0
+      },
+      {
+        "pair_id": 196761,
+        "lever": "set_rr",
+        "delta": -0.1718,
+        "es_multiplo": false,
+        "lag": 13.0
+      },
+      {
+        "pair_id": 196769,
+        "lever": "set_rr",
+        "delta": 0.1617,
+        "es_multiplo": false,
+        "lag": 3.0
+      },
+      {
+        "pair_id": 196783,
+        "lever": "set_rr",
+        "delta": -0.3697,
+        "es_multiplo": false,
+        "lag": 5.0
+      },
+      {
+        "pair_id": 196903,
+        "lever": "set_rr",
+        "delta": -0.274,
+        "es_multiplo": false,
+        "lag": 10.0
+      },
+      {
+        "pair_id": 196925,
+        "lever": "set_rr",
+        "delta": 0.1815,
+        "es_multiplo": false,
+        "lag": 7.0
+      },
+      {
+        "pair_id": 196951,
+        "lever": "set_rr",
+        "delta": -0.2412,
+        "es_multiplo": false,
+        "lag": 8.0
+      },
+      {
+        "pair_id": 196957,
+        "lever": "set_rr",
+        "delta": 0.6258,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 196969,
+        "lever": "set_rr",
+        "delta": -0.1736,
+        "es_multiplo": false,
+        "lag": 3.0
+      },
+      {
+        "pair_id": 196985,
+        "lever": "set_rr",
+        "delta": -0.3855,
+        "es_multiplo": false,
+        "lag": 3.0
+      },
+      {
+        "pair_id": 196993,
+        "lever": "set_rr",
+        "delta": -0.6148,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 197027,
+        "lever": "set_rr",
+        "delta": 0.271,
+        "es_multiplo": false,
+        "lag": 3.0
+      },
+      {
+        "pair_id": 197047,
+        "lever": "set_rr",
+        "delta": 0.3632,
+        "es_multiplo": false,
+        "lag": 9.0
+      },
+      {
+        "pair_id": 197083,
+        "lever": "set_rr",
+        "delta": -0.264,
+        "es_multiplo": false,
+        "lag": 4.0
+      },
+      {
+        "pair_id": 197097,
+        "lever": "set_rr",
+        "delta": 0.1566,
+        "es_multiplo": false,
+        "lag": 50.0
+      },
+      {
+        "pair_id": 197117,
+        "lever": "set_rr",
+        "delta": -0.2074,
+        "es_multiplo": false,
+        "lag": 37.0
+      },
+      {
+        "pair_id": 197145,
+        "lever": "set_rr",
+        "delta": 0.1528,
+        "es_multiplo": false,
+        "lag": 30.0
+      },
+      {
+        "pair_id": 197185,
+        "lever": "set_rr",
+        "delta": -0.2318,
+        "es_multiplo": false,
+        "lag": 7.0
+      },
+      {
+        "pair_id": 197277,
+        "lever": "set_rr",
+        "delta": 0.2978,
+        "es_multiplo": false,
+        "lag": 13.0
+      },
+      {
+        "pair_id": 197279,
+        "lever": "set_rr",
+        "delta": 0.3631,
+        "es_multiplo": false,
+        "lag": 3.0
+      },
+      {
+        "pair_id": 197341,
+        "lever": "set_rr",
+        "delta": 0.3996,
+        "es_multiplo": false,
+        "lag": 16.0
+      },
+      {
+        "pair_id": 197369,
+        "lever": "set_rr",
+        "delta": -0.1179,
+        "es_multiplo": false,
+        "lag": 24.0
+      },
+      {
+        "pair_id": 197381,
+        "lever": "set_rr",
+        "delta": -0.2492,
+        "es_multiplo": false,
+        "lag": 72.0
+      },
+      {
+        "pair_id": 197531,
+        "lever": "set_tv",
+        "delta": -0.6859,
+        "es_multiplo": false,
+        "lag": 4.0
+      },
+      {
+        "pair_id": 197533,
+        "lever": "set_tv",
+        "delta": 0.0272,
+        "es_multiplo": false,
+        "lag": 41.0
+      },
+      {
+        "pair_id": 197545,
+        "lever": "set_tv",
+        "delta": 0.0494,
+        "es_multiplo": false,
+        "lag": 51.0
+      },
+      {
+        "pair_id": 197595,
+        "lever": "set_tv",
+        "delta": -0.2487,
+        "es_multiplo": false,
+        "lag": 9.0
+      },
+      {
+        "pair_id": 197783,
+        "lever": "set_tv",
+        "delta": -0.4591,
+        "es_multiplo": false,
+        "lag": 2.0
+      },
+      {
+        "pair_id": 197801,
+        "lever": "set_tv",
+        "delta": 0.7715,
+        "es_multiplo": false,
+        "lag": 3.0
+      },
+      {
+        "pair_id": 197995,
+        "lever": "set_tv",
+        "delta": -0.3173,
+        "es_multiplo": false,
+        "lag": 5.0
+      },
+      {
+        "pair_id": 198143,
+        "lever": "set_tv",
+        "delta": -0.3667,
+        "es_multiplo": false,
+        "lag": 3.0
+      }
+    ],
+    "crit1_lag_ge_2_all_no_multiplo": true,
+    "crit2_no_abs_k_ge_1_with_lag_ge_2": true,
+    "crit2_violations": [],
+    "pass": true,
+    "elapsed_s": 0.3
+  },
+  "pass": false,
+  "elapsed_s": 0.4
+}

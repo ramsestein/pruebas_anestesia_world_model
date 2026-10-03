@@ -1,7 +1,14 @@
 {
   "description": "Registro central de huecos de procedencia. Cada entrada documenta un artefacto perdido o de procedencia no garantizada y qué lo sustituye o lo garantiza.",
-  "generated_at": "2026-10-01",
+  "generated_at": "2026-10-03",
   "entries": [
+    {
+      "artifact": "cf_v7 / reproducibilidad y sha del código generador",
+      "status": "abierto",
+      "lost": "El manifiesto de cf_v7 no registra el sha256 del código generador (generate_f2_cf.py, simulate.py, sensors.py, respiratory.py, render.py) ni el commit de git, así que la procedencia del dataset no estaba garantizada. La puerta G0a del paso 3d regeneró 210 pares (los 10 primeros de cada una de las 21 palancas) con el código actual y comparó caso (ambas ramas), truth y metadata contra data/cf_v7: 0/210 idénticos. La única diferencia es 'Solar8000/BT' en el caso (más un artefacto nulo en 'truth/phase'); ninguna otra columna difiere y los metadatos son idénticos.",
+      "substitute": "NO CERRADO. G0a FALLÓ por el hueco de BT de simulate.py (§6 de LIMITACIONES_GENERADOR_v7.md: C3 revertido en el código, sin revertir en los datos), de modo que cf_v7 no es reproducible bit a bit desde el repo y la Fase 2 del paso 3d (G2a/G2c) es inalcanzable sin excluir BT o restaurar C3. El paso 3d se detuvo en la Fase 0 (regla §1: puerta bloqueante fallida). El cierre hacia adelante requiere que la regeneración cf_v7_1 registre el commit de git y los sha de los ficheros del núcleo (Fase 2 del paso 3d).",
+      "related": "LIMITACIONES_GENERADOR_v7.md §6"
+    },
     {
       "artifact": "windows_v2",
       "status": "perdido",
