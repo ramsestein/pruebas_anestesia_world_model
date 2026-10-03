@@ -1,0 +1,536 @@
+REPORT_paso3c_pares_cf.txt
+========================================================================
+PASO 3c — corregir la anotación de los pares CF (t_effective, prefijo
+fisiológico, adelanto de tokens)
+fecha: 2026-10-03
+========================================================================
+
+VEREDICTOS
+------------------------------------------------------------------------
+  1. Prefijo fisiológico (B1, bloqueante):  FALLA
+     877 de los 6177 pares efectivos (14.198 %) divergen en alguna de las 14
+     variables de la imagen (valores o máscaras) en una celda que cierra en o
+     antes de t_effective. En los 877 la imagen nunca se adelanta al acto del
+     generador (min(imagen - t_action) = 0.0 s, 0 pares por delante): lo que
+     falla es que t_effective es un proxy TARDÍO del acto para las consignas
+     persistentes de ventilación.
+
+  2. Adelanto máximo de tokens (C3):  5.2 s  -> clase 5-10 s (NO bloqueante)
+     Una sola celda de 5 s. 6100 pares por debajo de 5 s, 77 en la clase
+     5-10 s y 0 por encima de 10 s. Mecanismo identificado y documentado en
+     LIMITACIONES §8.1 (estampado del bolo a 0.5 s + rejilla `side="left"` +
+     desplazamiento de pk_tokens.py). Se marca para la próxima regeneración.
+
+  3. Anotación v2 (F):  NO ADOPTADA
+     `cf_pairs` sigue apuntando a `pairs_annotated.parquet` (3b). Fallan B1
+     (877 pares) y D1 en tres palancas (set_rr 93.94 %, set_tv 97.87 %,
+     set_peep 94.50 % frente al 99 % exigido). C5 (prefijo de tokens) pasa en
+     los 6345 pares y C3 está en la clase no bloqueante.
+
+  4. Pares efectivos para entrenar:  6177 (anotación de 3b, vigente)
+     ADVERTENCIA: con el generador actual NINGUNA de las dos anotaciones debe
+     usarse para entrenar. La v2 no se adopta, y la de 3b (la que sigue en
+     vigor) es la que este paso ha medido como insegura: su prefijo
+     fisiológico contiene 877 pares con la imagen ya divergente y su frontera
+     usa un margen fijo de 2 celdas para taparlo. El defecto es del GENERADOR
+     (§7 de este informe y LIMITACIONES §8.4): la consigna registrada
+     `Primus/SET_*` no refleja el valor aplicado desde split_t.
+
+Artefactos
+------------------------------------------------------------------------
+  pairs.parquet (NO reescrito, R2)
+    sha256 = 5ec3eb8a27b13bd296b4906c7eb5086ff33ad663e66011296e5a4cf01fa482ba
+  pairs_annotated.parquet (3b, NO reescrito, R2)
+    sha256 = 1257a088f759cb52fb0fa4f1d6c73074c76eab22b155131f28b3e213a73ccd06
+  pairs_annotated_v2.parquet (NUEVO, anotación corregida, no adoptada)
+    sha256 = dc839eb879cda130b0089b326844dc0e6e36cc59efb787a25d02152085184645
+  manifiesto de la anotación v2
+    manifests/tokens_v2_cf_pairs_annotation_v2.json
+    sha256 = e9fd9d521565511cbc9b852eeb3391afd326bbf6171adf9beb4a34e32cf3a42e
+  analizador      scripts/paso3c_analyze_pairs.py
+  módulo          src/tokens/cf_pairs.py (t_boundary_of, pre_action_bounded,
+                  post_action_bounded, PAIRS_ANNOTATED_V2_PARQUET)
+  limitaciones    LIMITACIONES_GENERADOR_v7.md §8.1-§8.4
+  tests           tests/test_paso3c_criterios.py (24 casos)
+
+Nada se ha regenerado (R1): no se ha vuelto a ejecutar el generador, ni la
+tokenización, ni pk_v2, ni windows_v4. Todos los artefactos de entrada son los
+mismos que dejó el paso 3b (los dos sha256 de arriba lo fijan).
+
+========================================================================
+1. Convención de tiempos (fase 0)
+========================================================================
+Verificada contra `src/autoencoder/window.py`, `src/tokens/pk_tokens.py` y
+`src/tokens/tokenize.py` antes de medir nada; sin ella "adelanto" sería
+indistinguible de un artefacto de notación.
+
+  1. La rejilla es `t = a0 + 5k` con `a0 = max(anestart, casestart, t_min)`
+     (window.py:692). Para los casos sintéticos cf_v7 medidos aquí a0 = 0 y el
+     caso del par 170171 cubre [120, 10570].
+  2. Un punto de rejilla `g` es el CIERRE de la celda semiabierta `(g-5, g]`:
+     la celda cubre `(g-5, g]` y el instante `g` le pertenece. Es la convención
+     de `tokenize.py:222` ("cierres de celda") y de `window.py:53-58` (B1:
+     "valor en la ventana = suma en (t - grid_s, t]").
+  3. Tracks continuos: `valor(g)` = última muestra cruda con `time <= g`
+     (forward-fill hold; window.py:623-625, pk_tokens.py:291,
+     tokenize.py:196).
+  4. Bolos: `valor(g)` = suma de eventos en `(g-5, g]`, estampada en el primer
+     punto de rejilla `>= t_evento` (window.py:785).
+  5. Ventana de tokens: `t1 = t0 + 60`; sus 12 celdas cierran en
+     `t0+5 .. t0+60` y cubren `(t0, t1]`; `ce_t0 = ce(t0)`, `ce_t1 = ce(t0+60)`
+     (tokenize.py:17-21, 325-329).
+
+Consecuencia que fija la frontera de este paso:
+
+  "celdas que cierran en o antes de X"  <=>  puntos de rejilla `g <= X`
+  `pre_action(ventana)`  <=>  `t1 <  t_boundary`   (todas sus celdas cierran
+                                                    antes de la frontera)
+  `post_action(ventana)` <=>  `t1 >= t_boundary`   (contiene la celda de la
+                                                    frontera o una posterior)
+  `t_boundary = min(t_div_grid, floor(t_effective / 5) * 5)`
+
+Es exactamente la partición (sin solape y exhaustiva) que exige C4 y la que se
+usa en C5 y D. No queda ningún margen fijo: el margen de 2 celdas de 3b
+(`PREFIX_MARGIN_CELLS = 2`) se conserva sólo como referencia histórica, porque
+la anotación v2 no se adopta.
+
+Nota de interpretación: B1 dice "toda celda que termine en o antes de
+t_effective", que con la convención 2 se lee `g <= t_effective`; así se ha
+medido. La celda que cierra EXACTAMENTE en `t_effective` contiene el instante de
+la divergencia y por eso B1 la incluye (329 de los 877 fallos son de esta clase;
+ver §3).
+
+========================================================================
+2. Fase A — t_effective
+========================================================================
+Definición medida (una sola para todo el paso):
+
+  par nulo                                    -> t_effective = NaN
+  acción puntual (pharma, learning, sevo)      -> t_effective = t_action
+  consigna persistente efectiva (7 overrides)  -> t_effective = t_divergence_raw
+
+Reparto sobre los 6345 pares:
+
+  one_shot   4380   t_effective == t_action (comprobado en los 4380)
+  inmediato  1719   persistentes con |t_divergence_raw - t_action| <= 30 s
+  retrasado    78   persistentes con recorte; retraso mediano 484.245 s,
+                    máximo 12531.81 s
+  nulo        168   t_effective = NaN (31 below_resolution, 135 clip_bound,
+                    2 no_change_requested)
+
+Por palanca, las 7 persistentes son exactamente `PERSISTENT_LEVERS` (peep_up,
+peep_down, fio2_down, set_fio2, set_rr, set_tv, set_peep) y todas las
+retrasadas pertenecen a ellas.
+
+Evidencia del recorte (los 78 retrasados, en
+`manifiesto["A"]["retrasados"]`, con consigna base en t_action, consigna base en
+la divergencia y consigna aplicada en la divergencia). Dos ejemplos:
+
+  180317  peep_down  t_action 10290.14  override {peep_delta: -5.0}
+          base en t_action = 0.0  ->  retraso 5725.86 s
+          base en la divergencia 1.0 / intervención 0.0
+  180319  peep_down  t_action  4756.89  override {peep_delta: -5.0}
+          base en t_action = 0.0  ->  retraso   45.11 s
+          base en la divergencia 4.0 / intervención 0.0
+
+Lectura: el delta se aplica de forma ADITIVA sobre la consigna del plan base
+(`peep_arr[post] = clip(peep_arr[post] + delta, ...)`, `post = t > split_t`);
+si el recorte contra el límite físico lo anula (PEEP base 0 con delta -5 -> 0)
+la consigna no cambia hasta que el plan base vuelve a escribirla. No es un
+delta acumulativo en el tiempo.
+
+========================================================================
+3. Fase B — prefijo fisiológico (B1, bloqueante) y B2 (informativo)
+========================================================================
+B1 — las 14 variables de la imagen de `windows_v4` (valores, `m_*` y
+`m_raw_*`) deben ser idénticas entre ramas en toda celda que cierre en o antes
+de `t_effective`. Evaluado en los 6177 pares efectivos, SIN margen.
+
+  RESULTADO: FALLAN 877  (14.198 % de 6177)
+
+  Por palanca:   set_fio2 247 | set_rr 145 | set_tv 131 | set_peep 126 |
+                 fio2_down 96 | peep_up 88 | peep_down 35 | sevo_mac 5 |
+                 eph_bolus 3 | phen_bolus 1
+
+  Por variable que rompe primero: Solar8000/PLETH_SPO2 304 | Primus/PEEP_MBAR
+                 178 | Primus/MV 117 | Primus/PIP_MBAR 88 | Primus/ETCO2 77 |
+                 Solar8000/HR 57 | Solar8000/ART_MBP 25 | Primus/RR_CO2 9
+
+  Por posición de la primera celda divergente respecto de t_effective:
+                 cierra exactamente en t_effective        329
+                 0 < t_effective - imagen <= 5 s          337
+                 5 < t_effective - imagen <= 10 s         138
+                 > 10 s                                    73
+
+  Respecto del ACTO del generador:  imagen - t_action >= 0 en los 877
+                 (mínimo 0.000 s, 0 pares con la imagen por delante del acto)
+
+Lectura (esto es el hallazgo central del paso): el prefijo NO filtra el futuro
+— no hay ninguna celda anterior al acto que ya vea la intervención — pero
+`t_effective`, tal como queda definido en la fase A para las consignas
+persistentes (`t_divergence_raw` medido sobre los `SET_*` crudos), es un proxy
+TARDÍO del instante en que la intervención actúa:
+
+  * 337 + 138 pares: la imagen diverge 0-10 s (1-2 celdas) DESPUÉS de t_action
+    y ANTES de t_effective; consigna e imagen responden al mismo acto, pero el
+    registro disperso `SET_*` se sella en otro punto de rejilla.
+  * 73 pares: > 10 s; son las consignas persistentes retrasadas del §2, donde
+    la imagen (y el plan base) cambian el valor mucho después del acto.
+  * 329 pares: la primera celda divergente cierra exactamente en t_effective;
+    es la celda `(t_effective-5, t_effective]` que B1 incluye por su "en o
+    antes" y que contiene el instante de la divergencia.
+  * Sobre los tracks crudos (B2, informativo) fallan 1773 de 6177
+    (4572 con prefijo crudo idéntico). B2 confirma lo mismo a resolución 0.5 s.
+
+Causa raíz medida: los `SET_*` del caso crudo son DISPERSOS (NaN salvo cuando
+el plan escribe). En el par 196761 `Primus/SET_RR_IPPV` sólo tiene muestra cada
+~35 s (7875.0, 7910.0, 7945.0 ...), idéntica en ambas ramas; la divergencia que
+fija `t_divergence_raw` está en el hueco entre muestras. La frontera de este
+paso se calcula reteniendo esa consigna en la rejilla (hold, convención §1),
+mientras que el tokenizador, cuando el setpoint es NaN en los extremos de la
+ventana, cae al PROXY MEDIDO (`Primus/RR_CO2`, etc.). Por eso la frontera y el
+momento en que cambian las features del grupo no coinciden siempre (§5).
+
+Consecuencia (R3: el criterio no se cambia): B1 FALLA y la anotación v2 NO se
+adopta. Un fallo de B1 es un defecto del generador y se PARA aquí; lo que sigue
+se entrega como documentación y como inventario de lo que habría que medir otra
+vez tras la corrección.
+
+========================================================================
+4. Fase C — adelanto de tokens, frontera y prefijo (C5)
+========================================================================
+C1 — `t_div_grid`: primer punto de rejilla donde difiere alguna serie que
+alimenta las features del `lever_group` (pk_v2 del grupo, columnas de bolo de
+`windows_v4` y, en ventilación, las consignas `SET_*` retenidas en la rejilla).
+Hay divergencia de rejilla en 6190 de los 6345 pares: los 6177 efectivos más los
+13 pares nulos de tasa cuya serie observada diverge sin llegar a cambiar la
+feature. Los 155 pares sin divergencia de rejilla son todos nulos
+(`lever_effective = False`).
+
+C3 — adelanto `lead_s = t_effective - t_div_grid`:
+
+  máximo        5.200 s      <- UNA celda de 5 s
+  p95           4.020 s
+  mediana      -2.000 s
+  clases        < 5 s: 6100 | 5-10 s: 77 | > 10 s: 0
+
+  histograma (s): <=0 4898 | (0,1] 232 | (1,2] 266 | (2,3] 257 | (3,4] 215 |
+                  (4,5] 253 | (5,5.5] 56 | (5.5,10] 0 | >10 0
+
+  por palanca (máximo): phen_rate 5.2 | phen_bolus 5.2 | eph_bolus 5.2 |
+                  ephedrine 5.2 | ppf_bolus 0.2 | propofol_bolus 0.2 |
+                  remi_bolus 0.2 | sevo_up -0.5 | rftn20_rate -0.2 |
+                  ppf20_rate -0.1 | resto (incluidas las 7 de ventilación) 0.0
+
+Mecanismo (medido, no inferido). Cadena de tres desplazamientos acotados:
+
+  a) el generador aplica el bolo en t_action y la capa de observación lo
+     escribe a la baja en el eje de 0.5 s: t_evento = floor_0.5(t_action)
+     (3125.2 -> 3125.0; 6781.7 -> 6781.5 ...). Aporta <= 0.5 s.
+  b) `window.py:785` (searchsorted(grid, tb, side="left")) lo estampa en el
+     primer punto de rejilla >= t_evento (3125.0 -> 3125; 4685.0 -> 4685).
+  c) `pk_tokens.py:161-164` (build_linear_ce) y `:194-197` (exponential_ce)
+     aplican el bolo de la celda i al inicio de la celda i-1
+     (`bolus_at[:-1] += bol[1:]`, y `rate[i+1]` mueve `ce[i]`), de modo que la
+     Ce diverge una celda entera antes.
+
+Casos extremos verificados uno a uno:
+  3125.2 (phen_rate)   -> Ce en 3120   (+5.2 s)
+  4685.0 (eph_bolus)   -> Ce en 4680   (+5.0 s)
+  5220.2 (ppf_bolus)   -> Ce en 5220   (+0.2 s)
+  6781.7 (ephedrine)   -> Ce en 6780   (+1.7 s)
+
+Clase C3: 5.2 s cae en la banda "5 <= lead <= 10 s" = atribución temprana, NO
+bloqueante, a documentar para la próxima regeneración (LIMITACIONES §8.1). No
+hay ningún adelanto > 10 s, y en las 7 palancas de ventilación y en las de
+infusión continua (nepi/remi/ppf rate) el adelanto es <= 0.2 s.
+
+Frontera: `t_boundary = min(t_div_grid, floor(t_effective/5)*5)`. Comprobado
+sobre los pares con ambas magnitudes: coincide en todos; los pares sin
+divergencia de rejilla usan la rejilla de `t_effective` y los nulos no tienen
+frontera (NaN).
+
+C5 — prefijo de tokens idéntico: para cada par efectivo, TODAS las ventanas con
+`t1 < t_boundary` deben coincidir entre ramas en las 65 features y las 12
+máscaras (se excluye `cf_role`, que es metadato).
+
+  RESULTADO: PASA en los 6345 pares (0 fallos, `c5_ok = true`).
+
+Es la comprobación que 3b no hacía con la frontera correcta: si el adelanto de
+una celda afectase al prefijo, aquí se vería. No ocurre, porque la frontera se
+sitúa exactamente en el primer punto de rejilla donde difiere una serie del
+grupo.
+
+========================================================================
+5. Fase D — el efecto en la ventana de la frontera o la siguiente
+========================================================================
+Para cada par efectivo se buscan las ventanas con `t1 >= t_boundary` y se toma
+la primera en la que difiere alguna feature del `lever_group`
+(`lever_effective_v2`), con `lag = índice de esa ventana en la lista posterior`.
+El criterio es lag ∈ {0,1} (la ventana que contiene la celda de la frontera o la
+siguiente) en >= 99 % de los pares POR PALANCA.
+
+  Cumplimiento (% de pares con lag ∈ {0,1}):
+
+    propofol_bolus 100.0 | noradrenaline 100.0 | remi_up 100.0 |
+    ephedrine 100.0 | peep_up 100.0 | peep_down 100.0 | fio2_down 100.0 |
+    sevo_up 100.0 | ppf20_rate 100.0 | rftn20_rate 100.0 | ppf_bolus 100.0 |
+    remi_bolus 100.0 | nepi_rate 100.0 | phen_rate 100.0 | phen_bolus 100.0 |
+    eph_bolus 100.0 | set_fio2 100.0 | sevo_mac 99.2 |
+    set_rr 93.94 | set_tv 97.87 | set_peep 94.50
+
+  RESULTADO: FALLA en set_rr (93.94 %), set_tv (97.87 %) y set_peep (94.50 %);
+  18 de las 21 palancas cumplen al 100 %. Pares con lag >= 2: 49.
+
+Explicación medida de los lag >= 2 (los 49 están listados en
+`manifiesto["D"]["lag_ge_2_pares"]` con la columna que fija la frontera):
+
+  * Los 49 son de las 4 palancas de consigna persistente/MAC
+    (set_rr, set_tv, set_peep, sevo_mac) y la frontera la fija la PROPIA
+    consigna: `Primus/SET_RR_IPPV`, `Primus/SET_TV_L`, `Primus/SET_INTER_PEEP`
+    (o `ce_sevoflurano` en los 3 de MAC).
+  * Las consignas crudas son dispersas (§3): en el par 196761 el setpoint sólo
+    tiene muestras cada ~35 s, así que `use_sp` es falso en casi todas las
+    ventanas y el token `vent_*` toma el PROXY MEDIDO (`Primus/RR_CO2`), que
+    responde a la intervención con el retardo fisiológico y no con el de la
+    consigna.
+  * Comprobado en los pares 196761, 196769, 196903 y 196951 (set_rr,
+    lag 13/3/10/8): la diferencia del token aparece en UNA sola celda — el
+    cambio de consigna dura una celda y el plan base lo reescribe — de modo que
+    el efecto es visible en `vent_rr_t1` de una ventana y en `vent_rr_t0` de la
+    siguiente.
+  * Consecuencia: para estas palancas el par se marca efectivo (la feature
+    cambia en algún momento posterior a la frontera) pero el efecto cae lejos de
+    la frontera (hasta 157 ventanas ≈ 2.6 h en set_peep). Es una limitación del
+    generador (consigna registrada vs aplicada, §8.4 de LIMITACIONES), no del
+    tokenizador.
+
+`lever_effective_v2` coincide con `lever_effective` de 3b en los 6177 pares: la
+corrección de la frontera no cambia el conjunto efectivo.
+
+========================================================================
+6. Fase E — reclasificación, unidades, manifiesto v2
+========================================================================
+E1 — los 13 pares de tasa con causa `below_resolution` en 3b se reclasifican
+como `overridden_by_base_plan`, con evidencia registrada en el manifiesto v2
+(par, palanca, t_action, petición, primer cambio del track observado
+`Orchestra/*_RATE` tras t_action, su valor, el valor de la rama base en ese
+instante, si las series observadas son idénticas desde t_action y el tiempo que
+se mantiene la diferencia):
+
+   171181 remi_up     t_action 14364.7  cambio +1.8 s a 48.16   base 21.4025
+                      diferencia mantenida 3.5 s
+   171217 remi_up     t_action  5780.5  cambio +0.0 s a 26.3149  base 26.3149
+                      diferencia mantenida 4.0 s
+   171473 remi_up     t_action  3768.5  cambio +3.0 s a  7.0637  base  7.0637
+                      series idénticas desde t_action
+   190207 ppf20_rate  t_action  4429.3  cambio +2.2 s a 34.4343  base 34.4343
+                      series idénticas desde t_action
+   190739 ppf20_rate  t_action  4150.8  cambio +0.7 s a 10.1928  base 11.9951
+                      diferencia mantenida 3.0 s
+   190811 rftn20_rate t_action  3544.9  cambio +2.6 s a 14.5696  base 14.5696
+                      series idénticas desde t_action
+   190827 rftn20_rate t_action  4560.3  cambio +1.7 s a 16.6160  base  8.6123
+                      diferencia mantenida 2.5 s
+   190913 rftn20_rate t_action  2636.9  cambio +7.1 s a 31.2268  base 31.2268
+                      series idénticas desde t_action
+   190975 rftn20_rate t_action 12306.2  cambio +1.3 s a 34.6905  base  9.1826
+                      diferencia mantenida 2.0 s
+   191359 rftn20_rate t_action  4739.7  cambio +2.8 s a 31.3248  base 31.3248
+                      series idénticas desde t_action
+   191381 rftn20_rate t_action  3127.9  cambio +4.1 s a 16.2117  base 16.2117
+                      series idénticas desde t_action
+   191423 rftn20_rate t_action  4174.1  cambio +1.9 s a 18.7814  base 14.9768
+                      diferencia mantenida 2.5 s
+   191477 rftn20_rate t_action  3078.8  cambio +1.2 s a 23.5360  base 23.5360
+                      series idénticas desde t_action
+
+  Dos subclases, ambas compatibles con la sobrescritura por el plan base:
+  (a) 7 pares con la serie observada IDÉNTICA en las dos ramas desde t_action:
+      el plan base escribe su valor antes de que la observación muestree la
+      diferencia;
+  (b) 6 pares con la diferencia mantenida sólo 2.0-4.0 s (< 1 celda de 5 s):
+      la diferencia existe pero se pierde en la agregación de pk_v2, de modo
+      que la Ce recalculada es idéntica y la feature no cambia.
+  El cambio pedido llega al track entre 0.0 y 7.1 s después de t_action.
+
+  Se mantienen las demás causas `below_resolution` (set_rr/set_tv con delta por
+  debajo del escalón del setpoint; set_peep con |peep_delta| por debajo del
+  escalón 1).
+
+E2 — unidades homogéneas en las tablas de nulos. Las tasas se registran en
+`Orchestra/*_RATE` en mL/h mientras la petición de `intervention_a` va en mg/min
+o mcg/min; con PPF20 = 20 mg/mL y RFTN20 = 20 mcg/mL la conversión es
+`mL/h = (mg/min) · 3`. Re-verificados los dos pares `no_change_requested` con
+tolerancia del 5 %:
+
+   190231 ppf20_rate  pide 7.43 mg/min -> 22.29 mL/h   observado 22.181519
+                      diferencia 0.49 %   (t_action 8004.0, series idénticas)
+   190567 ppf20_rate  pide 4.31 mg/min -> 12.93 mL/h   observado 13.190063
+                      diferencia 1.97 %   (t_action 4788.4, series idénticas)
+
+  La causa `no_change_requested` se confirma; el manifiesto v2 deja constancia
+  de la unidad de cada tabla.
+
+E3 — manifiesto v2: `manifests/tokens_v2_cf_pairs_annotation_v2.json` con los
+sha256 de `pairs.parquet`, de la anotación 3b y de la v2, los recuentos por
+palanca y causa, el histograma completo de `lead_s`, la tabla de lags por
+palanca y el bloque `decided_post_hoc` con las cuatro decisiones posteriores.
+En detalle, el manifiesto v2 lleva: el reparto por clase de la fase A
+(4380 one_shot / 1719 inmediato / 78 retrasado / 168 nulo), los 78 retrasados con
+su evidencia de recorte, los 10 recuentos de fallos de B1 por palanca y sus 4
+clases, el histograma de `lead_s` (9 tramos), la tabla de lags por palanca con
+el porcentaje que cumple lag ∈ {0,1}, los 49 pares de lag >= 2 con la columna que
+fija la frontera y los 13 pares de E1 con la evidencia completa. Los recuentos
+del conjunto nulo por causa son los del paso 3b (`below_resolution` 31,
+`clip_bound` 135, `no_change_requested` 2), que se mantienen tal cual porque el
+manifiesto de 3b no se toca (R2); lo que añade 3c es la subclasificación de 13 de
+esos pares bajo la causa `overridden_by_base_plan`.
+
+El bloque `decided_post_hoc` contiene las cuatro decisiones tomadas después de
+3b, cada una con su motivo:
+
+  post_3b       t_action de los overrides de ventilación = split_t (el
+                generador aplica a t > split_t; 3b no lo justificó por escrito)
+  post_3c_A     t_effective = t_action (puntual) / t_divergence_raw (persistente
+                efectiva), conservando la definición de 3b para no cambiar el
+                criterio
+  post_3c_C     t_boundary = min(t_div_grid, rejilla(t_effective)) y
+                pre/post_action por la convención semiabierta (g-5, g]
+  post_3c_alcance  3b restringió C1/C2 a las acciones puntuales sin autorización;
+                3c evalúa TODOS los pares efectivos y reporta las persistentes
+                aparte
+
+E4 — LIMITACIONES_GENERADOR_v7.md §8: reescrito §8.1 (adelanto máximo real de
+una celda con mecanismo, en lugar de la afirmación "hasta 5 s antes" y los 120
+pares sin respaldo), §8.2 ("delta acumulativo" -> aditivo aplicado en el acto,
+con el reparto 1719/78 y el valor único de referencia), §8.3 (nueva causa
+`overridden_by_base_plan` con las dos subclases y las unidades) y nuevo §8.4 con
+el bloqueo B1 y las acciones que debe corregir el generador.
+
+========================================================================
+7. Fase F — decisión sobre la anotación v2
+========================================================================
+NO ADOPTADA. Motivos, en el orden en que se comprobaron:
+
+  B1 (bloqueante)   FALLA: 877 de 6177 pares efectivos (14.198 %)
+  D1 (bloqueante)   FALLA en 3 de 21 palancas: set_rr 93.94 %, set_tv 97.87 %,
+                    set_peep 94.50 % (exigido >= 99 %)
+  A2                informativo: 78 de 1797 consignas persistentes retrasadas
+                    (mediana 484.245 s, máx. 12531.81 s)
+  C3                NO bloqueante: máximo 5.2 s (clase 5-10 s)
+  C5                PASA: 0 fallos en 6345 pares
+  D2                lag por palanca publicado y explicado (49 pares con lag >= 2)
+
+Qué cambia y qué no:
+
+  * `cf_pairs.load_pairs_annotated()` sigue leyendo
+    `pairs_annotated.parquet` (3b) y `effective_pair_ids` sigue dando 6177.
+  * `cf_pairs.pre_action` / `post_action` siguen siendo los de 3b, con su margen
+    de 2 celdas: NO se retiran, porque son el criterio vigente con la anotación
+    vigente.
+  * Se añaden, sin sustituir nada, las definiciones corregidas
+    (`t_boundary_of`, `pre_action_bounded`, `post_action_bounded`) y
+    `load_pairs_annotated_v2()` como herramienta de diagnóstico. Sustituirán a
+    las anteriores en cuanto B1 pase.
+  * No se han regenerado datos (R1) ni se han tocado `pairs.parquet`,
+    `pairs_annotated.parquet` ni el manifiesto de 3b (R2).
+
+ADVERTENCIA PARA ENTRENAMIENTO. Con el generador actual no hay anotación
+utilizable: la v2 falla B1 y la de 3b, que sigue en vigor, es precisamente la
+que tiene el margen de 2 celdas que oculta el desfase medido aquí. Los 877 pares
+con la imagen ya divergente en el prefijo deben quedar FUERA de cualquier
+entrenamiento (o el generador debe corregirse antes) porque el prefijo contiene
+información de la intervención. Orden propuesto para desbloquearlo:
+
+  1. que `Primus/SET_*` registre el valor APLICADO desde split_t (y con la
+     cadencia de los medidos) — elimina la clase > 10 s y las 329 de frontera;
+  2. re-medir B1/D1 con la misma definición de este paso;
+  3. sólo entonces adoptar la anotación v2 en `cf_pairs`.
+
+========================================================================
+8. Tests
+========================================================================
+8.1 Rojo (antes de añadir la API de frontera a `cf_pairs`)
+------------------------------------------------------------------------
+  $env:PYTHONPATH="src"; .\.venv\Scripts\python.exe -m pytest \
+      tests/test_paso3c_criterios.py -q
+
+  E       AttributeError: module 'tokens.cf_pairs' has no attribute
+          'PAIRS_ANNOTATED_V2_PARQUET'
+
+  tests\test_paso3c_criterios.py:306: AttributeError
+  =========================== short test summary info ===========================
+  FAILED tests/test_paso3c_criterios.py::test_convencion_prefijo_estricto_y_post_contiene_la_celda_frontera
+  FAILED tests/test_paso3c_criterios.py::test_prefijo_y_post_cubren_todas_las_ventanas_sin_solape
+  FAILED tests/test_paso3c_criterios.py::test_frontera_no_usa_margen_de_celdas
+  FAILED tests/test_paso3c_criterios.py::test_t_boundary_es_min_de_la_divergencia_de_rejilla_y_la_rejilla_de_t_effective
+  FAILED tests/test_paso3c_criterios.py::test_t_effective_es_la_divergencia_cruda_en_las_consignas_persistentes
+  FAILED tests/test_paso3c_criterios.py::test_lag_cero_o_uno_al_menos_del_99_por_ciento_en_todo_menos_ventilacion
+  FAILED tests/test_paso3c_criterios.py::test_lag_mayor_que_1_solo_con_consignas_persistentes_y_mac
+  FAILED tests/test_paso3c_criterios.py::test_los_artefactos_de_3b_no_se_han_tocado
+  FAILED tests/test_paso3c_criterios.py::test_el_pipeline_sigue_apuntando_a_la_anotacion_de_3b
+  9 failed, 15 passed in 1.23s
+
+  (Las 9 fallas son de la API nueva: `pre_action_bounded`, `post_action_bounded`,
+  `t_boundary_of` y `PAIRS_ANNOTATED_V2_PARQUET` no existían todavía, y las
+  aserciones sobre nombres/valores medidos se corrigieron a los valores reales
+  antes de dar el verde. El volcado completo queda en
+  `reports/_pytest_paso3c_rojo.txt`.)
+
+8.2 Verde (después de añadir la API)
+------------------------------------------------------------------------
+  $env:PYTHONPATH="src"; .\.venv\Scripts\python.exe -m pytest \
+      tests/test_paso3c_criterios.py -q
+
+  ........................                                                 [100%]
+  24 passed in 0.86s
+
+  (Volcado completo en `reports/_pytest_paso3c_verde.txt`.)
+
+8.3 Suite completa
+------------------------------------------------------------------------
+  $env:PYTHONPATH="src"; .\.venv\Scripts\python.exe -m pytest -q
+
+  ........................................................................ [ 25%]
+  ........................................................................ [ 50%]
+  ........................................................................ [ 75%]
+  ....................................................sssss.............   [100%]
+  281 passed, 5 skipped in 4717.01s (1:18:37)
+
+  (257 casos de la suite previa + los 24 de test_paso3c_criterios.py = 281; los
+  5 saltados son los de test_v7_attribution, que ya se saltaban en el paso 3b.
+  Volcado completo en `reports/_pytest_paso3c_final.txt`.)
+
+========================================================================
+9. Supuestos numerados
+========================================================================
+  1. `t_div_grid` se mide sobre rejilla de 5 s y con la retención de los tracks
+     continuos de §1; para ventilación equivale a la primera rejilla en que
+     difiere una consigna `SET_*` retenida. 3b medía `t_divergence_raw` sobre
+     los tracks crudos (eje de 0.5 s, irregular); ambas medidas conviven y la
+     frontera usa el mínimo con la rejilla de `t_effective`.
+  2. La frontera se ancla en `t_effective` y no en `t_action` porque la fase A
+     define así `t_effective` para las consignas persistentes: es la definición
+     heredada de 3b y R3 impide cambiarla. El efecto medido de esa elección es
+     el 14.198 % de fallos de B1: con `t_action` como límite del prefijo los
+     fallos caen de 877 a 9 (los 9 pares cuya primera celda divergente de la
+     imagen cierra exactamente en `t_action`, es decir en un punto de rejilla
+     igual al acto), porque en los 868 restantes la imagen empieza a divergir
+     DESPUÉS del acto y quedaría fuera del prefijo.
+  3. "Celdas que terminan en o antes de t_boundary" se lee por el cierre de
+     celda (`g <= t_boundary`), que es la convención documentada del
+     tokenizador. La ventana que contiene la celda de la frontera es la primera
+     post-acción.
+  4. El criterio D1 se interpreta como lag ∈ {0,1} ("la ventana que contiene la
+     frontera o la siguiente") y se evalúa por palanca; se publica además la
+     tabla completa de lags para que cualquier otra lectura sea comprobable.
+  5. `pk_v2` se lee con el filtro por `caseid` de la partición; sin ese filtro
+     las series de otro caso entran en la comparación (el smoke test lo sufrió y
+     se documenta aquí para que no se repita).
+  6. Los pares nulos no tienen `t_effective` ni frontera y quedan fuera de B1,
+     C5 y D (B1 se evalúa sobre los 6177 efectivos).
+  7. B2 se reporta como informativo y no se usa como criterio: mide lo mismo a
+     resolución 0.5 s sobre los tracks crudos del caso.
+  8. Las medidas se han tomado del corpus en disco sin regenerar nada; los
+     recuentos son reproducibles con `python -m scripts.paso3c_analyze_pairs`.
