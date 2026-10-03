@@ -1,4 +1,4 @@
-"""cf_pairs.py — anotación de pares contrafactuales (paso 3b).
+"""cf_pairs.py — anotación de pares contrafactuales (pasos 3b y 3c).
 
 Este módulo concentra las definiciones y funciones reutilizables para la
 anotación de los pares CF de ``data/tokens_v2/pairs.parquet``:
@@ -8,17 +8,19 @@ anotación de los pares CF de ``data/tokens_v2/pairs.parquet``:
   - la derivación de ``t_action`` (el momento real en que actúa la palanca) a
     partir de los metadatos ``cf_pair_*.json`` o, para los overrides de
     ventilación que no registran un ``intervention_a``, del código del
-    generador (``src/anessim/simulate.py``);
-  - ``post_action(t1, t_action)``: pertenencia de una ventana a la fase
-    posterior a la acción, calculada al vuelo (t1 > t_action), que es el
-    criterio CORREGIDO del paso 3b (el paso 3 medía en la ventana que contiene
-    split_t, ignorando que el generador aplica las intervenciones
-    farmacológicas en split_t + 10 s);
+    generador (``src/anessim/simulate.py``: ``t > split_t``);
+  - ``post_action(t1, t_action)`` y ``pre_action(t1, t_action, margin_cells=2)``:
+    criterio de 3b, con el margen de 2 celdas como red de seguridad. Siguen
+    siendo el criterio VIGENTE porque la anotación corregida de 3c no se adopta;
+  - la frontera corregida de 3c: ``t_boundary_of``, ``pre_action_bounded`` y
+    ``post_action_bounded`` (sin margen), que sustituirán a las anteriores
+    cuando la anotación ``pairs_annotated_v2.parquet`` sea adoptable;
   - el conjunto CF de entrenamiento: los pares con ``lever_effective = True``
     de ``data/tokens_v2/pairs_annotated.parquet``.
 
 No se regenera nada: este módulo SOLO lee ``pairs.parquet``,
-``pairs_annotated.parquet`` y los metadatos de cf_v7.
+``pairs_annotated.parquet``, ``pairs_annotated_v2.parquet`` y los metadatos de
+cf_v7.
 """
 
 from __future__ import annotations
@@ -40,6 +42,12 @@ from tokens import tokenize as tk
 # ---------------------------------------------------------------------------
 PAIRS_PARQUET = paths.TOKENS_V2_DIR / "pairs.parquet"
 PAIRS_ANNOTATED_PARQUET = paths.TOKENS_V2_DIR / "pairs_annotated.parquet"
+# Anotación corregida del paso 3c (t_effective, t_boundary, prefijo de tokens).
+# NO es la anotación por defecto: B1 falla (14.2 % de los 6177 pares efectivos)
+# y por eso el pipeline sigue anclado a pairs_annotated.parquet (paso 3b). Ver
+# LIMITACIONES_GENERADOR_v7.md §8.
+PAIRS_ANNOTATED_V2_PARQUET = paths.TOKENS_V2_DIR / "pairs_annotated_v2.parquet"
+MANIFEST_V2 = paths.MANIFESTS_DIR / "tokens_v2_cf_pairs_annotation_v2.json"
 CF_META_DIR = paths.COHORTS["cf_v7"] / "metadata"
 CF_CASES_DIR = paths.COHORTS["cf_v7"] / "cases"
 
@@ -70,11 +78,15 @@ VENT_OVERRIDE_LEVERS: frozenset[str] = frozenset({
     "set_fio2", "set_rr", "set_tv", "set_peep",
 })
 
-# Palancas de CONSIGNA PERSISTENTE: el simulador aplica un delta acumulativo a
-# la señal (``peep_arr[post] += delta`` en simulate.py) en lugar de un evento
-# puntual. La divergencia OBSERVADA aparece cuando el plan base cambia esa
-# consigna, no en t_action, de modo que C1/C2 (ventana de t_action o siguiente)
-# no son aplicables a esta clase y se reportan aparte.
+# Palancas de CONSIGNA PERSISTENTE: el simulador aplica un delta ADITIVO sobre
+# la consigna del plan base a partir de ``split_t`` (``peep_arr[post] += delta``
+# en simulate.py), no un efecto acumulativo en el tiempo. La divergencia
+# OBSERVADA aparece cuando el plan base vuelve a escribir esa consigna, no en
+# t_action: medido en 3c, de las 1797 consignas persistentes efectivas 1719 son
+# inmediatas (|t_divergence_raw - t_action| <= 30 s) y 78 están retrasadas
+# (retraso mediano 484.245 s, máximo 12531.81 s, por recorte contra el límite
+# físico: peep/fio2 negativos, tv/rr recortados). Por eso C1/C2 (ventana de
+# t_action o siguiente) no son aplicables a esta clase y se reportan aparte.
 PERSISTENT_LEVERS: frozenset[str] = VENT_OVERRIDE_LEVERS
 
 # Origen de t_action para los overrides de ventilación.
@@ -172,8 +184,63 @@ def pre_action(t1: float, t_action: float,
     rejilla de margen para absorber la atribución temprana de la capa de
     observación. Las ventanas de prefijo deben ser idénticas entre ramas en
     todas las features y máscaras (C4).
+
+    .. note::
+       El margen de 2 celdas es una **solución de compromiso de 3b**, no una
+       propiedad del generador: medido en 3c, el adelanto real de la capa de
+       observación es de a lo sumo 5.2 s (una celda) y lo fija el estampado del
+       bolo a 0.5 s. La definición corregida, que sustituirá a ésta cuando se
+       adopte la anotación v2, es :func:`pre_action_bounded`.
     """
     return float(t1) <= action_grid_time(t_action) - margin_cells * GRID_S
+
+
+# ---------------------------------------------------------------------------
+# Frontera corregida (paso 3c) — PENDIENTE DE ADOPCIÓN
+#
+# La frontera no se sitúa en la celda de ``t_action`` sino en el primer punto
+# de rejilla donde difiere alguna serie que alimenta las features del grupo
+# (``t_div_grid``) acotado por la rejilla de ``t_effective``. Con la convención
+# 0.1 (la celda ``(g-5, g]`` cierra en ``g`` y ``g`` le pertenece) el prefijo
+# son las ventanas que cierran ESTRICTAMENTE antes de la frontera y la primera
+# ventana post-acción es la que CONTIENE la celda de la frontera.
+# ---------------------------------------------------------------------------
+
+def t_boundary_of(t_div_grid: float | None, t_effective: float,
+                  grid_s: float = GRID_S) -> float:
+    """``min(t_div_grid, rejilla(t_effective))``; NaN si no hay ``t_effective``.
+
+    ``t_div_grid`` es el primer punto de rejilla donde difiere alguna de las
+    series que alimentan las features del ``lever_group`` y ``None`` si nunca
+    difieren. ``t_effective`` es ``t_action`` (acción puntual) o
+    ``t_divergence_raw`` (consigna persistente efectiva); NaN en los nulos.
+    """
+    if not math.isfinite(float(t_effective)):
+        return float("nan")
+    grid_teff = math.floor(float(t_effective) / grid_s) * grid_s
+    if t_div_grid is None or not math.isfinite(float(t_div_grid)):
+        return float(grid_teff)
+    return float(min(float(t_div_grid), grid_teff))
+
+
+def pre_action_bounded(t1: float, t_boundary: float) -> bool:
+    """Verdadero si TODAS las celdas de la ventana cierran antes de la frontera.
+
+    Celdas ``t0+5 .. t1`` con ``t1 = t0 + 60``: el prefijo exige
+    ``t1 < t_boundary``. Estas ventanas no pueden ver la intervención y sus
+    features y máscaras deben ser idénticas entre ramas (C5).
+    """
+    return float(t1) < float(t_boundary)
+
+
+def post_action_bounded(t1: float, t_boundary: float) -> bool:
+    """Verdadero si la ventana contiene la celda de la frontera o una posterior.
+
+    Por la convención 0.1 la celda que cierra en ``t_boundary`` ya puede ver la
+    intervención, de modo que ``post_action_bounded <=> t1 >= t_boundary`` (y es
+    el complementario exacto de :func:`pre_action_bounded`).
+    """
+    return float(t1) >= float(t_boundary)
 
 
 # ---------------------------------------------------------------------------
@@ -202,6 +269,26 @@ def effective_pair_ids(annotated: pd.DataFrame | None = None) -> frozenset[int]:
 def effective_pair_ids_count(annotated: pd.DataFrame | None = None) -> int:
     """Número de pares CF efectivos (para recuentos del manifiesto)."""
     return len(effective_pair_ids(annotated))
+
+
+def load_pairs_annotated_v2(path: Path | None = None) -> pd.DataFrame:
+    """Lee la anotación CORREGIDA de 3c (``pairs_annotated_v2.parquet``).
+
+    Añade a las columnas de ``pairs.parquet``: ``t_action``, ``t_divergence_raw``,
+    ``t_effective``, ``a2_class``, ``t_div_grid``, ``t_div_grid_col``, ``lead_s``,
+    ``t_boundary``, ``b1_prefix_ok``, ``b2_raw_prefix_ok``, ``c5_pre_ok``,
+    ``lever_effective_v2``, ``effect_lag_boundary`` y ``effect_t1_boundary``.
+
+    No es la anotación por defecto del pipeline: B1 falla en 877 de los 6177
+    pares efectivos, de modo que esta tabla NO debe usarse para entrenar hasta
+    que el generador corrija el desfase consigna/acto de las palancas de
+    ventilación (ver ``LIMITACIONES_GENERADOR_v7.md`` §8).
+    """
+    p = Path(path) if path is not None else PAIRS_ANNOTATED_V2_PARQUET
+    if not p.exists():
+        raise FileNotFoundError(
+            f"{p} no existe (ejecuta scripts/paso3c_analyze_pairs.py)")
+    return pq.read_table(p).to_pandas()
 
 
 # ---------------------------------------------------------------------------
