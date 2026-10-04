@@ -9,6 +9,7 @@ Uso:
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -162,8 +163,21 @@ def _sample_cases_v6(cases: pd.DataFrame) -> pd.DataFrame:
     return pd.concat(parts, ignore_index=True)
 
 
-SOURCES_V7: dict[str, Path] = paths.COHORTS
-OUT_DIR_V7 = paths.WINDOWS_DIR
+# ---------------------------------------------------------------------------
+# Destinos de la construcción. Por defecto, las cohortes y el directorio
+# vigentes (comportamiento original). Las dos variables de entorno permiten
+# reconstruir las ventanas con OTRA cohorte CF sin tocar el núcleo (paso 3d);
+# son necesarias porque ``_init_worker`` corre en procesos NUEVOS (spawn en
+# Windows) que re-importan este módulo y NO heredan ningún monkeypatch hecho en
+# el padre, mientras que el entorno sí se hereda.
+# ---------------------------------------------------------------------------
+_CF_ENV = os.environ.get("ANESTESIA_CF_V7_DIR")
+_WIN_OUT_ENV = os.environ.get("ANESTESIA_WINDOWS_OUT")
+
+SOURCES_V7: dict[str, Path] = (
+    {**paths.COHORTS, "cf_v7": Path(_CF_ENV)} if _CF_ENV else dict(paths.COHORTS)
+)
+OUT_DIR_V7 = Path(_WIN_OUT_ENV) if _WIN_OUT_ENV else paths.WINDOWS_DIR
 
 
 def _init_worker() -> None:

@@ -25,6 +25,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -49,6 +50,12 @@ def _require_cf() -> None:
 
 def stage_windows(workers: int) -> None:
     _require_cf()
+    # Las variables de entorno son la vía que SÍ llega a los workers: con spawn
+    # (Windows) los hijos re-importan build_windows_v4 y no heredan el
+    # monkeypatch del padre. Sin esto, los hijos leen cf_v7 en vez de cf_v7_1 y
+    # las ventanas de CF salen idénticas a windows_v4.
+    os.environ["ANESTESIA_CF_V7_DIR"] = str(CF_V7_1)
+    os.environ["ANESTESIA_WINDOWS_OUT"] = str(W41)
     import build_windows_v4 as bw  # scripts/ está en sys.path
 
     srcs = dict(paths.COHORTS)
@@ -57,6 +64,8 @@ def stage_windows(workers: int) -> None:
     bw.OUT_DIR_V7 = W41
     W41.mkdir(parents=True, exist_ok=True)
     print(f"windows_v4_1 -> {W41}  (cf_v7 := {CF_V7_1})")
+    print(f"  comprobación: SOURCES_V7['cf_v7'] = {bw.SOURCES_V7['cf_v7']}")
+    print(f"                OUT_DIR_V7           = {bw.OUT_DIR_V7}")
     bw.generate_v3(max_workers=workers)
 
 
