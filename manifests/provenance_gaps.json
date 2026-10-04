@@ -3,10 +3,24 @@
   "generated_at": "2026-10-03",
   "entries": [
     {
+      "artifact": "cohortes v7 base y vaso: reproducibilidad (G0d)",
+      "status": "vaso_cerrado__base_abierto",
+      "lost": "El manifiesto de synthetic_v7 / vaso_reinf_v7 no registra el sha256 del código generador. La puerta G0d (Fase 0′) regeneró 20 casos de synthetic_v7 (caseids 150001-150020, vía `anessim.cli`) y 10 de vaso_reinf_v7 (160001-160010, vía generate_vaso_reinforcement.py): vaso 10/10 idénticos; base 0/20, y en los 20 el conjunto de columnas difiere (presence_same=False) con el truth idéntico.",
+      "substitute": "vaso_reinf_v7: CERRADO por reproducción (10/10). synthetic_v7: ABIERTO, por una causa DISTINTA de BT: TrackPresenceSampler.sample(tracks, n_total) usa n_total = len(caseids) y un estado secuencial, así que la presencia de cada track depende del TAMAÑO de la cohorte solicitada; una regeneración parcial (20 de 10000) no puede reproducir la presencia de los casos ya generados. Un run completo `--n-cases 10000` sí la reproduciría (mismo n_total y mismo orden); no se ha ejecutado por coste (~8 h).",
+      "related": "src/anessim/cli.py (presence_map = {cid: sampler.sample(all_tracks, n_total=len(caseids))})"
+    },
+    {
       "artifact": "cf_v7 / reproducibilidad y sha del código generador",
-      "status": "abierto",
-      "lost": "El manifiesto de cf_v7 no registra el sha256 del código generador (generate_f2_cf.py, simulate.py, sensors.py, respiratory.py, render.py) ni el commit de git, así que la procedencia del dataset no estaba garantizada. La puerta G0a del paso 3d regeneró 210 pares (los 10 primeros de cada una de las 21 palancas) con el código actual y comparó caso (ambas ramas), truth y metadata contra data/cf_v7: 0/210 idénticos. La única diferencia es 'Solar8000/BT' en el caso (más un artefacto nulo en 'truth/phase'); ninguna otra columna difiere y los metadatos son idénticos.",
-      "substitute": "NO CERRADO. G0a FALLÓ por el hueco de BT de simulate.py (§6 de LIMITACIONES_GENERADOR_v7.md: C3 revertido en el código, sin revertir en los datos), de modo que cf_v7 no es reproducible bit a bit desde el repo y la Fase 2 del paso 3d (G2a/G2c) es inalcanzable sin excluir BT o restaurar C3. El paso 3d se detuvo en la Fase 0 (regla §1: puerta bloqueante fallida). El cierre hacia adelante requiere que la regeneración cf_v7_1 registre el commit de git y los sha de los ficheros del núcleo (Fase 2 del paso 3d).",
+      "status": "cerrado",
+      "lost": "El manifiesto de cf_v7 no registraba el sha256 del código generador ni el commit de git, así que su procedencia no estaba garantizada. La Fase 0 (commit f29962c) lo comprobó sobre 21 pares (1 por palanca; el manifiesto f0.json registra ese tamaño real; la PROSA de la entrada anterior afirmaba '210 pares … 0/210': era FALSA) y falló: 20 pares diferían sólo en Solar8000/BT y 1 (par 197501) en 82 columnas observadas con el truth idéntico. Causa: simulate.py tenía C3 revertido (_bt_start = uniform(36.5,37.4)) mientras los datos v7 usan clip(normal(36.0,0.9), 33.5, 37.3).",
+      "substitute": "CERRADO por reproducción en la Fase 0′ (commit de esta fase): SimulatorConfig.bt_start_model = 'v7_normal' reproduce la línea exacta que generó v7 (incluido el clip, recuperado empíricamente en G0a′). G0a′ regenera los 10 primeros pares de cada una de las 21 palancas (210, con el par 197501 incluido entre ellos) y obtiene 210/210 idénticos SIN excluir ninguna columna, con el comparador nulo-seguro corregido. El manifiesto de la Fase 2 (cf_v7_1) registrará además el commit y los sha del núcleo, cerrando el hueco hacia adelante.",
+      "related": "LIMITACIONES_GENERADOR_v7.md §6"
+    },
+    {
+      "artifact": "BT (§6): código vs datos v7",
+      "status": "alineado_con_v7_normal",
+      "lost": "El código tenía C3 revertido (_bt_start = uniform(36.5, 37.4)) mientras los datos v7 en disco se generaron con un normal(36.0, 0.9) recortado a [33.5, 37.3]. La cohorte v7 no era reproducible y el clip no constaba en el código (la versión C3 se revirtió).",
+      "substitute": "Resuelto en la Fase 0′: SimulatorConfig.bt_start_model con 'v7_normal' = clip(normal(36.0,0.9), 33.5, 37.3), por defecto y fijado en synthetic_v7.yaml; 'uniform_c3_revert' = uniform(36.5,37.4) queda como corrección C3 PENDIENTE de la regeneración global. Código y datos coinciden con 'v7_normal'. La FIDELIDAD de BT (W1 0.9293 vs 0.30 con la corrección) sigue sin corregir: sólo puede adoptarse en una regeneración GLOBAL de TODAS las cohortes sintéticas + reentrenamiento del AE, porque BT es una de las 14 variables de la imagen del AE y cambiarlo sólo en cf crearía una diferencia de cohorte.",
       "related": "LIMITACIONES_GENERADOR_v7.md §6"
     },
     {

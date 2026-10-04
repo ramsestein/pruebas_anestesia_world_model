@@ -28,8 +28,9 @@ BASE_COMMIT = "f29962c"  # "Paso 3d / Fase 0: diagnostico G0a/G0b/G0c"
 
 def _git_diff(path: str) -> str:
     p = subprocess.run(["git", "diff", BASE_COMMIT, "--", path],
-                       cwd=ROOT, capture_output=True, text=True)
-    return p.stdout.rstrip()
+                       cwd=ROOT, capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
+    return (p.stdout or "").rstrip()
 
 
 def _fmt_g0b(d: dict, lines: list[str]) -> None:
@@ -128,6 +129,12 @@ def _fmt_g0d(d: dict, lines: list[str]) -> None:
             else:
                 lines.append(f"    {rec['cohort']} caso {rec['caseid']} {rec['artifact']}: "
                              f"{rec.get('reason')}")
+    lines.append("")
+    lines.append("  NOTA: en synthetic_v7 los 20 casos difieren en el CONJUNTO DE COLUMNAS")
+    lines.append("  (presence_same=False) con el TRUTH idéntico. Causa: la presencia de tracks")
+    lines.append("  depende de n_total = len(caseids) (TrackPresenceSampler.sample) y de un estado")
+    lines.append("  secuencial, así que una regeneración PARCIAL (20 de 10000) no puede")
+    lines.append("  reproducirla. NO es BT. vaso_reinf_v7 (10/10) SÍ reproduce.")
 
 
 def _fase0(lines: list[str], data: dict) -> None:
@@ -204,11 +211,24 @@ def _fase0prime(lines: list[str], data: dict) -> None:
     lines.append("")
     lines.append("2. CAMBIO DE CÓDIGO (única excepción a 'no tocar simulate.py')")
     lines.append("   Se añade el campo de configuración ``bt_start_model``:")
-    lines.append("     'v7_normal'          = normal(36.0, 0.9) — la línea que generó v7 en disco;")
+    lines.append("     'v7_normal'          = clip(normal(36.0, 0.9), 33.5, 37.3) — la línea que")
+    lines.append("                            generó v7 en disco (el CLIP se recuperó empíricamente);")
     lines.append("     'uniform_c3_revert'  = uniform(36.5, 37.4) — corrección C3 pendiente de la")
     lines.append("                            regeneración GLOBAL.")
     lines.append("   Por defecto 'v7_normal'; synthetic_v7.yaml lo fija a 'v7_normal'. El sorteo se")
     lines.append("   centraliza en ``simulate.sample_bt_start``. Sin otros cambios de comportamiento.")
+    lines.append("")
+    lines.append("   RECUPERACIÓN DEL CLIP (por qué hacía falta): con sólo ``normal(36.0, 0.9)``,")
+    lines.append("   G0a′ daba 196/210: los 14 pares restantes diferían SÓLO en Solar8000/BT, con un")
+    lines.append("   desplazamiento CASI CONSTANTE (0.1 a 1.1 °C) que no arrastraba ninguna otra")
+    lines.append("   columna. Eso descarta un desplazamiento del flujo de ``rng_sensor`` (que")
+    lines.append("   afectaría a toda la capa de observación) y apunta a una transformación distinta")
+    lines.append("   del MISMO sorteo. Instrumentando ``sample_bt_start`` se obtuvo el valor sorteado")
+    lines.append("   S y el implicado por los datos (S + offset): los pares con S > 37.3 daban")
+    lines.append("   S_implicado ≈ 37.30 y el par con S < 33.5 daba S_implicado ≈ 33.50, es decir, un")
+    lines.append("   CLIP en [33.5, 37.3] que no constaba en el código. Con el clip, los 210 pares son")
+    lines.append("   idénticos. Un clip no consume sorteos, así que el flujo queda alineado y sólo")
+    lines.append("   cambia BT: exactamente lo observado.")
     lines.append("")
     for path in ("src/anessim/simulate.py", "src/anessim/config.py",
                  "src/anessim/configs/synthetic_v7.yaml"):

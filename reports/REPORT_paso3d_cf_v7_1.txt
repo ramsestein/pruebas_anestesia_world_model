@@ -1,21 +1,17 @@
 ==============================================================================
 PASO 3d — cf_v7_1: regeneración de los contrafactuales
-INFORME DE LA FASE 0 (diagnóstico). PUERTAS BLOQUEANTES.
-Fecha: 2026-10-03T16:40:49.953450
+INFORME DE LAS FASES 0 y 0′
+Fecha Fase 0: 2026-10-03T16:40:49.953450  |  Fase 0′: 2026-10-04T13:43:55.362322
+==============================================================================
+
+==============================================================================
+PARTE 1 — FASE 0 (commit f29962c)
 ==============================================================================
 
 Objetivo: corregir el muestreo de las palancas de consigna (set_rr, set_tv,
 set_peep) para que δ sea múltiplo entero no nulo del escalón de registro, y
 regenerar aguas abajo (cf_v7_1 -> windows_v4_1/pk_v2_1/tokens_v2_1).
-Antes de invertir en regenerar, la Fase 0 comprueba tres puertas bloqueantes.
-
-sha256 de los ficheros del núcleo del generador (para Fase 1):
-  src/anessim/simulate.py                       23fe6080c9c3b519f17503803dec100e6349972849db5ccad394e17c7c674dbd
-  src/anessim/sensors.py                        3549c034d2023d385e35db986e83ec4210f566d61acea6f52390a7631ab6a8d6
-  src/anessim/respiratory.py                    a30a8d87d6b9bff859760bc0ac01361933007fd9ac5407af8d0cfe6baf62db21
-  src/anessim/render.py                         0ac7c43173ea07ecbb8d64df6577a3cc72bdca7b580be2dc0082c162d11b9371
-  src/anessim/scripts/generate_f2_cf.py         9ca9cea279edd1a1ff164d85f84813cc04ef275b115ab7f39211eff3f2de4404
-  src/anessim/configs/synthetic_v7.yaml         de164be9491fb1b3a7a4fe65d9916fbed0bf3bcffa751d8b4d2e9850441d9057
+La Fase 0 comprueba tres puertas bloqueantes antes de invertir en regenerar.
 
 ------------------------------------------------------------------------------
 G0a — reproducibilidad de cf_v7 desde el código del repo
@@ -23,42 +19,18 @@ G0a — reproducibilidad de cf_v7 desde el código del repo
   Pares probados: 21  idénticos: 0  solo-hueco-BT: 20
   Veredicto: FALLA
 
-  Los pares NO idénticos difieren únicamente en ``Solar8000/BT`` (caso)
-  y en un artefacto nulo de ``truth/phase`` (el último muestreo, NaN en
-  ambas ramas). Ninguna otra columna del caso ni de la verdad difiere, y
-  los metadatos son idénticos.
-
-  CAUSA: el código actual de ``simulate.py`` tiene C3 REVERTIDO
-  (``_bt_start = uniform(36.5, 37.4)``), pero los datos v7 en disco se
-  generaron con la versión ensanchada ``normal(36.0, 0.9)`` que ya no
-  existe en el código. Es el hueco §6 de LIMITACIONES_GENERADOR_v7.md,
-  documentado en la v8 (decisión: documentar, no regenerar).
-
-  IMPLICACIÓN: con el código actual, CUALQUIER regeneración cambia BT en
-  todas las cohortes sintéticas. Por tanto las puertas G2a (18 palancas no
-  modificadas idénticas a cf_v7) y G2c (rama intervenida idéntica para
-  t <= split_t) son INALCANZABLES tal como están especificadas: no existe
-  ninguna configuración de solo ``generate_f2_cf.py`` que reproduzca el BT
-  de cf_v7.
-
-  Ejemplo (par 195251, eph_bolus): {"case_a": ["Solar8000/BT"], "case_b": ["Solar8000/BT"], "truth_a": ["phase"], "truth_b": ["phase"]}
-
-  ADEMÁS: 1 par(es) divergen más allá de BT, p. ej. el par 197501 (set_tv):
+  Pares NO idénticos: 21. De ellos, 20 difieren SOLO en Solar8000/BT.
+  Los otros 1 divergen más allá de BT, p. ej. el par 197501 (set_tv):
     case_a: 82 col. (p. ej. ['BIS/BIS', 'BIS/EMG', 'BIS/SEF', 'BIS/SQI', 'BIS/SR'])
     case_b: 82 col. (p. ej. ['BIS/BIS', 'BIS/EMG', 'BIS/SEF', 'BIS/SQI', 'BIS/SR'])
     truth_a: 1 col. (p. ej. ['phase'])
     truth_b: 1 col. (p. ej. ['phase'])
-  Comprobado en el par 197501: el TRUTH (fisiología) es IDÉNTICO (0/42
-  columnas) y los tracks OBSERVADOS difieren en 82 columnas desde t=0:
-  la divergencia está en la CAPA DE OBSERVACIÓN, no en la fisiología.
-  El generador SÍ es determinista (la regeneración del par 197501 coincide
-  100 % con una segunda regeneración independiente), de modo que el caso en
-  disco se generó con OTRA versión del código de observación. Causa:
-  el cambio de DISTRIBUCIÓN de BT (`normal(36.0,0.9)` vs `uniform(36.5,37.4)`)
-  altera el número de sorteos del muestreo ziggurat de `rng_sensor` en ~1
-  caso de cada 20 y desplaza TODA la capa de sensor posterior (la misma
-  raíz §6). Es decir: el 100 % del fallo de reproducibilidad se explica por el
-  hueco de BT.
+
+  Ejemplo (par 195251, eph_bolus): {"case_a": ["Solar8000/BT"], "case_b": ["Solar8000/BT"], "truth_a": ["phase"], "truth_b": ["phase"]}
+
+  NOTA (Fase 0′): G0a se ejecutó sobre 21 pares (1 por palanca), no 210, y el
+  'artefacto nulo de truth/phase' era un defecto del COMPARADOR (corregido en
+  la Fase 0′). Véase la Parte 2.
 
 ------------------------------------------------------------------------------
 G0b — cadencia real de las consignas en disco
@@ -118,20 +90,198 @@ G0c — prueba de la hipótesis (δ no múltiplo del escalón)
   arriba son las palancas de ventilación cubiertas por G0c y los otros 3 son
   sevo_mac (no son consignas de ventilación; fuera del alcance de G0c).
 
-------------------------------------------------------------------------------
-VEREDICTO DE LA FASE 0
-------------------------------------------------------------------------------
-  PARA. La puerta G0a FALLA: cf_v7 no es reproducible bit a bit desde el
-  repo por el hueco de BT (§6 de LIMITACIONES_GENERADOR_v7.md). Como el
-  arreglo propuesto NO toca ``simulate.py``, no hay forma de que cf_v7_1
-  mantenga el BT de cf_v7, de modo que las puertas G2a/G2c de la Fase 2 son
-  inalcanzables. Se PARA aquí y se documenta (regla §1 del paso 3d).
+  VEREDICTO FASE 0: PARA (G0a falló por el hueco de BT §6).
 
-  Opciones para desbloquear (decisión del usuario):
-   (a) excluir 'Solar8000/BT' de las comparaciones G0a/G2a/G2c como hueco
-       conocido §6, y aceptar que cf_v7_1 corrige el BT (cambio de alcance);
-   (b) restaurar C3 en ``simulate.py`` para reproducir el BT de cf_v7 (viola
-       la regla 'no tocar simulate.py' del paso 3d, pero es la única forma de
-       que cf_v7_1 sea idéntico a cf_v7 fuera de las 3 palancas modificadas);
-   (c) no hacer el paso 3d.
+==============================================================================
+PARTE 2 — FASE 0′ (Enmienda 1: el repo debe reproducir los datos v7)
+==============================================================================
+
+1. CORRECCIONES A LA FASE 0
+   1.1 Tamaño de G0a: la Fase 0 ejecutó G0a sobre 21 pares (1 por palanca), NO
+       210. Este informe declara siempre el tamaño real (el manifiesto f0.json
+       lo registra en n_tested). La entrada de provenance_gaps del commit f29962c
+       afirmaba '210 pares … 0/210 idénticos': era FALSA y queda corregida.
+   1.2 'truth/phase' era un ARTEFACTO DEL COMPARADOR, no una diferencia:
+       _diff_columns comparaba columnas object con np.array_equal, donde
+       nan != nan. Corregido a pd.Series.equals / equal_nan (nulo == nulo en la
+       misma posición). Test: tests/test_paso3d_comparador.py.
+   1.3 Se RECHAZA la opción (a): corregir BT sólo en cf crearía una diferencia de
+       cohorte en una de las 14 variables de la imagen del AE (ae_v2 se entrenó
+       con el BT normal(36.0,0.9) de toda la v7; y en ~1/20 casos cambiaría toda
+       la capa de observación). La corrección de BT pertenece a una regeneración
+       GLOBAL + reentrenamiento del AE. Decisión v8 §6 precisada: 'en la próxima
+       regeneración GLOBAL'.
+   1.4 Se adopta la opción (b): el repo debe contener el código que generó los
+       datos vigentes.
+
+2. CAMBIO DE CÓDIGO (única excepción a 'no tocar simulate.py')
+   Se añade el campo de configuración ``bt_start_model``:
+     'v7_normal'          = clip(normal(36.0, 0.9), 33.5, 37.3) — la línea que
+                            generó v7 en disco (el CLIP se recuperó empíricamente);
+     'uniform_c3_revert'  = uniform(36.5, 37.4) — corrección C3 pendiente de la
+                            regeneración GLOBAL.
+   Por defecto 'v7_normal'; synthetic_v7.yaml lo fija a 'v7_normal'. El sorteo se
+   centraliza en ``simulate.sample_bt_start``. Sin otros cambios de comportamiento.
+
+   RECUPERACIÓN DEL CLIP (por qué hacía falta): con sólo ``normal(36.0, 0.9)``,
+   G0a′ daba 196/210: los 14 pares restantes diferían SÓLO en Solar8000/BT, con un
+   desplazamiento CASI CONSTANTE (0.1 a 1.1 °C) que no arrastraba ninguna otra
+   columna. Eso descarta un desplazamiento del flujo de ``rng_sensor`` (que
+   afectaría a toda la capa de observación) y apunta a una transformación distinta
+   del MISMO sorteo. Instrumentando ``sample_bt_start`` se obtuvo el valor sorteado
+   S y el implicado por los datos (S + offset): los pares con S > 37.3 daban
+   S_implicado ≈ 37.30 y el par con S < 33.5 daba S_implicado ≈ 33.50, es decir, un
+   CLIP en [33.5, 37.3] que no constaba en el código. Con el clip, los 210 pares son
+   idénticos. Un clip no consume sorteos, así que el flujo queda alineado y sólo
+   cambia BT: exactamente lo observado.
+
+   DIFF COMPLETO de src/anessim/simulate.py (vs f29962c):
+   diff --git a/src/anessim/simulate.py b/src/anessim/simulate.py
+   index 5b8d96b..a246951 100644
+   --- a/src/anessim/simulate.py
+   +++ b/src/anessim/simulate.py
+   @@ -100,6 +100,35 @@ def emg_latent(bis, rng: np.random.Generator) -> np.ndarray:
+        return np.clip(central + extra, 0.0, 100.0)
+    
+    
+   +# ── BT (temperatura corporal): modelo del sorteo inicial. El repositorio debe
+   +# poder reproducir los datos v7 vigentes ("v7_normal") y ofrecer explícitamente
+   +# la corrección pendiente para la regeneración GLOBAL ("uniform_c3_revert").
+   +# NO cambiar el valor por defecto sin regenerar TODAS las cohortes sintéticas y
+   +# reentrenar el AE: BT es una de las 14 variables de la imagen del AE (véase
+   +# LIMITACIONES_GENERADOR_v7.md §6).
+   +BT_START_MODELS: tuple[str, ...] = ("v7_normal", "uniform_c3_revert")
+   +
+   +
+   +def sample_bt_start(rng: np.random.Generator, model: str = "v7_normal") -> float:
+   +    """Sorteo del BT inicial según el modelo configurado.
+   +
+   +    ``v7_normal`` reproduce EXACTAMENTE la línea que generó los datos v7 en
+   +    disco: ``normal(36.0, 0.9)`` con un clip ``[33.5, 37.3]``. El clip NO
+   +    constaba en el código (la versión C3 se revirtió) y se recuperó
+   +    EMPÍRICAMENTE en el paso 3d (G0a′): sin él, 14 de los 210 pares de cf_v7
+   +    diferían sólo en ``Solar8000/BT`` (porque su sorteo queda recortado),
+   +    mientras que el resto era idéntico; con él, los 210 son idénticos.
+   +    ``uniform_c3_revert`` es la corrección C3 (``uniform(36.5, 37.4)``),
+   +    pendiente de la regeneración global.
+   +    """
+   +    if model == "v7_normal":
+   +        return float(np.clip(rng.normal(36.0, 0.9), 33.5, 37.3))
+   +    if model == "uniform_c3_revert":
+   +        return float(rng.uniform(36.5, 37.4))
+   +    raise ValueError(
+   +        f"bt_start_model desconocido: {model!r} (esperado uno de {BT_START_MODELS})")
+   +
+   +
+    # ── v6 (M6): rejilla de cuantización de la capa de medida. El monitor real
+    # emite enteros (HR/SpO2/ETCO2/PEEP/PIP/TV/RR/ART_*), paso 0.1 (BIS/BIS, MV,
+    # BT) o 0.01 (BIS/EMG). El modelo fisiológico sigue en continuo; el redondeo
+   @@ -1217,12 +1246,15 @@ class CaseSimulator:
+            # Body temperature: A4 — deriva de hipotermia amplia. Referencia real
+            # (sin artefactos <30°C): p1=33.2, p50=36.0, p99=37.3 (500 casos, semilla
+            # 2024). Mayoría enfría poco (0.2-2.0°C); ~15% hipotermia marcada (2.8-4.5°C).
+   -        # NOTA v7 (C3 REVERTIDO): ensanchar _bt_start a normal(36.0, 0.9) empeoró
+   -        # la W1 de BT (0.30 -> 0.93) y reabrió V1 (0.664 -> 0.765). Se restaura el
+   -        # unif(36.5, 37.4) de v6; la corrección correcta debe ajustar la FORMA.
+   +        # NOTA v7 (paso 3d Fase 0′): el sorteo inicial de BT depende de
+   +        # ``config.bt_start_model``. "v7_normal" (normal(36.0, 0.9)) es la línea
+   +        # EXACTA con la que se generó la cohorte v7 en disco (reproducibilidad
+   +        # verificada con G0a′); "uniform_c3_revert" (unif(36.5, 37.4)) baja la
+   +        # W1 de BT de 0.93 a 0.30 pero reabre V1 y sólo puede adoptarse en una
+   +        # regeneración GLOBAL + reentrenamiento del AE (LIMITACIONES §6).
+            dt_bt = float(np.mean(np.diff(t))) if len(t) > 1 else 0.5
+            tau_bt = self.rng_sensor.uniform(1800.0, 7200.0)
+   -        _bt_start = self.rng_sensor.uniform(36.5, 37.4)
+   +        _bt_start = sample_bt_start(self.rng_sensor, self.config.bt_start_model)
+            if self.rng_sensor.random() < 0.15:
+                _bt_drop = self.rng_sensor.uniform(2.8, 4.5)
+            else:
+
+   DIFF COMPLETO de src/anessim/config.py (vs f29962c):
+   diff --git a/src/anessim/config.py b/src/anessim/config.py
+   index ac578ea..4bc04bb 100644
+   --- a/src/anessim/config.py
+   +++ b/src/anessim/config.py
+   @@ -95,6 +95,13 @@ class SimulatorConfig:
+        n_workers: int = 1
+        resume: bool = True
+    
+   +    # Modelo del sorteo del BT inicial (ver ``simulate.sample_bt_start``).
+   +    # Por defecto "v7_normal" porque la cohorte vigente en disco es v7 y el
+   +    # código debe reproducirla. "uniform_c3_revert" es la corrección C3
+   +    # (mejor W1 de BT) PENDIENTE de una regeneración GLOBAL de todas las
+   +    # cohortes sintéticas + reentrenamiento del AE (LIMITACIONES §6).
+   +    bt_start_model: str = "v7_normal"
+   +
+        def to_dict(self) -> dict[str, Any]:
+            return {
+                "n_cases": self.n_cases,
+   @@ -108,6 +115,7 @@ class SimulatorConfig:
+                "labs_path": str(self.labs_path),
+                "n_workers": self.n_workers,
+                "resume": self.resume,
+   +            "bt_start_model": self.bt_start_model,
+            }
+    
+        @classmethod
+
+   DIFF COMPLETO de src/anessim/configs/synthetic_v7.yaml (vs f29962c):
+   diff --git a/src/anessim/configs/synthetic_v7.yaml b/src/anessim/configs/synthetic_v7.yaml
+   index 1ccb9dc..9e426e3 100644
+   --- a/src/anessim/configs/synthetic_v7.yaml
+   +++ b/src/anessim/configs/synthetic_v7.yaml
+   @@ -9,3 +9,6 @@ clinical_path: data/real/clinical_data_enriched.parquet
+    labs_path: data/real/lab_data.parquet
+    n_workers: 8
+    resume: true
+   +# Modelo del sorteo inicial de BT: "v7_normal" reproduce los datos v7 vigentes.
+   +# "uniform_c3_revert" es la corrección C3 pendiente de la regeneración GLOBAL.
+   +bt_start_model: v7_normal
+
+   sha256 del núcleo (Fase 0′; referencia para test_nucleo_generador_intacto):
+     src/anessim/simulate.py                       e88e36670173ea205cf13a32c83bc62592f1729f03b0d62f43e3eb9cbcc2739c
+     src/anessim/sensors.py                        3549c034d2023d385e35db986e83ec4210f566d61acea6f52390a7631ab6a8d6
+     src/anessim/respiratory.py                    a30a8d87d6b9bff859760bc0ac01361933007fd9ac5407af8d0cfe6baf62db21
+     src/anessim/render.py                         0ac7c43173ea07ecbb8d64df6577a3cc72bdca7b580be2dc0082c162d11b9371
+     src/anessim/scripts/generate_f2_cf.py         9ca9cea279edd1a1ff164d85f84813cc04ef275b115ab7f39211eff3f2de4404
+     src/anessim/configs/synthetic_v7.yaml         84967bccca24e18509370e27cd13461a63ea5e8aeb3514e69d6dc94d5e52f3d4
+
+3. G0a′ — reproducibilidad de cf_v7 (10 pares/palanca + 197501)
+------------------------------------------------------------------------------
+   Criterio: 210/210 idénticos (10 pares x 21 palancas) + el par 197501, sin
+   excluir ninguna columna.
+  Pares probados: 210  idénticos: 210  solo-hueco-BT: 0
+  Veredicto: PASA
+
+   G0a′: PASA
+   El par 197501 sale idéntico: CONFIRMA la hipótesis del ziggurat
+   (normal() consume un número variable de sorteos; uniform() siempre 1).
+
+4. G0d — reproducibilidad de synthetic_v7 y vaso_reinf_v7 (INFORMATIVA)
+------------------------------------------------------------------------------
+  rc base=0  rc vaso=0
+  synthetic_v7     n= 20  idénticos=  0  no_regenerados=  0  FALLA
+  vaso_reinf_v7    n= 10  idénticos= 10  no_regenerados=  0  PASA
+
+  Primeras diferencias (20 en total):
+    synthetic_v7 caso 150001 cases/150001.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150002 cases/150002.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150003 cases/150003.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150004 cases/150004.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150005 cases/150005.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150006 cases/150006.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150007 cases/150007.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+    synthetic_v7 caso 150008 cases/150008.parquet: 1 col. (p. ej. ['<columnas>']) presence_same=False
+
+  NOTA: en synthetic_v7 los 20 casos difieren en el CONJUNTO DE COLUMNAS
+  (presence_same=False) con el TRUTH idéntico. Causa: la presencia de tracks
+  depende de n_total = len(caseids) (TrackPresenceSampler.sample) y de un estado
+  secuencial, así que una regeneración PARCIAL (20 de 10000) no puede
+  reproducirla. NO es BT. vaso_reinf_v7 (10/10) SÍ reproduce.
+
+------------------------------------------------------------------------------
+VEREDICTO DE LA FASE 0′
+------------------------------------------------------------------------------
+  PASA: con bt_start_model='v7_normal' el código del repo reproduce cf_v7.
+  Se procede a la Fase 1.
 
