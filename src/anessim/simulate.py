@@ -100,6 +100,35 @@ def emg_latent(bis, rng: np.random.Generator) -> np.ndarray:
     return np.clip(central + extra, 0.0, 100.0)
 
 
+# ── BT (temperatura corporal): modelo del sorteo inicial. El repositorio debe
+# poder reproducir los datos v7 vigentes ("v7_normal") y ofrecer explícitamente
+# la corrección pendiente para la regeneración GLOBAL ("uniform_c3_revert").
+# NO cambiar el valor por defecto sin regenerar TODAS las cohortes sintéticas y
+# reentrenar el AE: BT es una de las 14 variables de la imagen del AE (véase
+# LIMITACIONES_GENERADOR_v7.md §6).
+BT_START_MODELS: tuple[str, ...] = ("v7_normal", "uniform_c3_revert")
+
+
+def sample_bt_start(rng: np.random.Generator, model: str = "v7_normal") -> float:
+    """Sorteo del BT inicial según el modelo configurado.
+
+    ``v7_normal`` reproduce EXACTAMENTE la línea que generó los datos v7 en
+    disco: ``normal(36.0, 0.9)`` con un clip ``[33.5, 37.3]``. El clip NO
+    constaba en el código (la versión C3 se revirtió) y se recuperó
+    EMPÍRICAMENTE en el paso 3d (G0a′): sin él, 14 de los 210 pares de cf_v7
+    diferían sólo en ``Solar8000/BT`` (porque su sorteo queda recortado),
+    mientras que el resto era idéntico; con él, los 210 son idénticos.
+    ``uniform_c3_revert`` es la corrección C3 (``uniform(36.5, 37.4)``),
+    pendiente de la regeneración global.
+    """
+    if model == "v7_normal":
+        return float(np.clip(rng.normal(36.0, 0.9), 33.5, 37.3))
+    if model == "uniform_c3_revert":
+        return float(rng.uniform(36.5, 37.4))
+    raise ValueError(
+        f"bt_start_model desconocido: {model!r} (esperado uno de {BT_START_MODELS})")
+
+
 # ── v6 (M6): rejilla de cuantización de la capa de medida. El monitor real
 # emite enteros (HR/SpO2/ETCO2/PEEP/PIP/TV/RR/ART_*), paso 0.1 (BIS/BIS, MV,
 # BT) o 0.01 (BIS/EMG). El modelo fisiológico sigue en continuo; el redondeo
@@ -1217,12 +1246,15 @@ class CaseSimulator:
         # Body temperature: A4 — deriva de hipotermia amplia. Referencia real
         # (sin artefactos <30°C): p1=33.2, p50=36.0, p99=37.3 (500 casos, semilla
         # 2024). Mayoría enfría poco (0.2-2.0°C); ~15% hipotermia marcada (2.8-4.5°C).
-        # NOTA v7 (C3 REVERTIDO): ensanchar _bt_start a normal(36.0, 0.9) empeoró
-        # la W1 de BT (0.30 -> 0.93) y reabrió V1 (0.664 -> 0.765). Se restaura el
-        # unif(36.5, 37.4) de v6; la corrección correcta debe ajustar la FORMA.
+        # NOTA v7 (paso 3d Fase 0′): el sorteo inicial de BT depende de
+        # ``config.bt_start_model``. "v7_normal" (normal(36.0, 0.9)) es la línea
+        # EXACTA con la que se generó la cohorte v7 en disco (reproducibilidad
+        # verificada con G0a′); "uniform_c3_revert" (unif(36.5, 37.4)) baja la
+        # W1 de BT de 0.93 a 0.30 pero reabre V1 y sólo puede adoptarse en una
+        # regeneración GLOBAL + reentrenamiento del AE (LIMITACIONES §6).
         dt_bt = float(np.mean(np.diff(t))) if len(t) > 1 else 0.5
         tau_bt = self.rng_sensor.uniform(1800.0, 7200.0)
-        _bt_start = self.rng_sensor.uniform(36.5, 37.4)
+        _bt_start = sample_bt_start(self.rng_sensor, self.config.bt_start_model)
         if self.rng_sensor.random() < 0.15:
             _bt_drop = self.rng_sensor.uniform(2.8, 4.5)
         else:

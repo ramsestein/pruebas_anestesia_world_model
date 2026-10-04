@@ -9,3 +9,6 @@ clinical_path: data/real/clinical_data_enriched.parquet
 labs_path: data/real/lab_data.parquet
 n_workers: 8
 resume: true
+# Modelo del sorteo inicial de BT: "v7_normal" reproduce los datos v7 vigentes.
+# "uniform_c3_revert" es la corrección C3 pendiente de la regeneración GLOBAL.
+bt_start_model: v7_normal

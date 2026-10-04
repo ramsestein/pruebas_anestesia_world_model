@@ -32,6 +32,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
+import subprocess
 import sys
 import tempfile
 import time as _time
@@ -127,35 +129,35 @@ def collection_of(lever: str) -> str:
     return "learning"
 
 
-def _frames_equal(a: pd.DataFrame, b: pd.DataFrame) -> tuple[bool, str]:
-    """Igualdad estricta: columnas, dtypes y valores (NaN == NaN)."""
-    if list(a.columns) != list(b.columns):
-        return False, f"columnas difieren ({len(a.columns)} vs {len(b.columns)})"
-    for c in a.columns:
-        da, db = a[c].dtype, b[c].dtype
-        if str(da) != str(db):
-            return False, f"dtype de {c}: {da} vs {db}"
-    try:
-        pd.testing.assert_frame_equal(a, b, check_dtype=True, check_exact=True)
-    except AssertionError as exc:  # noqa: PERF203
-        return False, str(exc).splitlines()[0][:200]
-    return True, ""
-
-
 def _diff_columns(a: pd.DataFrame, b: pd.DataFrame) -> list[str]:
-    """Lista de columnas cuyos valores difieren (NaN == NaN)."""
+    """Lista de columnas cuyos valores difieren. Nulo == nulo.
+
+    Para columnas numéricas usa ``np.array_equal(equal_nan=True)``. Para el
+    resto (object/str/categorical, p. ej. ``truth/phase``) usa
+    ``pd.Series.equals``, que considera iguales los nulos en la MISMA posición
+    (el comparador anterior usaba ``np.array_equal`` sobre object, donde
+    ``nan != nan`` y por eso ``phase`` aparecía como diferencia espuria).
+    """
     if list(a.columns) != list(b.columns):
         return ["<columnas>"]
+    if len(a) != len(b):
+        return ["<filas>"]
 
-    def _eq(va: np.ndarray, vb: np.ndarray) -> bool:
-        if va.dtype.kind in "fc" and vb.dtype.kind in "fc":
-            return bool(np.array_equal(va, vb, equal_nan=True))
-        try:
-            return bool(np.array_equal(va, vb))
-        except TypeError:
-            return bool(np.array_equal(va.astype(str), vb.astype(str)))
+    def _eq(sa: pd.Series, sb: pd.Series) -> bool:
+        if sa.dtype.kind in "fc" and sb.dtype.kind in "fc":
+            return bool(np.array_equal(sa.to_numpy(), sb.to_numpy(), equal_nan=True))
+        if str(sa.dtype) != str(sb.dtype):
+            return False
+        # pd.Series.equals: NaN en la misma posición se considera igual.
+        return bool(sa.equals(sb))
 
-    return [c for c in a.columns if not _eq(a[c].to_numpy(), b[c].to_numpy())]
+    return [c for c in a.columns if not _eq(a[c], b[c])]
+
+
+def frames_equal(a: pd.DataFrame, b: pd.DataFrame) -> bool:
+    """Verdadero si ``a`` y ``b`` son idénticos (columnas, orden y valores con
+    nulo == nulo)."""
+    return len(_diff_columns(a, b)) == 0
 
 
 def _read_parquet(p: Path) -> pd.DataFrame:
@@ -172,7 +174,7 @@ def _g0a_task(task: dict) -> dict:
 
 def g0a(pairs: pd.DataFrame, config_dict: dict, workers: int,
         n_per_lever: int = 10, tmp_dir: str | None = None,
-        compare_only: bool = False) -> dict:
+        compare_only: bool = False, extra_pairs: tuple[int, ...] = ()) -> dict:
     t0 = _time.time()
     tasks = []
     for lever in sorted(pairs.lever.unique()):
@@ -181,6 +183,20 @@ def g0a(pairs: pd.DataFrame, config_dict: dict, workers: int,
             pid = int(r.pair_id)
             meta = json.loads((CF_DIR / "metadata" / f"cf_pair_{pid}.json").read_text())
             tasks.append((pid, lever, int(meta["seed"])))
+
+    # pares EXTRA (p. ej. 197501) aunque no estén entre los n primeros.
+    seen = {t[0] for t in tasks}
+    for pid in extra_pairs:
+        if pid in seen:
+            continue
+        row = pairs[pairs.pair_id == pid]
+        if len(row) == 0:
+            print(f"    (aviso: el par extra {pid} no está en pairs.parquet)")
+            continue
+        lever = str(row.lever.iloc[0])
+        meta = json.loads((CF_DIR / "metadata" / f"cf_pair_{pid}.json").read_text())
+        tasks.append((pid, lever, int(meta["seed"])))
+        seen.add(pid)
 
     if tmp_dir is not None:
         tmp_root = Path(tmp_dir)
@@ -488,12 +504,114 @@ def g0c(pairs: pd.DataFrame, ann2: pd.DataFrame) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# G0d — reproducibilidad de synthetic_v7 y vaso_reinf_v7 (informativa)
+# ---------------------------------------------------------------------------
+
+BASE_CASEIDS = tuple(range(150001, 150021))   # 20 casos base
+VASO_CASEIDS = tuple(range(160001, 160011))   # 10 casos vaso
+
+
+def _presence_signature(df: pd.DataFrame) -> list[str]:
+    """Columnas (sin 'time') con algún valor no nulo: firma de presencia."""
+    return sorted(c for c in df.columns if c != "time" and df[c].notna().any())
+
+
+def _run(cmd: list[str]) -> tuple[int, str]:
+    env = {**os.environ, "PYTHONPATH": "src"}
+    p = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
+    tail = (p.stdout or "")[-600:] + (p.stderr or "")[-600:]
+    return p.returncode, tail
+
+
+def g0d(workers: int) -> dict:
+    t0 = _time.time()
+    tmp = Path(tempfile.mkdtemp(prefix="paso3d_g0d_", dir=str(ROOT.parent)))
+    base_dir = tmp / "synthetic_v7"
+    vaso_dir = tmp / "vaso_reinf_v7"
+    base_dir.mkdir(parents=True, exist_ok=True)
+    vaso_dir.mkdir(parents=True, exist_ok=True)
+
+    rc_b, log_b = _run([
+        sys.executable, "-m", "anessim.cli",
+        "--config", "src/anessim/configs/synthetic_v7.yaml",
+        "--n-cases", str(len(BASE_CASEIDS)), "--case-offset", str(BASE_CASEIDS[0]),
+        "--workers", str(workers), "--output-dir", str(base_dir), "--resume", "false"])
+    rc_v, log_v = _run([
+        sys.executable, "src/anessim/scripts/generate_vaso_reinforcement.py",
+        "--cases", str(len(VASO_CASEIDS)), "--workers", str(workers),
+        "--start-caseid", str(VASO_CASEIDS[0]), "--output-dir", str(vaso_dir)])
+
+    cohorts = {
+        "synthetic_v7": (paths.COHORTS["synthetic_v7"], base_dir, BASE_CASEIDS),
+        "vaso_reinf_v7": (paths.COHORTS["vaso_reinf_v7"], vaso_dir, VASO_CASEIDS),
+    }
+    out: dict = {
+        "caseids": {"synthetic_v7": list(BASE_CASEIDS), "vaso_reinf_v7": list(VASO_CASEIDS)},
+        "rc_base": rc_b, "rc_vaso": rc_v,
+        "tmp_dir": str(tmp), "per_cohort": {}, "diffs": [],
+    }
+    if rc_b != 0:
+        out["log_base"] = log_b
+    if rc_v != 0:
+        out["log_vaso"] = log_v
+
+    for name, (disk_dir, tmp_cohort, cids) in cohorts.items():
+        n_id = 0
+        n_missing = 0
+        for cid in cids:
+            bad = False
+            for rel in (f"cases/{cid:04d}.parquet", f"truth/{cid:04d}_truth.parquet"):
+                p_disk, p_tmp = disk_dir / rel, tmp_cohort / rel
+                if not p_tmp.exists():
+                    out["diffs"].append({"cohort": name, "caseid": cid,
+                                         "artifact": rel, "reason": "no regenerado"})
+                    bad = True
+                    n_missing += 1
+                    continue
+                d = _diff_columns(_read_parquet(p_disk), _read_parquet(p_tmp))
+                if d:
+                    rec = {"cohort": name, "caseid": cid, "artifact": rel,
+                           "n_diff": len(d), "diff_columns": d[:15]}
+                    if rel.startswith("cases/"):
+                        rec["presence_disk"] = _presence_signature(_read_parquet(p_disk))
+                        rec["presence_tmp"] = _presence_signature(_read_parquet(p_tmp))
+                        rec["presence_same"] = rec["presence_disk"] == rec["presence_tmp"]
+                    out["diffs"].append(rec)
+                    bad = True
+            mp_disk = disk_dir / "metadata" / f"{cid:04d}_meta.json"
+            mp_tmp = tmp_cohort / "metadata" / f"{cid:04d}_meta.json"
+            if mp_disk.exists():
+                if not mp_tmp.exists():
+                    out["diffs"].append({"cohort": name, "caseid": cid,
+                                         "artifact": "metadata", "reason": "no regenerado"})
+                    bad = True
+                elif json.loads(mp_disk.read_text(encoding="utf-8")) != \
+                        json.loads(mp_tmp.read_text(encoding="utf-8")):
+                    out["diffs"].append({"cohort": name, "caseid": cid,
+                                         "artifact": "metadata", "reason": "json difiere"})
+                    bad = True
+            if not bad:
+                n_id += 1
+        out["per_cohort"][name] = {
+            "n_cases": len(cids), "n_identical": n_id, "n_missing": n_missing,
+            "pass": bool(n_id == len(cids)),
+        }
+    out["pass"] = bool(all(v["pass"] for v in out["per_cohort"].values()))
+    out["elapsed_s"] = round(_time.time() - t0, 1)
+    print(f"  G0d: base {out['per_cohort']['synthetic_v7']} "
+          f"vaso {out['per_cohort']['vaso_reinf_v7']} [{out['elapsed_s']}s]")
+    return out
+
+
+# ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--only", choices=["g0a", "g0b", "g0c"], default=None)
+    ap.add_argument("--only", choices=["g0a", "g0b", "g0c", "g0d"], default=None)
+    ap.add_argument("--out", type=str, default=None,
+                    help="manifiesto de salida (por defecto manifests/paso3d_f0.json)")
     ap.add_argument("--finalize", action="store_true",
                     help="recalcula el veredicto global 'pass' sin re-ejecutar puertas")
     ap.add_argument("--workers", type=int, default=12)
@@ -503,10 +621,13 @@ def main() -> int:
                     help="directorio temporal a reutilizar (resume) en G0a")
     ap.add_argument("--g0a-compare-only", action="store_true",
                     help="no simula: sólo compara lo ya presente en --g0a-tmp")
+    ap.add_argument("--g0a-extra", type=str, default="197501",
+                    help="pair_ids extra a incluir en G0a (coma-separados)")
     ap.add_argument("--target-pair", type=int, default=196761)
     args = ap.parse_args()
 
     t0 = _time.time()
+    out_json = Path(args.out) if args.out else OUT_JSON
     pairs = pq.read_table(paths.TOKENS_V2_DIR / "pairs.parquet").to_pandas()
     ann2 = pq.read_table(paths.TOKENS_V2_DIR / "pairs_annotated_v2.parquet").to_pandas()
 
@@ -515,7 +636,7 @@ def main() -> int:
     # FUSIONA con el JSON existente para no perder puertas ya calculadas (tanto
     # con --only como con --finalize).
     result: dict = {}
-    if OUT_JSON.exists():
+    if out_json.exists():
         try:
             result = json.loads(OUT_JSON.read_text(encoding="utf-8"))
         except (json.JSONDecodeError, OSError):
@@ -531,22 +652,25 @@ def main() -> int:
         if args.only in (None, "g0a"):
             cfg = SimulatorConfig.from_yaml(CONFIG_PATH)
             cfg.output_dir = CF_DIR
+            extra = tuple(int(x) for x in args.g0a_extra.split(",") if x.strip())
             result["G0a"] = g0a(pairs, cfg.to_dict(), args.workers, args.g0a_n,
-                                args.g0a_tmp, args.g0a_compare_only)
+                                args.g0a_tmp, args.g0a_compare_only, extra)
         if args.only in (None, "g0b"):
             result["G0b"] = g0b(pairs, args.target_pair)
         if args.only in (None, "g0c"):
             result["G0c"] = g0c(pairs, ann2)
+        if args.only in (None, "g0d"):
+            result["G0d"] = g0d(args.workers)
 
     gates = [g for g in ("G0a", "G0b", "G0c") if g in result]
     if len(gates) == 3:
         result["pass"] = bool(all(result[g]["pass"] for g in gates))
         result["elapsed_s"] = round(_time.time() - t0, 1)
         print(f"  F0 global: {'PASA' if result['pass'] else 'PARA'}")
-    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
-    OUT_JSON.write_text(json.dumps(result, indent=2, ensure_ascii=False),
+    out_json.parent.mkdir(parents=True, exist_ok=True)
+    out_json.write_text(json.dumps(result, indent=2, ensure_ascii=False),
                         encoding="utf-8")
-    print(f"  escrito {OUT_JSON}")
+    print(f"  escrito {out_json}")
     return 0 if result.get("pass", True) else 1
 
 

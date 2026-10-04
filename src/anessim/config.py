@@ -95,6 +95,13 @@ class SimulatorConfig:
     n_workers: int = 1
     resume: bool = True
 
+    # Modelo del sorteo del BT inicial (ver ``simulate.sample_bt_start``).
+    # Por defecto "v7_normal" porque la cohorte vigente en disco es v7 y el
+    # código debe reproducirla. "uniform_c3_revert" es la corrección C3
+    # (mejor W1 de BT) PENDIENTE de una regeneración GLOBAL de todas las
+    # cohortes sintéticas + reentrenamiento del AE (LIMITACIONES §6).
+    bt_start_model: str = "v7_normal"
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "n_cases": self.n_cases,
@@ -108,6 +115,7 @@ class SimulatorConfig:
             "labs_path": str(self.labs_path),
             "n_workers": self.n_workers,
             "resume": self.resume,
+            "bt_start_model": self.bt_start_model,
         }
 
     @classmethod
