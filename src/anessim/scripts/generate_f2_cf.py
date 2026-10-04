@@ -177,12 +177,21 @@ def build_intervention(
         # Con FiO2 0.18 la PaO2 cae lo bastante para desaturar SpO2 (~90%).
         return [], [], {"fio2_set": 0.18}, None
     if lever == "set_rr":
-        return [], [], {"rr_delta": float(rng.uniform(-4.0, 4.0))}, None
+        # v7.1 (paso 3d, decided_post_hoc): δ en la REJILLA del escalón de
+        # registro de Primus/SET_RR_IPPV (1 rpm). Con δ sub-escalón la
+        # diferencia registrada es 0 o un escalón al azar (ruido del sensor ×
+        # cuantización) y el token de acción va por detrás de la fisiología.
+        return [], [], {"rr_delta": float(rng.choice([-4, -3, -2, -1, 1, 2, 3, 4]))}, None
     if lever == "set_tv":
-        return [], [], {"tv_delta": float(rng.uniform(-150.0, 150.0))}, None
+        # v7.1 (paso 3d, decided_post_hoc): múltiplos de 10 mL (escalón de
+        # Primus/SET_TV_L = 0.01 L), |δ| de 10 a 150 mL.
+        return [], [], {"tv_delta": float(10.0 * rng.choice([k for k in range(-15, 16) if k != 0]))}, None
     if lever == "set_peep":
         # Set FiO2 low (0.35) AND apply PEEP delta, so PEEP has headroom.
-        return [], [], {"fio2_set": 0.35, "peep_delta": float(rng.uniform(-5.0, 5.0))}, None
+        # v7.1 (paso 3d, decided_post_hoc): δ en la rejilla del escalón de
+        # registro de Primus/SET_INTER_PEEP (1 cmH2O), |δ| de 1 a 5.
+        return [], [], {"fio2_set": 0.35,
+                        "peep_delta": float(rng.choice([-5, -4, -3, -2, -1, 1, 2, 3, 4, 5]))}, None
     if lever == "sevo_mac":
         # Delta relative to baseline: apply a minimum MAC change of ±0.5
         # relative to the current MAC (if any), so the effect is detectable
