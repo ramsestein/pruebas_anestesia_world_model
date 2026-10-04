@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-04T19:00:02.792987+00:00",
+  "artifact": "pk",
+  "pk_v2": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\pk_v2",
+  "pk_v2_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\pk_v2_1",
+  "counts_identical": true,
+  "n_rows_v2": 73797114,
+  "n_rows_v2_1": 73797114,
+  "n_partitions_v2": 369,
+  "n_partitions_v2_1": 369,
+  "pk_tokens_py_sha256_v2": "f1294ad7a3d83753520c022ab2fecfed4bd45dcb1e22652c24f72d86156a13dd",
+  "pk_tokens_py_sha256_v2_1": "f1294ad7a3d83753520c022ab2fecfed4bd45dcb1e22652c24f72d86156a13dd",
+  "g3b": {
+    "n_partitions": 369,
+    "non_cf": {
+      "n_partitions": 206,
+      "rows": 41087242,
+      "n_partitions_with_diffs": 0,
+      "examples": []
+    },
+    "cf": {
+      "n_partitions": 163,
+      "rows": 32709872,
+      "rows_control": 16354936,
+      "rows_intervened_prefix": 8008105,
+      "rows_intervened_post": 8346831,
+      "n_partitions_with_ctrl_diffs": 0,
+      "n_partitions_with_prefix_diffs": 0,
+      "n_partitions_post_differ": 0,
+      "unknown_caseids": 0,
+      "n_cases": 12690,
+      "examples_ctrl": [],
+      "examples_prefix": []
+    },
+    "elapsed_s": 14.8,
+    "pass": true
+  },
+  "pass": true,
+  "elapsed_s": 14.8
+}

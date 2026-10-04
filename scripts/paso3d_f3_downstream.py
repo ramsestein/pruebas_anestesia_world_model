@@ -89,16 +89,17 @@ def stage_tokens(ctx: str) -> None:
     paths.TOKENS_DIR = T41
     TK.WINDOWS_ROOT = W41
     TK.WINDOWS_DIR = W41 / "windows"
-    TK.PK_DIR = P41 / "windows"
-    TK.OUT_ROOT = T41
-    TK.OUT_DIR = T41 / "windows"
-    TK.MANIFEST_PATH = T41 / "manifest_tokens.json"
     if ctx == "rebuild":
         TK.CTX_TOKENS = paths.CONTEXT_DIR / "tokens.parquet"
         TK.CTX_VOCAB = paths.CONTEXT_DIR / "vocab.json"
-    TK.OUT_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"tokens_v2_1 -> {T41}  (pk_v2_1 = {P41}, contexto = {paths.CONTEXT_DIR})")
-    TK.main(["run"])
+    (T41 / "windows").mkdir(parents=True, exist_ok=True)
+    print(f"tokens_v2_1 -> {T41}  (pk_v2_1 = {P41}, windows = {W41}, "
+          f"contexto = {paths.CONTEXT_DIR})")
+    # ``main`` declara global PK_DIR/CTX_*/OUT_DIR/OUT_ROOT/MANIFEST_PATH y solo
+    # las reescribe si se pasan por CLI; pasarlas es más explícito que confiar
+    # en el re-apuntado previo. El directorio de ventanas no tiene opción de CLI
+    # y va por el global parcheado (tokenize no usa multiprocessing).
+    TK.main(["run", "--pk-root", str(P41), "--out-root", str(T41)])
 
 
 def main() -> int:

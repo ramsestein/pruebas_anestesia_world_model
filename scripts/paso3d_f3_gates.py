@@ -24,6 +24,7 @@ window.py actual para separar los dos efectos.
 
 Uso:
   python scripts/paso3d_f3_gates.py --stage windows --workers 10
+  python scripts/paso3d_f3_gates.py --stage pk --workers 10
 """
 from __future__ import annotations
 
@@ -48,6 +49,8 @@ from paso3d_f0_diagnostico import _diff_columns, _read_parquet  # noqa: E402
 
 W4 = ROOT / "data" / "windows_v4"
 W41 = ROOT / "data" / "windows_v4_1"
+P2 = ROOT / "data" / "pk_v2"
+P21 = ROOT / "data" / "pk_v2_1"
 CF_V71 = ROOT / "data" / "cf_v7_1"
 WIN_LEN_S = 60.0          # t1 = t0 + 60 (convención de la fase 0 de 3c)
 NON_CF = ("real", "synthetic_v7", "vaso_reinf_v7")
@@ -95,11 +98,16 @@ def _sort_key(df: pd.DataFrame) -> pd.DataFrame:
     return df.sort_values(["caseid", "t"], kind="stable").reset_index(drop=True)
 
 
-def _task_windows(task: dict) -> dict:
+def _task_identity(task: dict) -> dict:
+    """Compara una partición entre las dos cohortes. ``win_len`` es la duración
+    de la fila para decidir el prefijo (60 s en ventanas, 0 en pk/tokens, donde
+    cada fila es una celda de 5 s que cierra en ``t``)."""
     rel = task["rel"]
     source = task["source"]
-    a = _sort_key(_read_parquet(W4 / "windows" / rel))
-    b = _sort_key(_read_parquet(W41 / "windows" / rel))
+    dir_a, dir_b = Path(task["dir_a"]), Path(task["dir_b"])
+    win_len = float(task.get("win_len", 0.0))
+    a = _sort_key(_read_parquet(dir_a / rel))
+    b = _sort_key(_read_parquet(dir_b / rel))
     res: dict = {"rel": rel, "source": source, "rows": int(len(a))}
     if len(a) != len(b):
         res["diffs"] = ["<filas>"]
@@ -111,9 +119,9 @@ def _task_windows(task: dict) -> dict:
     split_by_a, control = _PAIRS if _PAIRS is not None else _pair_maps()
     cid = a["caseid"].to_numpy()
     s = pd.Series(cid).map(split_by_a)
+    t = a["t"].to_numpy(dtype=np.float64) + win_len
     m_ctrl = s.isna().to_numpy()
-    m_pref = (~s.isna()).to_numpy() & ((a["t"].to_numpy() + WIN_LEN_S)
-                                       <= s.fillna(-1.0).to_numpy())
+    m_pref = (~s.isna()).to_numpy() & (t < s.fillna(-1.0).to_numpy())
     m_post = (~s.isna()).to_numpy() & ~m_pref
     res["rows_control"] = int(m_ctrl.sum())
     res["rows_intervened_prefix"] = int(m_pref.sum())
@@ -147,20 +155,24 @@ def _task_missing(task: dict) -> dict:
             "diffs": ["<falta_particion>"]}
 
 
-def g3b_windows(workers: int) -> dict:
+def identity_gate(dir_a: Path, dir_b: Path, workers: int, win_len: float,
+                  label: str = "") -> dict:
+    """Identidad de las filas NO intervenidas entre dos raíces de particiones
+    (``<raíz>/source=*/split=*/part-*.parquet``)."""
     tasks: list[dict] = []
-    for src in sorted((W4 / "windows").glob("source=*")):
+    for src in sorted(dir_a.glob("source=*")):
         source = src.name.split("=", 1)[1]
         for part in sorted(src.glob("split=*/part-*.parquet")):
-            rel = str(part.relative_to(W4 / "windows")).replace("\\", "/")
-            tasks.append({"rel": rel, "source": source,
-                          "missing": not (W41 / "windows" / rel).exists()})
-    print(f"G3b: {len(tasks)} particiones")
+            rel = str(part.relative_to(dir_a)).replace("\\", "/")
+            tasks.append({"rel": rel, "source": source, "dir_a": str(dir_a),
+                          "dir_b": str(dir_b), "win_len": win_len,
+                          "missing": not (dir_b / rel).exists()})
+    print(f"{label}: {len(tasks)} particiones")
     res: list[dict] = []
     t0 = _time.time()
     with ProcessPoolExecutor(max_workers=workers,
                              initializer=_init_worker) as ex:
-        futs = [ex.submit(_task_missing if t["missing"] else _task_windows, t)
+        futs = [ex.submit(_task_missing if t["missing"] else _task_identity, t)
                 for t in tasks]
         for i, f in enumerate(as_completed(futs), 1):
             try:
@@ -168,7 +180,7 @@ def g3b_windows(workers: int) -> dict:
             except Exception as exc:  # noqa: BLE001
                 res.append({"rel": "?", "source": "?", "diffs": [f"<error {exc!r}>"]})
             if i % 50 == 0 or i == len(futs):
-                print(f"  G3b: {i}/{len(futs)}  ({_time.time() - t0:.0f}s)", flush=True)
+                print(f"  {label}: {i}/{len(futs)}  ({_time.time() - t0:.0f}s)", flush=True)
 
     non_cf = [r for r in res if r["source"] != "cf_v7"]
     cf = [r for r in res if r["source"] == "cf_v7"]
@@ -209,28 +221,57 @@ def g3b_windows(workers: int) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--stage", choices=["windows"], default="windows")
+    ap.add_argument("--stage", choices=["windows", "pk"], default="windows")
     ap.add_argument("--workers", type=int, default=10)
-    ap.add_argument("--out", type=Path, default=paths.MANIFESTS_DIR / "paso3d_f3_windows.json")
+    ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
     t0 = _time.time()
-    result = {"date": datetime.now(timezone.utc).isoformat(),
-              "windows_v4": str(W4), "windows_v4_1": str(W41),
-              "window_py_sha256_v4": json.loads((W4 / "manifest.json").read_text("utf-8"))["window_py_sha256"],
-              "window_py_sha256_v4_1": json.loads((W41 / "manifest.json").read_text("utf-8"))["window_py_sha256"]}
-    print("G3a — split / registry / cases")
-    result["g3a"] = g3a()
-    print(f"  G3a: {'PASA' if result['g3a']['pass'] else 'FALLA'}  "
-          f"{json.dumps(result['g3a']['files'], ensure_ascii=False)[:200]}")
-    print("G3b — identidad de las filas no intervenidas")
-    result["g3b"] = g3b_windows(args.workers)
+    result: dict = {"date": datetime.now(timezone.utc).isoformat()}
+
+    if args.stage == "windows":
+        out_path = args.out or (paths.MANIFESTS_DIR / "paso3d_f3_windows.json")
+        result.update({"artifact": "windows", "v4": str(W4), "v4_1": str(W41),
+                       "window_py_sha256_v4": json.loads((W4 / "manifest.json")
+                                                         .read_text("utf-8"))["window_py_sha256"],
+                       "window_py_sha256_v4_1": json.loads((W41 / "manifest.json")
+                                                           .read_text("utf-8"))["window_py_sha256"]})
+        print("G3a — split / registry / cases")
+        result["g3a"] = g3a()
+        print(f"  G3a: {'PASA' if result['g3a']['pass'] else 'FALLA'}  "
+              f"{json.dumps(result['g3a']['files'], ensure_ascii=False)[:200]}")
+        print("G3b — identidad de las filas no intervenidas (ventanas)")
+        result["g3b"] = identity_gate(W4 / "windows", W41 / "windows",
+                                       args.workers, WIN_LEN_S, "G3b")
+        result["pass"] = bool(result["g3a"]["pass"] and result["g3b"]["pass"])
+    else:
+        out_path = args.out or (paths.MANIFESTS_DIR / "paso3d_f3_pk.json")
+        m2 = json.loads((P2 / "manifest_pk.json").read_text("utf-8"))
+        m21 = json.loads((P21 / "manifest_pk.json").read_text("utf-8"))
+        result.update({
+            "artifact": "pk", "pk_v2": str(P2), "pk_v2_1": str(P21),
+            "counts_identical": m2["n_rows_by_source_split"] == m21["n_rows_by_source_split"],
+            "n_rows_v2": m2["n_rows"], "n_rows_v2_1": m21["n_rows"],
+            "n_partitions_v2": m2["n_partitions"], "n_partitions_v2_1": m21["n_partitions"],
+            "pk_tokens_py_sha256_v2": m2["pk_tokens_py_sha256"],
+            "pk_tokens_py_sha256_v2_1": m21["pk_tokens_py_sha256"],
+        })
+        print(f"  pk_v2: {m2['n_rows']} filas / {m2['n_partitions']} particiones | "
+              f"pk_v2_1: {m21['n_rows']} / {m21['n_partitions']} | "
+              f"conteos identicos: {result['counts_identical']}")
+        print(f"  pk_tokens.py sha v2={m2['pk_tokens_py_sha256'][:16]}... "
+              f"v2_1={m21['pk_tokens_py_sha256'][:16]}...")
+        print("G3b — identidad de las filas no intervenidas (pk)")
+        result["g3b"] = identity_gate(P2 / "windows", P21 / "windows",
+                                       args.workers, 0.0, "G3b-pk")
+        result["pass"] = bool(result["g3b"]["pass"] and result["counts_identical"])
+
     print(f"  G3b: {'PASA' if result['g3b']['pass'] else 'FALLA'}")
     print(f"    no-CF: {result['g3b']['non_cf']}")
     print(f"    CF: {result['g3b']['cf']}")
-    result["pass"] = bool(result["g3a"]["pass"] and result["g3b"]["pass"])
     result["elapsed_s"] = round(_time.time() - t0, 1)
-    args.out.write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf-8")
-    print(f"FASE 3 (ventanas): {'PASA' if result['pass'] else 'FALLA'} -> {args.out}")
+    out_path.write_text(json.dumps(result, indent=2, ensure_ascii=False),
+                        encoding="utf-8")
+    print(f"FASE 3 ({args.stage}): {'PASA' if result['pass'] else 'FALLA'} -> {out_path}")
     return 0 if result["pass"] else 1
 
 
