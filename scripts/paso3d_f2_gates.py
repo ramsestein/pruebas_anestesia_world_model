@@ -12,15 +12,26 @@ CONTROL: en las palancas de consigna el override vive en ``vent_override_a`` y
   G2b  en los 1125 pares modificados (set_rr / set_tv / set_peep), la rama de
        CONTROL (B) es idéntica bit a bit a cf_v7 en los cuatro artefactos.
   G2c  en esos mismos pares, la rama INTERVENIDA (A) coincide con su versión
-       cf_v7 en TODAS las columnas de ``cases`` y ``truth`` para ``t <= split_t``
+       cf_v7 en TODAS las columnas de ``cases`` y ``truth`` para ``t < split_t``
        (ninguna columna excluida); además el encabezado (caseid_a, caseid_b,
        seed, split_t, lever, collection) y el ``subjectid`` clínico son
        idénticos.
+
+       Frontera (``t < split_t``, estricto). El override contrafactual está
+       ACTIVO desde ``split_t``: el primer instante de simulación ``>= split_t``
+       ya muestra el valor aplicado nuevo (verificado sobre el par 198303, el
+       único que falló al usar ``t <= split_t``). Además, ``time`` en el
+       sidecar ``truth`` es float32, así que comparar contra el escalar float64
+       ``split_t`` lo REDONDEA a float32: para ``split_t = 9500.49995589281``
+       el redondeo da exactamente 9500.5 y el filtro ``<=`` colaba la primera
+       fila post-intervención. El prefijo se filtra por tanto con ``time``
+       promovido a float64 y comparación estricta.
   G2d  el δ registrado en el manifiesto está en la REJILLA de registro:
        ``|δ - round(δ)| < 1e-9``, ``δ != 0`` y dentro del rango declarado.
 
-Se informa además, sin ser criterio, en cuántos pares modificados la rama A
-DIVERGE tras ``split_t`` (si no divergiera, la intervención no tendría efecto).
+Se informa además, sin ser criterio, en cuántos pares la rama intervenida A
+DIFIERE de la de cf_v7 tras ``split_t`` (es decir, en cuántos pares el cambio de
+muestreo de v7.1 tuvo efecto).
 
 Uso:
   python scripts/paso3d_f2_gates.py --v7-1 data/cf_v7_1 --workers 12
@@ -104,14 +115,18 @@ def _meta_path(cf_dir: Path, cid: int) -> Path:
 def _cmp_parquet(dir_a: Path, dir_b: Path, kind: str, cid: int,
                  prefix_t: float | None = None) -> list[str]:
     """Columnas que difieren entre las dos cohortes. ``prefix_t`` restringe a
-    las filas con ``time <= prefix_t`` (mismo filtro en ambas)."""
+    las filas con ``time < prefix_t`` (estrictamente anteriores al split; ver
+    la nota de frontera del encabezado). ``time`` se promueve a float64 porque
+    en el sidecar ``truth`` es float32."""
     pa, pb = _parquet_path(dir_a, kind, cid), _parquet_path(dir_b, kind, cid)
     if not pa.exists() or not pb.exists():
         return ["<falta_archivo>"]
     da, db = _read_parquet(pa), _read_parquet(pb)
     if prefix_t is not None:
-        da = da.loc[da["time"] <= prefix_t].reset_index(drop=True)
-        db = db.loc[db["time"] <= prefix_t].reset_index(drop=True)
+        ta = da["time"].to_numpy(dtype=np.float64)
+        tb = db["time"].to_numpy(dtype=np.float64)
+        da = da.loc[ta < prefix_t].reset_index(drop=True)
+        db = db.loc[tb < prefix_t].reset_index(drop=True)
     return _diff_columns(da, db)
 
 
@@ -125,14 +140,17 @@ def _cmp_meta(dir_a: Path, dir_b: Path, cid: int) -> list[str]:
     return [] if _json_read(pa) == _json_read(pb) else ["<json>"]
 
 
-def _diverges_after(dir_a: Path, dir_b: Path, cid: int, split_t: float) -> bool:
-    """¿Difiere la rama A de cf_v7 en algún punto POSTERIOR a ``split_t``?"""
+def _changed_after(dir_a: Path, dir_b: Path, cid: int, split_t: float) -> bool:
+    """¿Difiere la rama A de cf_v7_1 respecto a la de cf_v7 DESPUÉS del
+    split? (es decir, ¿el cambio de muestreo de v7.1 tuvo efecto?)"""
     pa, pb = _parquet_path(dir_a, "case", cid), _parquet_path(dir_b, "case", cid)
     if not pa.exists() or not pb.exists():
         return False
     da, db = _read_parquet(pa), _read_parquet(pb)
-    da = da.loc[da["time"] > split_t].reset_index(drop=True)
-    db = db.loc[db["time"] > split_t].reset_index(drop=True)
+    ta = da["time"].to_numpy(dtype=np.float64)
+    tb = db["time"].to_numpy(dtype=np.float64)
+    da = da.loc[ta > split_t].reset_index(drop=True)
+    db = db.loc[tb > split_t].reset_index(drop=True)
     return len(_diff_columns(da, db)) > 0
 
 
@@ -174,12 +192,18 @@ def _task_g2bc(task: dict) -> dict:
     d = _cmp_meta(V7, V71, cid_a + 1)
     if d:
         b[f"{cid_a + 1}:meta"] = d
-    # G2c — rama intervenida A, prefijo t <= split_t.
+    # G2c — rama intervenida A, prefijo t < split_t.
     a: dict[str, list[str]] = {}
+    n_pref = 0
     for kind in ("case", "truth"):
         d = _cmp_parquet(V7, V71, kind, cid_a, prefix_t=split_t)
         if d:
             a[f"{cid_a}:{kind}"] = d
+        if kind == "truth":
+            p = _parquet_path(V71, "truth", cid_a)
+            if p.exists():
+                t = _read_parquet(p)["time"].to_numpy(dtype=np.float64)
+                n_pref = int((t < split_t).sum())
     d = _cmp_meta(V7, V71, cid_a)
     if d:
         a[f"{cid_a}:meta"] = d
@@ -190,7 +214,8 @@ def _task_g2bc(task: dict) -> dict:
         "caseid_a": cid_a,
         "b_diffs": b,
         "a_diffs": a,
-        "a_diverges": _diverges_after(V7, V71, cid_a, split_t),
+        "n_prefix_rows": n_pref,
+        "a_changed": _changed_after(V7, V71, cid_a, split_t),
     }
 
 
@@ -329,7 +354,8 @@ def main() -> int:
     res_bc = _run_tasks(tasks, _task_g2bc, args.workers, "G2b/c")
     b_bad = [r for r in res_bc if r.get("b_diffs") or r.get("error")]
     c_bad = [r for r in res_bc if r.get("a_diffs") or r.get("error")]
-    n_div = sum(1 for r in res_bc if r.get("a_diverges"))
+    n_changed = sum(1 for r in res_bc if r.get("a_changed"))
+    pref_rows = [r.get("n_prefix_rows", 0) for r in res_bc]
     g2b = {
         "n_tested": len(mod_ids),
         "n_identical": len(mod_ids) - len(b_bad),
@@ -342,10 +368,12 @@ def main() -> int:
         "n_tested": len(mod_ids),
         "n_prefix_identical": len(mod_ids) - len(c_bad),
         "n_prefix_diff": len(c_bad),
-        "n_a_diverges_after_split": n_div,
+        "n_a_changed_vs_v7_after_split": n_changed,
+        "prefix_rows_min": min(pref_rows) if pref_rows else 0,
+        "prefix_rows_median": int(np.median(pref_rows)) if pref_rows else 0,
         "examples": [{"caseid_a": r["caseid_a"],
                       "detalle": r.get("a_diffs") or r.get("error")} for r in c_bad[:10]],
-        "pass": not c_bad,
+        "pass": not c_bad and min(pref_rows or [0]) > 0,
     }
     g2d_res = g2d({c: mans_b[c] for c in mod_ids})
 

@@ -1,6 +1,6 @@
 ==============================================================================
 PASO 3d — cf_v7_1: regeneración de los contrafactuales
-INFORME DE LAS FASES 0 y 0′
+INFORME DE LAS FASES 0, 0′ y 2
 Fecha Fase 0: 2026-10-03T16:40:49.953450  |  Fase 0′: 2026-10-04T13:43:55.362322
 ==============================================================================
 
@@ -284,4 +284,96 @@ VEREDICTO DE LA FASE 0′
 ------------------------------------------------------------------------------
   PASA: con bt_start_model='v7_normal' el código del repo reproduce cf_v7.
   Se procede a la Fase 1.
+
+==============================================================================
+INFORME DE LA FASE 2 (compuertas G2a-G2d)
+==============================================================================
+Fecha: 2026-10-04T18:23:30.608306+00:00
+
+0. Cohorte regenerada y procedencia
+------------------------------------------------------------------------------
+   6345 pares en data\cf_v7_1
+   pares por colección: {'pharma': 870, 'vent': 600, 'learning': 4875, 'total': 6345}
+   commit del generador: 0ae4db5bb242778e8e3b3f24b127b4f505191e10
+   sha256 del núcleo (cierra hacia adelante el hueco de procedencia de cf_v7):
+     src/anessim/scripts/generate_f2_cf.py  c222909e6ec4494d...
+     src/anessim/simulate.py  e88e36670173ea20...
+     src/anessim/sensors.py  3549c034d2023d38...
+     src/anessim/respiratory.py  a30a8d87d6b9bff8...
+     src/anessim/render.py  0ac7c43173ea07ec...
+     src/anessim/configs/synthetic_v7.yaml  84967bccca24e185...
+   generado: 2026-10-04T18:10:26.886594+00:00
+   cf_v7: 6345 pares | cf_v7_1: 6345 pares
+   pares por colección: {'pharma': 870, 'vent': 600, 'learning': 4875}  (esperado, ok=True)
+   pares de palancas modificadas (set_rr/set_tv/set_peep): 1125
+   pares de palancas no modificadas: 5220
+   pares solo en cf_v7: [] | solo en cf_v7_1: []
+
+1. Convención de ramas (necesaria para leer las compuertas)
+------------------------------------------------------------------------------
+   En este generador la rama A (caseid_a) es la INTERVENIDA y la rama
+   B (caseid_b) es el CONTROL: el override de consigna vive en
+   vent_override_a y vent_override_b es None; en las palancas
+   farmacológicas la acción vive en intervention_a.
+
+2. G2a — identidad bit a bit de las 18 palancas NO modificadas
+------------------------------------------------------------------------------
+   Compara manifiesto cf_pair_*.json y cases/truth/clinical/metadata de
+   AMBAS ramas contra cf_v7. Ninguna columna excluida.
+   G2a: PASA
+     pares comprobados: 5220
+     idénticos bit a bit: 5220
+     con diferencias: 0
+     manifiestos divergentes: 0
+
+3. G2b — rama de CONTROL idéntica en los 1125 pares modificados
+------------------------------------------------------------------------------
+   G2b: PASA
+     pares comprobados: 1125
+     control idéntico: 1125
+     con diferencias: 0
+
+4. G2c — prefijo pre-intervención de la rama INTERVENIDA
+------------------------------------------------------------------------------
+   Todas las columnas de cases y truth para t < split_t, más el
+   encabezado (caseid_a/b, seed, split_t, lever, collection) y el
+   subjectid clínico.
+   G2c: PASA
+     pares comprobados: 1125
+     prefijo idéntico: 1125
+     prefijo con diferencias: 0
+     pares en que la rama A cambia respecto a cf_v7 tras el split: 1086
+     filas de prefijo (mínimo): 2489
+     filas de prefijo (mediana): 11262
+
+   NOTA DE FRONTERA (corrección de la compuerta)
+   El primer intento de G2c usó t <= split_t y falló en 1 de 1125
+   pares (198303, set_peep, split_t = 9500.49995589281). Diagnóstico:
+     - el override está activo desde split_t: en el primer instante de
+       simulación >= split_t (t = 9500.5) el truth ya trae el valor
+       aplicado nuevo (peep_applied 1.888 en A, 0.0 en B);
+     - la columna time del sidecar truth es float32, de modo que el
+       escalar float64 split_t se REDONDEA a float32: 9500.49995589281
+       -> 9500.5, y el filtro <= colaba esa fila post-intervención.
+   El prefijo se filtra ahora con time promovido a float64 y comparación
+   ESTRICTA (t < split_t). Regresión en
+   tests/test_paso3d_f2_frontera.py (18 tests).
+
+5. G2d — δ registrado en la rejilla del escalón de registro
+------------------------------------------------------------------------------
+   |δ - round(δ)| < 1e-9, δ != 0 y dentro del rango declarado.
+   G2d: PASA
+     pares comprobados: 1125
+     δ en la rejilla: 1125
+     δ fuera de la rejilla: 0
+     distribución de δ (en escalones): {"set_peep": {"-5": 44, "-4": 31, "-3": 37, "-2": 32, "-1": 35, "1": 35, "2": 34, "3": 39, "4": 36, "5": 52}, "set_rr": {"-4": 53, "-3": 56, "-2": 59, "-1": 49, "1": 43, "2": 34, "3": 36, "4": 45}, "set_tv": {"-15": 12, "-14": 14, "-13": 11, "-12": 13, "-11": 16, "-10": 15, "-9": 8, "-8": 10, "-7": 12, "-6": 17, "-5": 12, "-4": 10, "-3": 14, "-2": 16, "-1": 15, "1": 15, "2": 15, "3": 12, "4": 11, "5": 10, "6": 11, "7": 13, "8": 10, "9": 13, "10": 9, "11": 20, "12": 9, "13": 9, "14": 9, "15": 14}}
+
+------------------------------------------------------------------------------
+VEREDICTO DE LA FASE 2
+------------------------------------------------------------------------------
+  PASA: G2a, G2b, G2c y G2d. La cohorte cf_v7_1 es idéntica a
+  cf_v7 en todo salvo la intervención de las 3 palancas de consigna,
+  y el δ de esas 1125 intervenciones está en la rejilla de registro.
+  Se procede a la Fase 3 (aguas abajo).
+  (tiempo de las compuertas: 351.1 s)
 

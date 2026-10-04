@@ -22,6 +22,8 @@ import paths  # noqa: E402
 
 IN_JSON = paths.MANIFESTS_DIR / "paso3d_f0.json"
 IN_JSON_PRIME = paths.MANIFESTS_DIR / "paso3d_f0prime.json"
+IN_JSON_F2 = paths.MANIFESTS_DIR / "paso3d_f2.json"
+COHORTE_F2 = ROOT / "data" / "cf_v7_1" / "manifest_cohorte.json"
 OUT_TXT = paths.REPORTS_DIR / "REPORT_paso3d_cf_v7_1.txt"
 BASE_COMMIT = "f29962c"  # "Paso 3d / Fase 0: diagnostico G0a/G0b/G0c"
 
@@ -277,6 +279,122 @@ def _fase0prime(lines: list[str], data: dict) -> None:
     lines.append("")
 
 
+def _gate_line(d: dict, label: str, lines: list[str],
+               keys: list[tuple[str, str]]) -> None:
+    lines.append(f"   {label}: {'PASA' if d.get('pass') else 'FALLA'}")
+    for k, name in keys:
+        if k in d:
+            lines.append(f"     {name}: {d[k]}")
+    if d.get("examples"):
+        ex = json.dumps(d["examples"], ensure_ascii=False)
+        lines.append(f"     ejemplos: {ex[:500]}")
+
+
+def _fase2(lines: list[str], data: dict, coh: dict | None) -> None:
+    lines.append("=" * 78)
+    lines.append("INFORME DE LA FASE 2 (compuertas G2a-G2d)")
+    lines.append("=" * 78)
+    lines.append(f"Fecha: {data.get('date', '?')}")
+    lines.append("")
+    lines.append("0. Cohorte regenerada y procedencia")
+    lines.append("-" * 78)
+    if coh:
+        lines.append(f"   {data.get('n_pairs_v7_1')} pares en {data.get('cf_v7_1')}")
+        lines.append(f"   pares por colecci\u00f3n: {coh.get('n_pairs')}")
+        lines.append(f"   commit del generador: {coh.get('git_commit')}")
+        lines.append("   sha256 del n\u00facleo (cierra hacia adelante el hueco de"
+                     " procedencia de cf_v7):")
+        for f, s in (coh.get("core_sha256") or {}).items():
+            lines.append(f"     {f}  {s[:16]}...")
+        lines.append(f"   generado: {coh.get('generated_at')}")
+    else:
+        lines.append("   (falta data/cf_v7_1/manifest_cohorte.json)")
+    lines.append(f"   cf_v7: {data.get('n_pairs_v7')} pares | "
+                 f"cf_v7_1: {data.get('n_pairs_v7_1')} pares")
+    lines.append(f"   pares por colecci\u00f3n: {data.get('counts_by_collection')}"
+                 f"  (esperado, ok={data.get('counts_ok')})")
+    lines.append(f"   pares de palancas modificadas (set_rr/set_tv/set_peep): "
+                 f"{data.get('n_modified_pairs')}")
+    lines.append(f"   pares de palancas no modificadas: {data.get('n_other_pairs')}")
+    lines.append(f"   pares solo en cf_v7: {data.get('only_in_v7')} | "
+                 f"solo en cf_v7_1: {data.get('only_in_v7_1')}")
+    lines.append("")
+    lines.append("1. Convenci\u00f3n de ramas (necesaria para leer las compuertas)")
+    lines.append("-" * 78)
+    lines.append("   En este generador la rama A (caseid_a) es la INTERVENIDA y la rama")
+    lines.append("   B (caseid_b) es el CONTROL: el override de consigna vive en")
+    lines.append("   vent_override_a y vent_override_b es None; en las palancas")
+    lines.append("   farmacol\u00f3gicas la acci\u00f3n vive en intervention_a.")
+    lines.append("")
+    lines.append("2. G2a — identidad bit a bit de las 18 palancas NO modificadas")
+    lines.append("-" * 78)
+    lines.append("   Compara manifiesto cf_pair_*.json y cases/truth/clinical/metadata de")
+    lines.append("   AMBAS ramas contra cf_v7. Ninguna columna excluida.")
+    _gate_line(data.get("g2a", {}), "G2a", lines,
+               [("n_tested", "pares comprobados"),
+                ("n_identical", "id\u00e9nticos bit a bit"),
+                ("n_diff", "con diferencias"),
+                ("manifest_diffs", "manifiestos divergentes")])
+    lines.append("")
+    lines.append("3. G2b — rama de CONTROL id\u00e9ntica en los 1125 pares modificados")
+    lines.append("-" * 78)
+    _gate_line(data.get("g2b", {}), "G2b", lines,
+               [("n_tested", "pares comprobados"),
+                ("n_identical", "control id\u00e9ntico"),
+                ("n_diff", "con diferencias")])
+    lines.append("")
+    lines.append("4. G2c — prefijo pre-intervenci\u00f3n de la rama INTERVENIDA")
+    lines.append("-" * 78)
+    lines.append("   Todas las columnas de cases y truth para t < split_t, m\u00e1s el")
+    lines.append("   encabezado (caseid_a/b, seed, split_t, lever, collection) y el")
+    lines.append("   subjectid cl\u00ednico.")
+    _gate_line(data.get("g2c", {}), "G2c", lines,
+               [("n_tested", "pares comprobados"),
+                ("n_prefix_identical", "prefijo id\u00e9ntico"),
+                ("n_prefix_diff", "prefijo con diferencias"),
+                ("n_a_changed_vs_v7_after_split",
+                 "pares en que la rama A cambia respecto a cf_v7 tras el split"),
+                ("prefix_rows_min", "filas de prefijo (m\u00ednimo)"),
+                ("prefix_rows_median", "filas de prefijo (mediana)")])
+    lines.append("")
+    lines.append("   NOTA DE FRONTERA (correcci\u00f3n de la compuerta)")
+    lines.append("   El primer intento de G2c us\u00f3 t <= split_t y fall\u00f3 en 1 de 1125")
+    lines.append("   pares (198303, set_peep, split_t = 9500.49995589281). Diagn\u00f3stico:")
+    lines.append("     - el override est\u00e1 activo desde split_t: en el primer instante de")
+    lines.append("       simulaci\u00f3n >= split_t (t = 9500.5) el truth ya trae el valor")
+    lines.append("       aplicado nuevo (peep_applied 1.888 en A, 0.0 en B);")
+    lines.append("     - la columna time del sidecar truth es float32, de modo que el")
+    lines.append("       escalar float64 split_t se REDONDEA a float32: 9500.49995589281")
+    lines.append("       -> 9500.5, y el filtro <= colaba esa fila post-intervenci\u00f3n.")
+    lines.append("   El prefijo se filtra ahora con time promovido a float64 y comparaci\u00f3n")
+    lines.append("   ESTRICTA (t < split_t). Regresi\u00f3n en")
+    lines.append("   tests/test_paso3d_f2_frontera.py (18 tests).")
+    lines.append("")
+    lines.append("5. G2d — \u03b4 registrado en la rejilla del escal\u00f3n de registro")
+    lines.append("-" * 78)
+    lines.append("   |\u03b4 - round(\u03b4)| < 1e-9, \u03b4 != 0 y dentro del rango declarado.")
+    _gate_line(data.get("g2d", {}), "G2d", lines,
+               [("n_tested", "pares comprobados"),
+                ("n_on_grid", "\u03b4 en la rejilla"),
+                ("n_off_grid", "\u03b4 fuera de la rejilla")])
+    if data.get("g2d", {}).get("delta_step_counts"):
+        lines.append(f"     distribuci\u00f3n de \u03b4 (en escalones): "
+                     f"{json.dumps(data['g2d']['delta_step_counts'], ensure_ascii=False)}")
+    lines.append("")
+    lines.append("-" * 78)
+    lines.append("VEREDICTO DE LA FASE 2")
+    lines.append("-" * 78)
+    if bool(data.get("pass")):
+        lines.append("  PASA: G2a, G2b, G2c y G2d. La cohorte cf_v7_1 es id\u00e9ntica a")
+        lines.append("  cf_v7 en todo salvo la intervenci\u00f3n de las 3 palancas de consigna,")
+        lines.append("  y el \u03b4 de esas 1125 intervenciones est\u00e1 en la rejilla de registro.")
+        lines.append("  Se procede a la Fase 3 (aguas abajo).")
+    else:
+        lines.append("  PARA: alguna compuerta de la Fase 2 FALLA. V\u00e9ase arriba.")
+    lines.append(f"  (tiempo de las compuertas: {data.get('elapsed_s')} s)")
+    lines.append("")
+
+
 def main() -> int:
     data0 = json.loads(IN_JSON.read_text(encoding="utf-8"))
     data1 = (json.loads(IN_JSON_PRIME.read_text(encoding="utf-8"))
@@ -284,16 +402,25 @@ def main() -> int:
     lines: list[str] = []
     lines.append("=" * 78)
     lines.append("PASO 3d — cf_v7_1: regeneración de los contrafactuales")
-    lines.append("INFORME DE LAS FASES 0 y 0′")
+    lines.append("INFORME DE LAS FASES 0, 0′ y 2")
     lines.append(f"Fecha Fase 0: {data0.get('date', '?')}"
                  + (f"  |  Fase 0′: {data1.get('date')}" if data1 else ""))
     lines.append("=" * 78)
     lines.append("")
+    data2 = (json.loads(IN_JSON_F2.read_text(encoding="utf-8"))
+             if IN_JSON_F2.exists() else None)
+    coh = (json.loads(COHORTE_F2.read_text(encoding="utf-8"))
+           if COHORTE_F2.exists() else None)
     _fase0(lines, data0)
     if data1 is not None:
         _fase0prime(lines, data1)
     else:
-        lines.append("(FASE 0′: manifiesto paso3d_f0prime.json no encontrado)")
+        lines.append("(FASE 0\u2032: manifiesto paso3d_f0prime.json no encontrado)")
+        lines.append("")
+    if data2 is not None:
+        _fase2(lines, data2, coh)
+    else:
+        lines.append("(FASE 2: manifiesto paso3d_f2.json no encontrado)")
         lines.append("")
     OUT_TXT.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"escrito {OUT_TXT}")

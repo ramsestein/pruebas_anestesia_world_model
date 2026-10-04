@@ -1,0 +1,107 @@
+{
+  "date": "2026-10-04T18:23:30.608306+00:00",
+  "cf_v7": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\cf_v7",
+  "cf_v7_1": "data\\cf_v7_1",
+  "n_pairs_v7": 6345,
+  "n_pairs_v7_1": 6345,
+  "counts_by_collection": {
+    "pharma": 870,
+    "vent": 600,
+    "learning": 4875
+  },
+  "counts_ok": true,
+  "only_in_v7": [],
+  "only_in_v7_1": [],
+  "n_modified_pairs": 1125,
+  "n_other_pairs": 5220,
+  "g2a": {
+    "n_tested": 5220,
+    "n_identical": 5220,
+    "n_diff": 0,
+    "manifest_diffs": 0,
+    "examples": [],
+    "pass": true
+  },
+  "g2b": {
+    "n_tested": 1125,
+    "n_identical": 1125,
+    "n_diff": 0,
+    "examples": [],
+    "pass": true
+  },
+  "g2c": {
+    "n_tested": 1125,
+    "n_prefix_identical": 1125,
+    "n_prefix_diff": 0,
+    "n_a_changed_vs_v7_after_split": 1086,
+    "prefix_rows_min": 2489,
+    "prefix_rows_median": 11262,
+    "examples": [],
+    "pass": true
+  },
+  "g2d": {
+    "n_tested": 1125,
+    "n_on_grid": 1125,
+    "n_off_grid": 0,
+    "off_grid_examples": [],
+    "delta_step_counts": {
+      "set_peep": {
+        "-5": 44,
+        "-4": 31,
+        "-3": 37,
+        "-2": 32,
+        "-1": 35,
+        "1": 35,
+        "2": 34,
+        "3": 39,
+        "4": 36,
+        "5": 52
+      },
+      "set_rr": {
+        "-4": 53,
+        "-3": 56,
+        "-2": 59,
+        "-1": 49,
+        "1": 43,
+        "2": 34,
+        "3": 36,
+        "4": 45
+      },
+      "set_tv": {
+        "-15": 12,
+        "-14": 14,
+        "-13": 11,
+        "-12": 13,
+        "-11": 16,
+        "-10": 15,
+        "-9": 8,
+        "-8": 10,
+        "-7": 12,
+        "-6": 17,
+        "-5": 12,
+        "-4": 10,
+        "-3": 14,
+        "-2": 16,
+        "-1": 15,
+        "1": 15,
+        "2": 15,
+        "3": 12,
+        "4": 11,
+        "5": 10,
+        "6": 11,
+        "7": 13,
+        "8": 10,
+        "9": 13,
+        "10": 9,
+        "11": 20,
+        "12": 9,
+        "13": 9,
+        "14": 9,
+        "15": 14
+      }
+    },
+    "pass": true
+  },
+  "pass": true,
+  "elapsed_s": 351.1
+}
