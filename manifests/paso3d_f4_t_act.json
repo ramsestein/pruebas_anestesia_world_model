@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-05T05:52:25.879352+00:00",
+  "n_pairs": 6345,
+  "n_modified_pairs": 1125,
+  "t_act": {
+    "by_source": {
+      "plan": 4395,
+      "truth_applied": 1950
+    },
+    "n_no_divergence": 123,
+    "no_divergence_by_lever": {
+      "peep_down": 57,
+      "set_peep": 66
+    },
+    "lead_s_min": 0.0005042266375312465,
+    "lead_s_median": 9.978880284568504,
+    "lead_s_max": 10812.928199751532
+  },
+  "N1": {
+    "n_tested": 1059,
+    "n_below_resolution": 0,
+    "examples_below_resolution": [],
+    "pass": true
+  },
+  "no_divergence_pares": {
+    "n": 66,
+    "by_lever": {
+      "set_peep": 66
+    },
+    "nota": "pares sin divergencia en la serie APLICADA (clase de 3c: el plan base sobrescribe la intervención o el recorte la anula); no son fallos de resolución del registro"
+  },
+  "P3": {
+    "n_tested": 1059,
+    "n_ok": 946,
+    "n_bad": 113,
+    "n_samples": 826439,
+    "n_bad_samples": 559,
+    "bad_sample_fraction": 0.0006763959590483992,
+    "by_lever": {
+      "set_rr": {
+        "n": 375,
+        "n_clipped": 0,
+        "n_p3_bad": 0,
+        "n_bad_samples": 0,
+        "n_samples": 294900
+      },
+      "set_tv": {
+        "n": 375,
+        "n_clipped": 22,
+        "n_p3_bad": 1,
+        "n_bad_samples": 1,
+        "n_samples": 297445
+      },
+      "set_peep": {
+        "n": 309,
+        "n_clipped": 7,
+        "n_p3_bad": 112,
+        "n_bad_samples": 558,
+        "n_samples": 234094
+      }
+    },
+    "examples_bad": [
+      {
+        "caseid_a": 197669,
+        "lever": "set_tv",
+        "n_clipped": 0,
+        "p3_ok": false,
+        "n_samples": 898,
+        "n_bad": 1,
+        "t_act": 6957.5,
+        "max_abs_reg": 99.99999403953552,
+        "step": 10.0,
+        "first_bad": {
+          "t": 8778.0,
+          "registrado": -89.9999737739563,
+          "aplicado_cuantizado": -100.0
+        }
+      },
+      {
+        "caseid_a": 198253,
+        "lever": "set_peep",
+        "n_clipped": 0,
+        "p3_ok": false,
+        "n_samples": 497,
+        "n_bad": 2,
+        "t_act": 3784.0,
+        "max_abs_reg": 3.0,
+        "step": 1.0,
+        "first_bad": {
+          "t": 5558.0,
+          "registrado": 2.0,
+          "aplicado_cuantizado": 3.0
+        }
+      },
+      {
+        "caseid_a": 198271,
+        "lever": "set_peep",
+        "n_clipped": 0,
+        "p3_ok": false,
+        "n_samples": 489,
+        "n_bad": 1,
+        "t_act": 7549.5,
+        "max_abs_reg": 5.0,
+        "step": 1.0,
+        "first_bad": {
+          "t": 8106.0,
+          "registrado": -4.0,
+          "aplicado_cuantizado": -5.0
+        }
+      },
+      {
+        "caseid_a": 198281,
+        "lever": "set_peep",
+        "n_clipped": 0,
+        "p3_ok": false,
+        "n_samples": 396,
+        "n_bad": 2,
+        "t_act": 3079.0,
+        "max_abs_reg": 2.0,
+        "step": 1.0,
+        "first_bad": {
+          "t": 3885.0,
+          "registrado": 1.0,
+          "aplicado_cuantizado": 2.0
+        }
+      },
+      {
+        "caseid_a": 198287,
+        "lever": "set_peep",
+        "n_clipped": 0,
+        "p3_ok": false,
+        "n_samples": 945,
+        "n_bad": 10,
+        "t_act": 7636.5,
+        "max_abs_reg": 4.0,
+        "step": 1.0,
+        "first_bad": {
+          "t": 7728.0,
+          "registrado": 3.0,
+          "aplicado_cuantizado": 4.0
+        }
+      }
+    ],
+    "pass": false
+  },
+  "elapsed_s": 38.5,
+  "pass": false
+}
