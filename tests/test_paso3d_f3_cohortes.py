@@ -42,36 +42,71 @@ def test_no_hay_capturas_de_cohorte_en_el_import() -> None:
             assert n not in vars(mod), f"{mod.__name__}.{n} es una captura en import"
 
 
-def test_cohorte_activa_es_cf_v7_1_y_etiqueta_logica() -> None:
-    assert paths.CF_COHORT_ACTIVE == "cf_v7_1"
-    assert paths.cohort_dir("cf_v7") == paths.COHORTS["cf_v7_1"]
-    assert paths.cohort_dir("cf_v7_1") == paths.COHORTS["cf_v7_1"]
-    assert paths.COHORT_LABELS == {"cf_v7": "cf_v7_1"}
+def test_cohorte_activa_por_defecto_es_cf_v7() -> None:
+    """Hasta la adopción de la Fase 5 la cohorte activa es la ADOPTADA (cf_v7):
+    si fuese cf_v7_1 mientras las ventanas/pk/tokens siguen siendo los de cf_v7,
+    las rutinas que leen casos crudos vía ``cf_pairs`` mezclarían cohorte y
+    anotaciones sin avisar."""
+    assert paths.CF_COHORT_DEFAULT == "cf_v7"
+    assert paths.CF_COHORT_ACTIVE == "cf_v7"
+    assert paths.cohort_dir("cf_v7") == paths.COHORTS["cf_v7"]
+    assert paths.COHORT_LABELS == {"cf_v7": paths.CF_COHORT_ACTIVE}
+
+
+def test_cohorte_activa_se_fija_solo_durante_la_ejecucion(tmp_path: Path) -> None:
+    """Con ANESTESIA_CF_COHORT puesta, la etiqueta lógica lleva a la cohorte
+    nueva y el mapa lo registra; sin ella, a la adoptada."""
+    code = ("import sys; sys.path.insert(0, r'%s'); import paths;"
+            " print(paths.CF_COHORT_ACTIVE);"
+            " print(paths.cohort_dir('cf_v7').name);"
+            " print(paths.cohort_label_map()['cf_v7']['cohort'])"
+            % (ROOT / "src"))
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src"),
+           "ANESTESIA_CF_COHORT": "cf_v7_1"}
+    pr = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env,
+                        capture_output=True, text=True, encoding="ascii",
+                        errors="replace")
+    assert pr.returncode == 0, pr.stderr
+    lines = [ln.strip() for ln in (pr.stdout or "").splitlines() if ln.strip()]
+    assert lines[-3:] == ["cf_v7_1", "cf_v7_1", "cf_v7_1"]
+    # y una cohorte inexistente falla con mensaje claro en vez de pasar en silencio
+    env2 = {**env, "ANESTESIA_CF_COHORT": "cf_que_no_existe"}
+    pr2 = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env2,
+                         capture_output=True, text=True, encoding="ascii",
+                         errors="replace")
+    assert pr2.returncode != 0
+    assert "no es una cohorte conocida" in (pr2.stderr or "")
 
 
 def test_lectura_diferida_tras_cambiar_la_cohorte(tmp_path: Path) -> None:
-    """Un módulo YA IMPORTADO ve la cohorte nueva."""
-    saved = paths.COHORTS["cf_v7_1"]
+    """Un módulo YA IMPORTADO ve la cohorte nueva, tanto si cambia el mapa de
+    etiquetas como el directorio de la cohorte activa."""
+    saved_dir = paths.COHORTS[paths.CF_COHORT_ACTIVE]
+    saved_label = paths.COHORT_LABELS["cf_v7"]
     try:
+        paths.COHORT_LABELS["cf_v7"] = "cf_v7_1"
         paths.COHORTS["cf_v7_1"] = tmp_path
+        assert paths.cohort_dir("cf_v7") == tmp_path
         assert cp.CF_CASES_DIR == tmp_path / "cases"
         assert cp.CF_META_DIR == tmp_path / "metadata"
         assert tk.cf_cases_dir() == tmp_path / "cases"
         assert tk.cf_meta_dir() == tmp_path / "metadata"
     finally:
-        paths.COHORTS["cf_v7_1"] = saved
-    assert cp.CF_CASES_DIR == saved / "cases"      # vuelve al valor real
+        paths.COHORT_LABELS["cf_v7"] = saved_label
+        paths.COHORTS["cf_v7_1"] = paths.CF_V7_1_DIR
+        paths.COHORTS[paths.CF_COHORT_ACTIVE] = saved_dir
+    assert cp.CF_CASES_DIR == saved_dir / "cases"      # vuelve al valor real
 
 
 def test_dataset_sources_usa_la_etiqueta_logica() -> None:
     d = paths.dataset_sources()
     assert set(d) == {"real", "synthetic_v7", "vaso_reinf_v7", "cf_v7"}
-    assert d["cf_v7"] == paths.COHORTS["cf_v7_1"]
+    assert d["cf_v7"] == paths.COHORTS[paths.CF_COHORT_ACTIVE]
     assert "cf_v7_1" not in d               # la cohorte nueva NO es una fuente
-    assert "cf_v7" not in [k for k in d if d[k] == paths.COHORTS["cf_v7"]]
     assert bw.SOURCES_V7 == paths.dataset_sources()
     assert paths.cohort_label_map() == {
-        "cf_v7": {"cohort": "cf_v7_1", "dir": str(paths.COHORTS["cf_v7_1"])}}
+        "cf_v7": {"cohort": paths.CF_COHORT_ACTIVE,
+                  "dir": str(paths.COHORTS[paths.CF_COHORT_ACTIVE])}}
 
 
 def test_proceso_nuevo_ve_los_directorios_redirigidos(tmp_path: Path) -> None:
@@ -86,7 +121,7 @@ def test_proceso_nuevo_ve_los_directorios_redirigidos(tmp_path: Path) -> None:
             % (ROOT, ROOT / "scripts"))
     env = {**os.environ, "PYTHONPATH": str(ROOT / "src"),
            "ANESTESIA_WINDOWS_DIR": str(w), "ANESTESIA_PK_DIR": str(p),
-           "ANESTESIA_TOKENS_DIR": str(t)}
+           "ANESTESIA_TOKENS_DIR": str(t), "ANESTESIA_CF_COHORT": "cf_v7_1"}
     pr = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env,
                         capture_output=True, text=True, encoding="ascii",
                         errors="replace")

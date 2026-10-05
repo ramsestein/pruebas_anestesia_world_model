@@ -108,18 +108,33 @@ COHORTS: dict[str, Path] = {
 # ---------------------------------------------------------------------------
 # Cohorte de CF ACTIVA (paso 3d)
 # ---------------------------------------------------------------------------
-# cf_v7 es la cohorte histórica (contrafactuales con el muestreo antiguo) y
-# cf_v7_1 la regenerada con el muestreo v7.1 en la rejilla del escalón. Los
-# datasets eligen la cohorte por CONSTANTE, no por redirección.
+# cf_v7 es la cohorte ADOPTADA: los artefactos vigentes (windows_v4, pk_v2,
+# tokens_v2 y sus anotaciones) salen de ella. cf_v7_1 es la regenerada con el
+# muestreo v7.1 en la rejilla del escalón.
+#
+# La cohorte y sus artefactos derivados tienen que cambiar JUNTOS. Si la cohorte
+# activa fuese cf_v7_1 mientras las ventanas, el pk y los tokens siguen siendo
+# los de cf_v7, cualquier rutina que lea casos CRUDOS a través de ``cf_pairs``
+# (la anotación de pares) leería una cohorte y contrastaría contra anotaciones y
+# tokens de otra, en silencio. Por eso el valor por defecto es ``cf_v7`` hasta
+# que la Fase 5 adopte en bloque cf_v7_1 con sus artefactos, y las regeneraciones
+# del paso 3d fijan la cohorte nueva SÓLO durante su ejecución con
+# ANESTESIA_CF_COHORT.
 CF_V7_DIR = COHORTS["cf_v7"]
 CF_V7_1_DIR = COHORTS["cf_v7_1"]
-CF_COHORT_ACTIVE = "cf_v7_1"
+CF_COHORT_DEFAULT = "cf_v7"
+CF_COHORT_ENV_VAR = "ANESTESIA_CF_COHORT"
+CF_COHORT_ACTIVE = os.environ.get(CF_COHORT_ENV_VAR, CF_COHORT_DEFAULT)
+if CF_COHORT_ACTIVE not in COHORTS:
+    raise RuntimeError(
+        f"{CF_COHORT_ENV_VAR}={CF_COHORT_ACTIVE!r} no es una cohorte conocida: "
+        f"{sorted(COHORTS)}")
 
 # Etiqueta LÓGICA de partición -> cohorte que la alimenta. Se conserva la
-# etiqueta ``cf_v7`` en las particiones (``source=cf_v7``) para que
-# windows_v4_1, pk_v2_1 y tokens_v2_1 sean comparables partición a partición con
-# los artefactos anteriores; el directorio FÍSICO es data/cf_v7_1 y queda
-# registrado en los manifiestos vía ``cohort_label_map()``.
+# etiqueta ``cf_v7`` en las particiones (``source=cf_v7``) para que los
+# artefactos regenerados sean comparables partición a partición con los
+# adoptados; el directorio FÍSICO lo registran los manifiestos vía
+# ``cohort_label_map()``.
 COHORT_LABELS: dict[str, str] = {"cf_v7": CF_COHORT_ACTIVE}
 
 

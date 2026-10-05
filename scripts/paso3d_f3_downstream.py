@@ -66,6 +66,11 @@ def _point_paths(windows: Path, pk: Path, tokens: Path) -> None:
     os.environ["ANESTESIA_WINDOWS_DIR"] = str(windows)
     os.environ["ANESTESIA_PK_DIR"] = str(pk)
     os.environ["ANESTESIA_TOKENS_DIR"] = str(tokens)
+    # La cohorte nueva se fija SÓLO durante esta ejecución: la cohorte activa por
+    # defecto sigue siendo cf_v7 hasta que la Fase 5 adopte en bloque cf_v7_1 con
+    # sus artefactos (cohorte y artefactos cambian juntos, o las rutinas que leen
+    # casos crudos vía cf_pairs mezclarían cohorte y anotaciones).
+    os.environ["ANESTESIA_CF_COHORT"] = "cf_v7_1"
     importlib.reload(paths)
     print(f"  paths: WINDOWS_DIR={paths.WINDOWS_DIR}")
     print(f"         PK_DIR={paths.PK_DIR}  TOKENS_DIR={paths.TOKENS_DIR}")
