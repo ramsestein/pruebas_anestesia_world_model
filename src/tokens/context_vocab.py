@@ -57,12 +57,18 @@ OUT_DIR = paths.CONTEXT_DIR
 REPORT_PATH = paths.REPORTS_DIR / "REPORT_context_vocab_v2.txt"
 
 SOURCE_ORDER = ["real", "synthetic_v7", "cf_v7", "vaso_reinf_v7"]
-SOURCE_DIRS = {
-    "real": paths.COHORTS["real"] / "clinical_data_enriched.parquet",
-    "synthetic_v7": paths.COHORTS["synthetic_v7"] / "clinical_data.parquet",
-    "cf_v7": paths.COHORTS["cf_v7"],
-    "vaso_reinf_v7": paths.COHORTS["vaso_reinf_v7"],
-}
+
+
+def source_dirs() -> dict[str, Path]:
+    """Directorios clínicos por cohorte, resueltos en cada llamada. Lectura
+    DIFERIDA a propósito: capturar ``paths.COHORTS["cf_v7"]`` en el import fija
+    la cohorte aunque ``paths`` cambie (paso 3d, Corrección C)."""
+    return {
+        "real": paths.COHORTS["real"] / "clinical_data_enriched.parquet",
+        "synthetic_v7": paths.COHORTS["synthetic_v7"] / "clinical_data.parquet",
+        "cf_v7": paths.cohort_dir("cf_v7"),
+        "vaso_reinf_v7": paths.COHORTS["vaso_reinf_v7"],
+    }
 
 # --------------------------------------------------------------------------
 # Tabla "Excluidas" del contrato v2 (45 columnas). El enunciado decía "40";
@@ -391,13 +397,14 @@ def load_clinical(source: str) -> pd.DataFrame:
     Real se deduplica con la regla INSPIRE (fila con más no nulos por caseid).
     """
     cols = FEATURE_READ_COLUMNS
+    dirs = source_dirs()
     if source == "real":
-        df = pq.read_table(SOURCE_DIRS[source], columns=cols).to_pandas()
+        df = pq.read_table(dirs[source], columns=cols).to_pandas()
         df = dedupe_inspire(df)
     elif source == "synthetic_v7":
-        df = pq.read_table(SOURCE_DIRS[source], columns=cols).to_pandas()
+        df = pq.read_table(dirs[source], columns=cols).to_pandas()
     else:
-        base = SOURCE_DIRS[source]
+        base = dirs[source]
         files = sorted((base / "clinical").glob("*_clinical.parquet"))
         df = pd.concat([pq.read_table(p, columns=cols).to_pandas() for p in files],
                        ignore_index=True) if files else pd.DataFrame(columns=cols)

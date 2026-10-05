@@ -1,7 +1,8 @@
 {
-  "date": "2026-10-04T18:38:01.516480+00:00",
-  "windows_v4": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4",
-  "windows_v4_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4_1",
+  "date": "2026-10-05T04:26:38.811004+00:00",
+  "artifact": "windows",
+  "v4": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4",
+  "v4_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\windows_v4_1",
   "window_py_sha256_v4": "9508ccd008b58fb2058e53f8e0ffef884e182341103970f9b52039c2d1a5ebae",
   "window_py_sha256_v4_1": "e714476c8b27363f98a8472082ca5d4b636f5d3b78ca8e16b92d078ea1e0e853",
   "g3a": {
@@ -31,6 +32,7 @@
   },
   "g3b": {
     "n_partitions": 369,
+    "criterio": "igualdad EXACTA en TODAS las columnas de las filas no intervenidas",
     "non_cf": {
       "n_partitions": 206,
       "rows": 41087242,
@@ -43,17 +45,15 @@
       "rows_control": 16354936,
       "rows_intervened_prefix": 7931965,
       "rows_intervened_post": 8422971,
-      "n_partitions_with_ctrl_diffs": 0,
-      "n_partitions_with_prefix_diffs": 0,
+      "n_partitions_with_diffs": 0,
       "n_partitions_post_differ": 30,
       "unknown_caseids": 0,
       "n_cases": 12690,
-      "examples_ctrl": [],
-      "examples_prefix": []
+      "examples": []
     },
-    "elapsed_s": 16.1,
+    "elapsed_s": 18.2,
     "pass": true
   },
   "pass": true,
-  "elapsed_s": 16.2
+  "elapsed_s": 18.2
 }

@@ -28,14 +28,22 @@ ROOT = vv.ROOT
 # ── Monkeypatch de constantes v6 -> v7 ─────────────────────────────────────
 vv.WINDOWS_V6 = paths.WINDOWS_DIR
 vv.SYNTH_SOURCES_V6 = paths.SYNTH_COHORTS
-vv.CF_V6_METADATA = paths.COHORTS["cf_v7"] / "metadata"
+vv.CF_V6_METADATA = paths.cohort_dir("cf_v7") / "metadata"
 vv.CACHE_PATH = paths.DIAGNOSTICS_DIR / "v7_validate_results.json"
 vv.REPORT_PATH = paths.REPORTS_DIR / "REPORT_generator_validation_v7.txt"
 vv.ROJO_TXT = paths.REPORTS_DIR / "_pytest_v7_validate_rojo.txt"
 vv.VERDE_TXT = paths.REPORTS_DIR / "_pytest_v7_validate_verde.txt"
 
-SYNTH_V7 = paths.COHORTS["synthetic_v7"]
-CF_V7 = paths.COHORTS["cf_v7"]
+
+# ── Rutas de cohorte: LECTURA DIFERIDA (paso 3d, Corrección C) ──────────────
+# Capturarlas en constantes de módulo fijaba la cohorte y el directorio aunque
+# ``paths`` cambiasen (es el bug de ``cf_pairs.CF_CASES_DIR``).
+def synt_v7() -> Path:
+    return paths.COHORTS["synthetic_v7"]
+
+
+def cf_v7() -> Path:
+    return paths.cohort_dir("cf_v7")
 
 
 # ── V5: gate 3 de pk_tokens sobre casos v7 ─────────────────────────────────
@@ -45,9 +53,9 @@ def _v5_pk_gate3_v7() -> dict:
     from anessim.pk.remifentanil import RemifentanilMinto
     from tokens import pk_tokens as pk
 
-    meta_dir = SYNTH_V7 / "metadata"
-    cases = sorted((SYNTH_V7 / "cases").glob("*.parquet"))
-    syn_clin = pq.read_table(SYNTH_V7 / "clinical_data.parquet").to_pandas()
+    meta_dir = synt_v7() / "metadata"
+    cases = sorted((synt_v7() / "cases").glob("*.parquet"))
+    syn_clin = pq.read_table(synt_v7() / "clinical_data.parquet").to_pandas()
     demo = {int(r.caseid): dict(weight=float(r.weight), age=float(r.age),
                                 height=float(r.height), sex=str(r.sex))
             for _, r in syn_clin.iterrows()}
@@ -116,7 +124,7 @@ def _v5_pk_gate3_v7() -> dict:
 
 # ── V6: divergencia de prefijo CF v7 ───────────────────────────────────────
 def _v6_cf_prefix_v7() -> dict:
-    pairs_dir = CF_V7 / "metadata"
+    pairs_dir = cf_v7() / "metadata"
     if not pairs_dir.exists():
         return {"error": f"no existe {pairs_dir}"}
     diffs: list[float] = []
@@ -144,7 +152,7 @@ def _v6_cf_prefix_v7() -> dict:
 
 
 def _read_truth_v7(caseid: int, split_t: float) -> np.ndarray | None:
-    path = CF_V7 / "truth" / f"{caseid}_truth.parquet"
+    path = cf_v7() / "truth" / f"{caseid}_truth.parquet"
     if not path.exists():
         return None
     try:

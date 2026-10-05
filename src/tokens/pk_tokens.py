@@ -79,7 +79,7 @@ BOLUS_COLS = {
     "rocuronio": "roc_bolus",
 }
 
-SOURCES = paths.COHORTS
+SOURCES = paths.dataset_sources()
 
 
 # --------------------------------------------------------------------------
@@ -610,6 +610,7 @@ def run_all(out_dir: Path = OUT_DIR) -> dict:
 def build_manifest(summary: dict, assumptions: list[str]) -> dict:
     manifest = {
         "date": pd.Timestamp.now().isoformat(),
+        "cohort_label_map": paths.cohort_label_map(),
         "pk_tokens_py_sha256": _sha256(ROOT / "src" / "tokens" / "pk_tokens.py"),
         "contract_sha256": _sha256(CONTRACT_PATH),
         "windows_manifest_path": str(paths.WINDOWS_DIR / "manifest.json"),

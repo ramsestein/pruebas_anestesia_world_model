@@ -40,16 +40,33 @@ from tokens import tokenize as tk
 # ---------------------------------------------------------------------------
 # Rutas de artefactos
 # ---------------------------------------------------------------------------
-PAIRS_PARQUET = paths.TOKENS_V2_DIR / "pairs.parquet"
-PAIRS_ANNOTATED_PARQUET = paths.TOKENS_V2_DIR / "pairs_annotated.parquet"
 # Anotación corregida del paso 3c (t_effective, t_boundary, prefijo de tokens).
 # NO es la anotación por defecto: B1 falla (14.2 % de los 6177 pares efectivos)
 # y por eso el pipeline sigue anclado a pairs_annotated.parquet (paso 3b). Ver
 # LIMITACIONES_GENERADOR_v7.md §8.
-PAIRS_ANNOTATED_V2_PARQUET = paths.TOKENS_V2_DIR / "pairs_annotated_v2.parquet"
-MANIFEST_V2 = paths.MANIFESTS_DIR / "tokens_v2_cf_pairs_annotation_v2.json"
-CF_META_DIR = paths.COHORTS["cf_v7"] / "metadata"
-CF_CASES_DIR = paths.COHORTS["cf_v7"] / "cases"
+#
+# LECTURA DIFERIDA (paso 3d, Corrección C). Estas rutas y, sobre todo, las de la
+# cohorte de CF NO pueden capturarse en una constante de módulo: el paso 3d
+# construyó tokens_v2_1 y las features ``vent_*`` leyendo los casos CRUDOS de
+# ``paths.COHORTS["cf_v7"]`` capturados en el import, de modo que el tokenizador
+# seguía leyendo la cohorte antigua y las filas de CF salían idénticas. Ahora se
+# resuelven en cada acceso, y ``__getattr__`` (PEP 562) mantiene los nombres
+# históricos para el código que ya los usaba.
+_LAZY: dict[str, object] = {
+    "PAIRS_PARQUET": lambda: paths.TOKENS_DIR / "pairs.parquet",
+    "PAIRS_ANNOTATED_PARQUET": lambda: paths.TOKENS_DIR / "pairs_annotated.parquet",
+    "PAIRS_ANNOTATED_V2_PARQUET": lambda: paths.TOKENS_DIR / "pairs_annotated_v2.parquet",
+    "MANIFEST_V2": lambda: paths.MANIFESTS_DIR / "tokens_v2_cf_pairs_annotation_v2.json",
+    "CF_META_DIR": lambda: paths.cohort_dir("cf_v7") / "metadata",
+    "CF_CASES_DIR": lambda: paths.cohort_dir("cf_v7") / "cases",
+}
+
+
+def __getattr__(name: str):
+    fn = _LAZY.get(name)
+    if fn is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    return fn()
 
 # ---------------------------------------------------------------------------
 # Mapa lever_group -> tracks crudos que alimentan las features del grupo.

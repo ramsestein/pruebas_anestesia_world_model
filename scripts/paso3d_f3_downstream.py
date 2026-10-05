@@ -66,7 +66,8 @@ def _point_paths(windows: Path, pk: Path, tokens: Path) -> None:
     os.environ["ANESTESIA_WINDOWS_DIR"] = str(windows)
     os.environ["ANESTESIA_PK_DIR"] = str(pk)
     os.environ["ANESTESIA_TOKENS_DIR"] = str(tokens)
-    importlib.reload(paths)    print(f"  paths: WINDOWS_DIR={paths.WINDOWS_DIR}")
+    importlib.reload(paths)
+    print(f"  paths: WINDOWS_DIR={paths.WINDOWS_DIR}")
     print(f"         PK_DIR={paths.PK_DIR}  TOKENS_DIR={paths.TOKENS_DIR}")
     print(f"         cohorte CF activa={paths.CF_COHORT_ACTIVE} "
           f"({paths.cohort_dir('cf_v7')})")

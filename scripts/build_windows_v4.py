@@ -9,7 +9,6 @@ Uso:
 """
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -164,20 +163,14 @@ def _sample_cases_v6(cases: pd.DataFrame) -> pd.DataFrame:
 
 
 # ---------------------------------------------------------------------------
-# Destinos de la construcción. Por defecto, las cohortes y el directorio
-# vigentes (comportamiento original). Las dos variables de entorno permiten
-# reconstruir las ventanas con OTRA cohorte CF sin tocar el núcleo (paso 3d);
-# son necesarias porque ``_init_worker`` corre en procesos NUEVOS (spawn en
-# Windows) que re-importan este módulo y NO heredan ningún monkeypatch hecho en
-# el padre, mientras que el entorno sí se hereda.
+# Fuentes y destino: se leen de ``paths`` (cohorte de CF ACTIVA por constante y
+# directorio de ventanas sobrescribible con ANESTESIA_WINDOWS_DIR). Tienen que
+# resolverse al IMPORTAR porque los workers de esta construcción son procesos
+# NUEVOS (spawn en Windows) que re-importan este módulo y no heredan ningún
+# monkeypatch hecho en el padre.
 # ---------------------------------------------------------------------------
-_CF_ENV = os.environ.get("ANESTESIA_CF_V7_DIR")
-_WIN_OUT_ENV = os.environ.get("ANESTESIA_WINDOWS_OUT")
-
-SOURCES_V7: dict[str, Path] = (
-    {**paths.COHORTS, "cf_v7": Path(_CF_ENV)} if _CF_ENV else dict(paths.COHORTS)
-)
-OUT_DIR_V7 = Path(_WIN_OUT_ENV) if _WIN_OUT_ENV else paths.WINDOWS_DIR
+SOURCES_V7: dict[str, Path] = paths.dataset_sources()
+OUT_DIR_V7 = paths.WINDOWS_DIR
 
 
 def _init_worker() -> None:
@@ -332,6 +325,7 @@ def generate_v3(max_workers: int = 14) -> None:
         "image_tracks": W.IMAGE_TRACKS,
         "bolus_tracks": W.BOLUS_SHORT,
         "bolus_specs": {s: dict(spec) for s, spec in W.BOLUS_SPECS.items()},
+        "cohort_label_map": paths.cohort_label_map(),
         "exclusions_path": str(W.EXCLUSIONS_PATH),
         "exclusions_sha256": None,
         "n_cases_by_source_split": {

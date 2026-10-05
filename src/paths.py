@@ -34,10 +34,24 @@ def _resolve_data_root() -> Path:
 # Directorio raíz de datos (sobrescribible con ANESTESIA_DATA_ROOT).
 DATA_ROOT = _resolve_data_root()
 
+
+def _env_dir(name: str, default: Path) -> Path:
+    """Directorio de artefacto sobrescribible con ``ANESTESIA_<NAME>``.
+
+    Se usa SOLO en las regeneraciones del paso 3d (cf_v7_1 -> windows_v4_1,
+    pk_v2_1, tokens_v2_1) mientras los directorios vigentes siguen apuntando a
+    los artefactos adoptados. Va por variable de entorno y NO por monkeypatch
+    porque el entorno SI se hereda entre procesos: los workers de
+    ``autoencoder.window`` son procesos nuevos (spawn en Windows) que
+    re-importan los módulos y no verían un parche hecho en el padre.
+    """
+    env = os.environ.get(f"ANESTESIA_{name.upper()}")
+    return Path(env).expanduser() if env else default
+
 # ---------------------------------------------------------------------------
 # Directorios de artefactos vigentes (bajo DATA_ROOT)
 # ---------------------------------------------------------------------------
-WINDOWS_DIR = DATA_ROOT / "windows_v4"   # ventanas vigentes (cohortes v7)
+WINDOWS_DIR = _env_dir("WINDOWS_DIR", DATA_ROOT / "windows_v4")   # ventanas vigentes (cohortes v7)
 
 # Artefactos de tokens con nombre explícito por versión (paso 3). *_DIR
 # apunta a la versión vigente; las constantes *_V1_DIR / *_V2_DIR son
@@ -50,9 +64,11 @@ TOKENS_V1_DIR = DATA_ROOT / "tokens_v1"
 TOKENS_V2_DIR = DATA_ROOT / "tokens_v2"
 
 # Vigentes (paso 3b): pk_v2, context_v2 y tokens_v2 adoptados.
-TOKENS_DIR = TOKENS_V2_DIR
-PK_DIR = PK_V2_DIR
-CONTEXT_DIR = CONTEXT_V2_DIR
+# Los tres son sobrescribibles por entorno durante las regeneraciones del paso
+# 3d (ANESTESIA_PK_DIR, ANESTESIA_TOKENS_DIR y ANESTESIA_CONTEXT_DIR).
+TOKENS_DIR = _env_dir("TOKENS_DIR", TOKENS_V2_DIR)
+PK_DIR = _env_dir("PK_DIR", PK_V2_DIR)
+CONTEXT_DIR = _env_dir("CONTEXT_DIR", CONTEXT_V2_DIR)
 
 # AE vigente del proyecto. En el paso 2 (fase D) se repunta a ae_v2; antes
 # apunta a ae_v1 (histórico). Véanse AE_V1_DIR y AE_V2_DIR más abajo.
@@ -86,7 +102,53 @@ COHORTS: dict[str, Path] = {
     "synthetic_v7": DATA_ROOT / "synthetic_v7",
     "vaso_reinf_v7": DATA_ROOT / "synthetic_vaso_reinf_v7",
     "cf_v7": DATA_ROOT / "cf_v7",
+    "cf_v7_1": DATA_ROOT / "cf_v7_1",
 }
+
+# ---------------------------------------------------------------------------
+# Cohorte de CF ACTIVA (paso 3d)
+# ---------------------------------------------------------------------------
+# cf_v7 es la cohorte histórica (contrafactuales con el muestreo antiguo) y
+# cf_v7_1 la regenerada con el muestreo v7.1 en la rejilla del escalón. Los
+# datasets eligen la cohorte por CONSTANTE, no por redirección.
+CF_V7_DIR = COHORTS["cf_v7"]
+CF_V7_1_DIR = COHORTS["cf_v7_1"]
+CF_COHORT_ACTIVE = "cf_v7_1"
+
+# Etiqueta LÓGICA de partición -> cohorte que la alimenta. Se conserva la
+# etiqueta ``cf_v7`` en las particiones (``source=cf_v7``) para que
+# windows_v4_1, pk_v2_1 y tokens_v2_1 sean comparables partición a partición con
+# los artefactos anteriores; el directorio FÍSICO es data/cf_v7_1 y queda
+# registrado en los manifiestos vía ``cohort_label_map()``.
+COHORT_LABELS: dict[str, str] = {"cf_v7": CF_COHORT_ACTIVE}
+
+
+def cohort_label_map() -> dict[str, dict[str, str]]:
+    """Mapeo explícito etiqueta lógica -> cohorte y directorio físico."""
+    return {label: {"cohort": cohort, "dir": str(COHORTS[cohort])}
+            for label, cohort in COHORT_LABELS.items()}
+
+
+def dataset_sources() -> dict[str, Path]:
+    """Fuentes de los datasets (ventanas, pk y tokens).
+
+    real, synthetic_v7, vaso_reinf_v7 y el CF ACTIVO bajo la etiqueta lógica
+    ``cf_v7``. Es lo que deben usar los constructores en lugar de recorrer
+    ``COHORTS`` (que ahora incluye también la cohorte histórica y la de v7.1).
+    """
+    return {
+        "real": COHORTS["real"],
+        "synthetic_v7": COHORTS["synthetic_v7"],
+        "vaso_reinf_v7": COHORTS["vaso_reinf_v7"],
+        "cf_v7": COHORTS[CF_COHORT_ACTIVE],
+    }
+
+
+def cohort_dir(name: str) -> Path:
+    """Directorio de una cohorte por nombre, con la etiqueta lógica resuelta a
+    la cohorte activa. Lectura DIFERIDA: nunca se captura en una constante de
+    módulo (era el bug de ``cf_pairs.CF_CASES_DIR``)."""
+    return COHORTS[COHORT_LABELS.get(name, name)]
 
 # Lista de las tres cohortes sintéticas vigentes.
 SYNTH_COHORTS: list[str] = ["synthetic_v7", "vaso_reinf_v7", "cf_v7"]

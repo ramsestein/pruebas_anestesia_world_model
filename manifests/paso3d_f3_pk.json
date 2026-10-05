@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-04T19:00:02.792987+00:00",
+  "date": "2026-10-05T04:26:58.790418+00:00",
   "artifact": "pk",
   "pk_v2": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\pk_v2",
   "pk_v2_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\pk_v2_1",
@@ -9,9 +9,10 @@
   "n_partitions_v2": 369,
   "n_partitions_v2_1": 369,
   "pk_tokens_py_sha256_v2": "f1294ad7a3d83753520c022ab2fecfed4bd45dcb1e22652c24f72d86156a13dd",
-  "pk_tokens_py_sha256_v2_1": "f1294ad7a3d83753520c022ab2fecfed4bd45dcb1e22652c24f72d86156a13dd",
+  "pk_tokens_py_sha256_v2_1": "15eef917ea60f727205f6320e6bb4b5f43ac2d9c60f548be4ce22e3ee34e1ca6",
   "g3b": {
     "n_partitions": 369,
+    "criterio": "igualdad EXACTA en TODAS las columnas de las filas no intervenidas",
     "non_cf": {
       "n_partitions": 206,
       "rows": 41087242,
@@ -24,17 +25,15 @@
       "rows_control": 16354936,
       "rows_intervened_prefix": 8008105,
       "rows_intervened_post": 8346831,
-      "n_partitions_with_ctrl_diffs": 0,
-      "n_partitions_with_prefix_diffs": 0,
+      "n_partitions_with_diffs": 0,
       "n_partitions_post_differ": 0,
       "unknown_caseids": 0,
       "n_cases": 12690,
-      "examples_ctrl": [],
-      "examples_prefix": []
+      "examples": []
     },
-    "elapsed_s": 14.8,
+    "elapsed_s": 13.7,
     "pass": true
   },
   "pass": true,
-  "elapsed_s": 14.8
+  "elapsed_s": 13.7
 }

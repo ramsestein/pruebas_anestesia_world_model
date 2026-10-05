@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-05T03:45:56.339660+00:00",
+  "date": "2026-10-05T04:27:14.052930+00:00",
   "artifact": "tokens",
   "tokens_v2": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2",
   "tokens_v2_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2_1",
@@ -57,7 +57,7 @@
       "n_cases": 12690,
       "examples": []
     },
-    "elapsed_s": 15.3,
+    "elapsed_s": 10.2,
     "pass": true
   },
   "g3c": {
@@ -67,5 +67,5 @@
     "no_intervenidas_identicas": true
   },
   "pass": true,
-  "elapsed_s": 15.3
+  "elapsed_s": 10.3
 }
