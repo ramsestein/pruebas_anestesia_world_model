@@ -58,6 +58,24 @@ def intervened_caseids() -> np.ndarray:
     return np.array(sorted(out), dtype=np.int64)
 
 
+def _mae_acc(model, pa, vn: np.ndarray, masks: np.ndarray, device,
+             k_def: int) -> tuple[np.ndarray, np.ndarray]:
+    """(suma de error absoluto, recuento de observaciones) por variable."""
+    import torch
+    acc = np.zeros(pa.N_VARS, dtype=np.float64)
+    cnt = np.zeros(pa.N_VARS, dtype=np.float64)
+    n = len(vn)
+    with torch.no_grad():
+        for i in range(0, n, BATCH):
+            idx = np.arange(i, min(i + BATCH, n))
+            x = pa._make_input(vn, masks, idx, device)
+            recon = model(x, k=k_def)[:, :pa.N_VARS].cpu().numpy()
+            err = np.abs(recon - vn[idx]) * masks[idx].astype(np.float64)
+            acc += err.sum(axis=0)
+            cnt += masks[idx].sum(axis=0)
+    return acc, cnt
+
+
 def measure(windows_dir: Path) -> dict:
     t0 = _time.time()
     # ``physio_ae`` captura paths.WINDOWS_DIR al importar: hay que fijarlo antes.
@@ -81,48 +99,46 @@ def measure(windows_dir: Path) -> dict:
     excluded = pa.excluded_caseids()
     wanted = intervened_caseids()
 
-    vs: list[np.ndarray] = []
-    ms: list[np.ndarray] = []
+    per_split: dict[str, dict] = {}
+    tot_acc = np.zeros(pa.N_VARS, dtype=np.float64)
+    tot_cnt = np.zeros(pa.N_VARS, dtype=np.float64)
     for split in ("train", "val"):
         val = pa.load_cells(["cf_v7"], split, excluded)
         sel = np.isin(val["caseid"], wanted)
         print(f"  split={split}: {int(sel.sum())} celdas de casos intervenidos "
               f"(de {len(val['caseid'])})", flush=True)
-        if sel.any():
-            vs.append(val["values"][sel])
-            ms.append(val["masks"][sel])
-    if not vs:
+        if not sel.any():
+            continue
+        values = val["values"][sel]
+        masks = val["masks"][sel]
+        vn = pa.normalize(values, stats, pa.IMAGE_TRACKS).astype(np.float32)
+        # Misma convención que ``_normalize_train_data``: las celdas enmascaradas
+        # valen 0 (los valores crudos traen NaN donde la máscara es 0 y
+        # ``NaN * 0`` seguiría siendo NaN en el error).
+        vn[masks == 0] = 0.0
+        acc, cnt = _mae_acc(model, pa, vn, masks, device, k_def)
+        per_split[split] = {
+            "n_cells": int(len(vn)),
+            "n_obs_by_var": {v: int(c) for v, c in zip(pa.IMAGE_TRACKS, cnt)},
+            "mae_by_var": {v: float(a / max(c, 1.0))
+                           for v, a, c in zip(pa.IMAGE_TRACKS, acc, cnt)},
+        }
+        tot_acc += acc
+        tot_cnt += cnt
+    if not per_split:
         raise SystemExit("no se han encontrado celdas de casos intervenidos")
-    values = np.concatenate(vs, axis=0)
-    masks = np.concatenate(ms, axis=0)
-    vn = pa.normalize(values, stats, pa.IMAGE_TRACKS).astype(np.float32)
-    # Misma convención que ``_normalize_train_data``: las celdas enmascaradas
-    # valen 0 (los valores crudos traen NaN donde la máscara es 0 y ``NaN * 0``
-    # seguiría siendo NaN en el error).
-    vn[masks == 0] = 0.0
-
-    n = len(vn)
-    acc = np.zeros(pa.N_VARS, dtype=np.float64)
-    cnt = np.zeros(pa.N_VARS, dtype=np.float64)
-    with torch.no_grad():
-        for i in range(0, n, BATCH):
-            idx = np.arange(i, min(i + BATCH, n))
-            x = pa._make_input(vn, masks, idx, device)
-            recon = model(x, k=k_def)[:, :pa.N_VARS].cpu().numpy()
-            err = np.abs(recon - vn[idx]) * masks[idx].astype(np.float64)
-            acc += err.sum(axis=0)
-            cnt += masks[idx].sum(axis=0)
-    mae = acc / np.maximum(cnt, 1.0)
+    mae = tot_acc / np.maximum(tot_cnt, 1.0)
     out = {
         "windows_dir": str(windows_dir),
         "k_def": k_def,
-        "n_cells": int(n),
+        "n_cells": int(tot_cnt.sum() and sum(s["n_cells"] for s in per_split.values())),
         "n_intervened_cases": int(len(wanted)),
-        "n_obs_by_var": {v: int(c) for v, c in zip(pa.IMAGE_TRACKS, cnt)},
+        "n_obs_by_var": {v: int(c) for v, c in zip(pa.IMAGE_TRACKS, tot_cnt)},
         "mae_by_var": {v: float(m) for v, m in zip(pa.IMAGE_TRACKS, mae)},
+        "per_split": per_split,
         "elapsed_s": round(_time.time() - t0, 1),
     }
-    print(f"  {n} celdas, k={k_def}, {out['elapsed_s']}s", flush=True)
+    print(f"  {out['n_cells']} celdas, k={k_def}, {out['elapsed_s']}s", flush=True)
     return out
 
 
@@ -130,13 +146,32 @@ def compare(old: dict, new: dict) -> dict:
     ratios = {v: (new["mae_by_var"][v] / old["mae_by_var"][v]
                   if old["mae_by_var"][v] > 0 else float("inf"))
               for v in old["mae_by_var"]}
+
+    def _ratio_by_split(split: str) -> dict[str, float]:
+        o = old.get("per_split", {}).get(split)
+        n = new.get("per_split", {}).get(split)
+        if not o or not n:
+            return {}
+        return {v: (n["mae_by_var"][v] / o["mae_by_var"][v]
+                    if o["mae_by_var"][v] > 0 else float("inf"))
+                for v in o["mae_by_var"]}
+
     blocking = {v: ratios[v] for v in BLOCKING_VARS}
+    train_r = _ratio_by_split("train")
+    val_r = _ratio_by_split("val")
     result = {
         "old": {"windows_dir": old["windows_dir"], "n_cells": old["n_cells"],
-                "mae_by_var": old["mae_by_var"]},
+                "mae_by_var": old["mae_by_var"],
+                "per_split": old.get("per_split", {})},
         "new": {"windows_dir": new["windows_dir"], "n_cells": new["n_cells"],
-                "mae_by_var": new["mae_by_var"]},
+                "mae_by_var": new["mae_by_var"],
+                "per_split": new.get("per_split", {})},
         "ratio_new_over_old": ratios,
+        # Informativo: las celdas de TRAIN estuvieron en el entrenamiento de
+        # ae_v2, las de VAL no. Un cociente mayor en train que en val apuntaria a
+        # sobreajuste a las celdas vistas.
+        "ratio_train": train_r,
+        "ratio_val": val_r,
         "blocking_vars": list(BLOCKING_VARS),
         "ratio_max": RATIO_MAX,
         "n_obs_by_var": new["n_obs_by_var"],
@@ -161,13 +196,20 @@ def main() -> int:
         out = args.out or (paths.MANIFESTS_DIR / "paso3d_g3d.json")
         out.write_text(json.dumps(res, indent=2, ensure_ascii=False),
                        encoding="utf-8")
-        print(f"{'variable':28s} {'viejo':>10s} {'nuevo':>10s} {'cociente':>9s}")
+        print(f"{'variable':28s} {'viejo':>10s} {'nuevo':>10s} {'total':>8s} "
+              f"{'train':>8s} {'val':>8s}")
         for v in res["ratio_new_over_old"]:
             mark = " *" if v in BLOCKING_VARS else ""
+            tr = res["ratio_train"].get(v, float("nan"))
+            va = res["ratio_val"].get(v, float("nan"))
             print(f"{v:28s} {old['mae_by_var'][v]:10.5f} {new['mae_by_var'][v]:10.5f} "
-                  f"{res['ratio_new_over_old'][v]:9.4f}{mark}")
-        print(f"\nBLOQUEANTES (cociente <= {RATIO_MAX}): "
+                  f"{res['ratio_new_over_old'][v]:8.4f} {tr:8.4f} {va:8.4f}{mark}")
+        print(f"\nBLOQUEANTES (cociente total <= {RATIO_MAX}): "
               f"{ {v: round(res['ratio_new_over_old'][v], 4) for v in BLOCKING_VARS} }")
+        print("  bloqueantes en train: "
+              f"{ {v: round(res['ratio_train'].get(v, float('nan')), 4) for v in BLOCKING_VARS} }")
+        print("  bloqueantes en val  : "
+              f"{ {v: round(res['ratio_val'].get(v, float('nan')), 4) for v in BLOCKING_VARS} }")
         print(f"G3d: {'PASA' if res['pass'] else 'FALLA'} -> {out}")
         return 0 if res["pass"] else 1
 
