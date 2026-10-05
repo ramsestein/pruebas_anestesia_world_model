@@ -165,6 +165,48 @@ def cohort_dir(name: str) -> Path:
     módulo (era el bug de ``cf_pairs.CF_CASES_DIR``)."""
     return COHORTS[COHORT_LABELS.get(name, name)]
 
+
+# ---------------------------------------------------------------------------
+# Guarda de coherencia cohorte <-> artefactos derivados
+# ---------------------------------------------------------------------------
+# La cohorte de CF y las ventanas, el pk y los tokens tienen que ser de la MISMA
+# generación. Si la cohorte activa fuese cf_v7_1 mientras los artefactos siguen
+# siendo los de cf_v7, cualquier rutina que lea casos CRUDOS (de ahí salen los
+# setpoints ``vent_*``) resolvería a una cohorte y contrastaría contra tokens de
+# otra, sin error ni aviso. El contexto se comparte entre generaciones (se
+# reutiliza context_v2, verificado por G3c).
+ARTIFACTS_BY_COHORT: dict[str, dict[str, str]] = {
+    "cf_v7": {"windows": "windows_v4", "pk": "pk_v2",
+              "tokens": "tokens_v2", "context": "context_v2"},
+    "cf_v7_1": {"windows": "windows_v4_1", "pk": "pk_v2_1",
+                "tokens": "tokens_v2_1", "context": "context_v2"},
+}
+
+
+def generation_mismatches() -> list[str]:
+    """Artefactos cuyo directorio no es el de la generación de la cohorte
+    activa. Lista vacía si todo cuadra (o si la cohorte no está tabulada)."""
+    expected = ARTIFACTS_BY_COHORT.get(CF_COHORT_ACTIVE)
+    if not expected:
+        return []
+    actual = {"windows": WINDOWS_DIR.name, "pk": PK_DIR.name,
+              "tokens": TOKENS_DIR.name, "context": CONTEXT_DIR.name}
+    return [f"{k}: la cohorte {CF_COHORT_ACTIVE} espera '{v}' y hay "
+            f"'{actual[k]}'"
+            for k, v in expected.items() if actual.get(k) != v]
+
+
+def require_same_generation() -> None:
+    """Falla con mensaje claro si la cohorte activa y los directorios de
+    artefactos no son de la misma generación. No se llama en el import: sólo
+    bajo demanda (y desde ``require_vigent_dirs``)."""
+    bad = generation_mismatches()
+    if bad:
+        raise RuntimeError(
+            f"{CF_COHORT_ENV_VAR}={CF_COHORT_ACTIVE} no cuadra con los "
+            "directorios de artefactos: la cohorte y sus artefactos derivados "
+            "cambian JUNTOS.\n  " + "\n  ".join(bad))
+
 # Lista de las tres cohortes sintéticas vigentes.
 SYNTH_COHORTS: list[str] = ["synthetic_v7", "vaso_reinf_v7", "cf_v7"]
 
@@ -199,7 +241,11 @@ LOST_COHORT_DIRS: dict[str, Path] = {
 def require_vigent_dirs() -> None:
     """Verifica que los directorios de datos vigentes existen; falla con un
     mensaje claro si falta alguno. No se llama en el import: solo bajo demanda.
+
+    Incluye la guarda de coherencia entre la cohorte de CF activa y la
+    generación de los artefactos de ventanas, pk y tokens.
     """
+    require_same_generation()
     missing: list[Path] = []
     for d in (WINDOWS_DIR, TOKENS_DIR, PK_DIR, CONTEXT_DIR, AE_DIR,
               DIAGNOSTICS_DIR):

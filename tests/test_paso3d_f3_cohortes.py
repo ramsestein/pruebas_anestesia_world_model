@@ -21,6 +21,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 for _p in (str(ROOT), str(ROOT / "src"), str(ROOT / "scripts")):
     if _p not in sys.path:
@@ -110,9 +112,6 @@ def test_dataset_sources_usa_la_etiqueta_logica() -> None:
 
 
 def test_proceso_nuevo_ve_los_directorios_redirigidos(tmp_path: Path) -> None:
-    """El caso real del fallo de spawn: un proceso NUEVO ve lo que dice el
-    entorno. Se comparan sólo los nombres de directorio: la consola de Windows
-    usa cp1252 y la ruta lleva «Ramsés»."""
     w, p, t = tmp_path / "w_x", tmp_path / "p_x", tmp_path / "t_x"
     code = ("import sys; sys.path.insert(0, r'%s'); sys.path.insert(0, r'%s');"
             " import paths;"
@@ -128,3 +127,48 @@ def test_proceso_nuevo_ve_los_directorios_redirigidos(tmp_path: Path) -> None:
     assert pr.returncode == 0, pr.stderr
     lines = [ln.strip() for ln in (pr.stdout or "").splitlines() if ln.strip()]
     assert lines[-4:] == [w.name, p.name, t.name, "cf_v7_1"]
+
+
+# ---------------------------------------------------------------------------
+# Guarda de coherencia cohorte <-> generación de artefactos
+# ---------------------------------------------------------------------------
+
+def test_guarda_de_generacion_pasa_en_el_estado_adoptado() -> None:
+    assert paths.CF_COHORT_ACTIVE == "cf_v7"
+    assert paths.generation_mismatches() == []
+    assert paths.require_same_generation() is None
+
+
+def test_guarda_detecta_la_mezcla_de_generaciones(monkeypatch) -> None:
+    """Cohorte adoptada con ventanas de la regeneración (o al revés) = error."""
+    monkeypatch.setattr(paths, "WINDOWS_DIR", paths.DATA_ROOT / "windows_v4_1")
+    bad = paths.generation_mismatches()
+    assert bad and any(b.startswith("windows:") for b in bad)
+    with pytest.raises(RuntimeError, match="cambian JUNTOS"):
+        paths.require_same_generation()
+
+    # ... y tambien si la cohorte es la nueva y los artefactos los viejos
+    monkeypatch.setattr(paths, "WINDOWS_DIR", paths.DATA_ROOT / "windows_v4")
+    monkeypatch.setattr(paths, "CF_COHORT_ACTIVE", "cf_v7_1")
+    bad2 = paths.generation_mismatches()
+    assert bad2 and any(b.startswith("windows:") for b in bad2)
+    with pytest.raises(RuntimeError):
+        paths.require_same_generation()
+
+
+def test_guarda_pasa_con_la_generacion_de_regeneracion() -> None:
+    code = ("import sys; sys.path.insert(0, r'%s'); import paths;"
+            " print(paths.CF_COHORT_ACTIVE);"
+            " print(paths.generation_mismatches())" % (ROOT / "src"))
+    root = ROOT / "data"
+    env = {**os.environ, "PYTHONPATH": str(ROOT / "src"),
+           "ANESTESIA_CF_COHORT": "cf_v7_1",
+           "ANESTESIA_WINDOWS_DIR": str(root / "windows_v4_1"),
+           "ANESTESIA_PK_DIR": str(root / "pk_v2_1"),
+           "ANESTESIA_TOKENS_DIR": str(root / "tokens_v2_1")}
+    pr = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env,
+                        capture_output=True, text=True, encoding="ascii",
+                        errors="replace")
+    assert pr.returncode == 0, pr.stderr
+    lines = [ln.strip() for ln in (pr.stdout or "").splitlines() if ln.strip()]
+    assert lines[-2:] == ["cf_v7_1", "[]"]
