@@ -82,11 +82,21 @@ def stage_pk() -> None:
 
 
 def stage_tokens(ctx: str) -> None:
+    import tokens.cf_pairs as CP
     import tokens.tokenize as TK
 
     paths.WINDOWS_DIR = W41
     paths.PK_DIR = P41
     paths.TOKENS_DIR = T41
+    # CLAVE: las features vent_* (consignas de ventilación) NO salen de las
+    # ventanas sino del parquet de CASO CRUDO, vía ``cf_pairs.CF_CASES_DIR``,
+    # que se captura en el import desde ``paths.COHORTS["cf_v7"]``. Sin esta
+    # redirección el tokenizador lee los setpoints de la cohorte vieja y las
+    # filas de CF salen idénticas a tokens_v2 (lo detectó G3b: 0 de 163
+    # particiones con diferencias tras el split, cuando en las ventanas sí
+    # difieren 30 de 163).
+    paths.COHORTS["cf_v7"] = CF_V7_1
+    CP.CF_CASES_DIR = CF_V7_1 / "cases"
     TK.WINDOWS_ROOT = W41
     TK.WINDOWS_DIR = W41 / "windows"
     if ctx == "rebuild":
@@ -94,7 +104,7 @@ def stage_tokens(ctx: str) -> None:
         TK.CTX_VOCAB = paths.CONTEXT_DIR / "vocab.json"
     (T41 / "windows").mkdir(parents=True, exist_ok=True)
     print(f"tokens_v2_1 -> {T41}  (pk_v2_1 = {P41}, windows = {W41}, "
-          f"contexto = {paths.CONTEXT_DIR})")
+          f"casos crudos = {CP.CF_CASES_DIR}, contexto = {paths.CONTEXT_DIR})")
     # ``main`` declara global PK_DIR/CTX_*/OUT_DIR/OUT_ROOT/MANIFEST_PATH y solo
     # las reescribe si se pasan por CLI; pasarlas es más explícito que confiar
     # en el re-apuntado previo. El directorio de ventanas no tiene opción de CLI

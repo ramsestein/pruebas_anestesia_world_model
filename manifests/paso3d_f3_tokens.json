@@ -1,0 +1,79 @@
+{
+  "date": "2026-10-05T03:30:38.749814+00:00",
+  "artifact": "tokens",
+  "tokens_v2": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2",
+  "tokens_v2_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2_1",
+  "counts_identical": true,
+  "dense_counts_identical": true,
+  "discards_identical": true,
+  "pairs_identical": false,
+  "n_rows_v2": 14725190,
+  "n_rows_v2_1": 14725190,
+  "counts": {
+    "source=cf_v7/split=train": 2208098,
+    "source=cf_v7/split=val": 4594614,
+    "source=real/split=train": 734663,
+    "source=real/split=val": 1501733,
+    "source=synthetic_v7/split=train": 1720953,
+    "source=synthetic_v7/split=val": 3698864,
+    "source=vaso_reinf_v7/split=train": 91503,
+    "source=vaso_reinf_v7/split=val": 174762
+  },
+  "dense_counts": {
+    "source=cf_v7/split=train": 0,
+    "source=cf_v7/split=val": 4210908,
+    "source=real/split=train": 0,
+    "source=real/split=val": 1376544,
+    "source=synthetic_v7/split=train": 0,
+    "source=synthetic_v7/split=val": 3389983,
+    "source=vaso_reinf_v7/split=train": 0,
+    "source=vaso_reinf_v7/split=val": 160164
+  },
+  "pairs": {
+    "n_pairs": 6345,
+    "path": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2_1\\pairs.parquet",
+    "n_unusable": 0
+  },
+  "context_dir": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\context_v2",
+  "context_reused": true,
+  "g3b": {
+    "n_partitions": 369,
+    "criterio": "columnas exactas identicas en filas no intervenidas + ajuste afin (R2=1) en las z-scores vent_*_t0/t1",
+    "non_cf": {
+      "n_partitions": 206,
+      "rows": 7922478,
+      "n_partitions_with_diffs": 0,
+      "examples": []
+    },
+    "cf": {
+      "n_partitions": 163,
+      "rows": 6802712,
+      "rows_control": 3401356,
+      "rows_intervened_prefix": 1740141,
+      "rows_intervened_post": 1661215,
+      "n_partitions_with_diffs": 0,
+      "n_partitions_post_differ": 0,
+      "unknown_caseids": 0,
+      "n_cases": 12690,
+      "examples": []
+    },
+    "elapsed_s": 18.5,
+    "affine": {
+      "n_cols_per_partition": 3690,
+      "n_partitions_all_cols_affine": 369,
+      "r2_min": 0.9999996111899132,
+      "resid_max": 0.0016796844710289356,
+      "resid_max_post_split": 3.9035868171121724,
+      "examples_bad": []
+    },
+    "pass": true
+  },
+  "g3c": {
+    "contexto": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\context_v2",
+    "reutilizado": true,
+    "verificacion": "G3b: las filas no intervenidas (real/synthetic_v7/vaso, control de CF y prefijo intervenido) son identicas; un desplazamiento del vocabulario de contexto habria cambiado todas ellas",
+    "no_intervenidas_identicas": true
+  },
+  "pass": true,
+  "elapsed_s": 18.5
+}
