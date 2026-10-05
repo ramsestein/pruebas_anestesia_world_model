@@ -51,9 +51,22 @@ WINDOWS_DIR = WINDOWS_ROOT / "windows"
 PK_DIR = paths.PK_DIR / "windows"
 CTX_TOKENS = paths.CONTEXT_DIR / "tokens.parquet"
 CTX_VOCAB = paths.CONTEXT_DIR / "vocab.json"
-CF_META_DIR = paths.COHORTS["cf_v7"] / "metadata"
 OUT_DIR = paths.TOKENS_DIR / "windows"
 OUT_ROOT = paths.TOKENS_DIR
+
+
+def cf_meta_dir() -> Path:
+    """Directorio de metadatos de la cohorte de CF ACTIVA, resuelto en cada
+    llamada: es una LECTURA DIFERIDA a propósito (capturarlo en el import era el
+    bug del paso 3d: el tokenizador leía los metadatos y los casos CRUDOS de la
+    cohorte antigua)."""
+    return paths.cohort_dir("cf_v7") / "metadata"
+
+
+def cf_cases_dir() -> Path:
+    """Casos CRUDOS de la cohorte de CF ACTIVA (de aquí salen los setpoints
+    ``vent_*``, no de las ventanas). Lectura diferida."""
+    return paths.cohort_dir("cf_v7") / "cases"
 MANIFEST_PATH = OUT_ROOT / "manifest_tokens.json"
 REPORT_PATH = paths.REPORTS_DIR / "REPORT_tokens.txt"
 
@@ -100,7 +113,7 @@ LEVER_GROUP = {
     "peep_up": "ventilacion",
 }
 
-SOURCES = paths.COHORTS
+SOURCES = paths.dataset_sources()
 
 
 # --------------------------------------------------------------------------
@@ -150,7 +163,7 @@ def load_context_map() -> dict[int, dict[str, float]]:
 @lru_cache(maxsize=1)
 def load_cf_meta() -> dict[int, dict]:
     out: dict[int, dict] = {}
-    for p in sorted(CF_META_DIR.glob("cf_pair_*.json")):
+    for p in sorted(cf_meta_dir().glob("cf_pair_*.json")):
         d = json.loads(p.read_text(encoding="utf-8"))
         a = int(d["caseid_a"])
         b = int(d["caseid_b"])
@@ -981,7 +994,18 @@ def _select_parts(all_parts: list[Path], limit_per_group: int | None) -> list[Pa
     return sorted(out)
 
 
-def run_full(verbose: bool = True, limit_parts_per_group: int | None = None) -> dict:
+def run_full(verbose: bool = True, limit_parts_per_group: int | None = None,
+             stats_from: Path | None = None) -> dict:
+    """Tokeniza el corpus.
+
+    ``stats_from``: ruta a un manifiesto de tokens del que tomar los estadísticos
+    de normalización (clave ``normalization_stats``). Con ella NO se acumulan
+    estadísticos sobre el corpus: se usan los registrados. Sin ella el
+    comportamiento no cambia (acumular sobre el train del corpus).
+
+    Motivo (paso 3d, Corrección A): acumular sobre el train de TODAS las
+    cohortes hace que regenerar una cohorte sintética cambie los tokens de real.
+    """
     t_start = _time.time()
     ctx_ids = load_vocab_v1()
     context_map = load_context_map()
@@ -994,14 +1018,38 @@ def run_full(verbose: bool = True, limit_parts_per_group: int | None = None) -> 
         sorted(WINDOWS_DIR.glob("source=*/split=*/part-*.parquet")), limit_parts_per_group)
     train_parts = [p for p in all_parts if "/split=train/" in str(p).replace("\\", "/")]
 
-    acc = StatsAccumulator()
-    for i, part in enumerate(train_parts):
-        w, _ = process_partition_windows(part, dense_val, context_map, cf_meta,
-                                         excluded_caseids=excluded)
-        accumulate_stats_from_windows(acc, w)
-        if verbose and (i + 1) % 50 == 0:
-            print(f"[stats] {i + 1}/{len(train_parts)} particiones train", flush=True)
-    stats = acc.finalize()
+    if stats_from is not None:
+        stats_path = Path(stats_from)
+        man = json.loads(stats_path.read_text(encoding="utf-8"))
+        if "normalization_stats" not in man:
+            raise ValueError(f"{stats_path} no tiene 'normalization_stats'")
+        stats = man["normalization_stats"]
+        stats_origin = {
+            "modo": "congelado",
+            "manifest": str(stats_path),
+            "sha256_manifest": _sha256(stats_path),
+            "stats_acumulados_sobre_corpus": False,
+            "n_claves": len(stats),
+        }
+        if verbose:
+            print(f"[stats] CONGELADOS desde {stats_path} ({len(stats)} claves)",
+                  flush=True)
+    else:
+        acc = StatsAccumulator()
+        for i, part in enumerate(train_parts):
+            w, _ = process_partition_windows(part, dense_val, context_map, cf_meta,
+                                             excluded_caseids=excluded)
+            accumulate_stats_from_windows(acc, w)
+            if verbose and (i + 1) % 50 == 0:
+                print(f"[stats] {i + 1}/{len(train_parts)} particiones train", flush=True)
+        stats = acc.finalize()
+        stats_origin = {
+            "modo": "acumulado",
+            "manifest": None,
+            "sha256_manifest": None,
+            "stats_acumulados_sobre_corpus": True,
+            "n_claves": len(stats),
+        }
 
     counts: dict[str, int] = {}
     dense_counts: dict[str, int] = {}
@@ -1028,6 +1076,7 @@ def run_full(verbose: bool = True, limit_parts_per_group: int | None = None) -> 
     elapsed = _time.time() - t_start
     return {
         "stats": stats,
+        "stats_origin": stats_origin,
         "counts": counts,
         "dense_counts": dense_counts,
         "discards": discards,
@@ -1066,6 +1115,7 @@ def build_manifest(summary: dict) -> dict:
     win_manifest = json.loads((WINDOWS_ROOT / "manifest.json").read_text(encoding="utf-8"))
     return {
         "date": pd.Timestamp.now().isoformat(),
+        "cohort_label_map": paths.cohort_label_map(),
         "sha256_contract": _sha256(CONTRACT_PATH),
         "sha256_tokenize_py": _sha256(Path(__file__).resolve()),
         "windows_manifest_path": str(WINDOWS_ROOT / "manifest.json"),
@@ -1077,6 +1127,7 @@ def build_manifest(summary: dict) -> dict:
         "split_parquet_path": str(WINDOWS_ROOT / "split.parquet"),
         "sha256_split_parquet": _sha256(WINDOWS_ROOT / "split.parquet"),
         "normalization_stats": summary["stats"],
+        "stats_origin": summary.get("stats_origin"),
         "feature_columns": feature_columns(),
         "mask_columns": mask_columns(),
         "metadata_columns": metadata_columns(),
@@ -1106,6 +1157,10 @@ def main(argv=None) -> int:
                     help="raíz de contexto (por defecto paths.CONTEXT_DIR)")
     ap.add_argument("--out-root", default=None,
                     help="raíz de salida (por defecto paths.TOKENS_DIR)")
+    ap.add_argument("--stats-from", default=None,
+                    help="manifiesto del que tomar normalization_stats (congela "
+                         "la normalización; por defecto se acumulan sobre el "
+                         "train del corpus)")
     args = ap.parse_args(argv)
 
     global PK_DIR, CTX_TOKENS, CTX_VOCAB, OUT_DIR, OUT_ROOT, MANIFEST_PATH
@@ -1123,7 +1178,9 @@ def main(argv=None) -> int:
 
     if args.command == "run":
         limit = 2 if args.smoke else None
-        summary = run_full(verbose=True, limit_parts_per_group=limit)
+        summary = run_full(verbose=True, limit_parts_per_group=limit,
+                           stats_from=(Path(args.stats_from)
+                                       if args.stats_from else None))
         ver = verify_output()
         summary["verify"] = ver
         manifest = build_manifest(summary)

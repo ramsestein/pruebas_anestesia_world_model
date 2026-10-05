@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-05T03:30:38.749814+00:00",
+  "date": "2026-10-05T03:45:56.339660+00:00",
   "artifact": "tokens",
   "tokens_v2": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2",
   "tokens_v2_1": "C:\\Users\\Ramsés\\Desktop\\Proyectos\\anestesia_world\\data\\tokens_v2_1",
@@ -38,7 +38,7 @@
   "context_reused": true,
   "g3b": {
     "n_partitions": 369,
-    "criterio": "columnas exactas identicas en filas no intervenidas + ajuste afin (R2=1) en las z-scores vent_*_t0/t1",
+    "criterio": "igualdad EXACTA en TODAS las columnas de las filas no intervenidas",
     "non_cf": {
       "n_partitions": 206,
       "rows": 7922478,
@@ -52,20 +52,12 @@
       "rows_intervened_prefix": 1740141,
       "rows_intervened_post": 1661215,
       "n_partitions_with_diffs": 0,
-      "n_partitions_post_differ": 0,
+      "n_partitions_post_differ": 30,
       "unknown_caseids": 0,
       "n_cases": 12690,
       "examples": []
     },
-    "elapsed_s": 18.5,
-    "affine": {
-      "n_cols_per_partition": 3690,
-      "n_partitions_all_cols_affine": 369,
-      "r2_min": 0.9999996111899132,
-      "resid_max": 0.0016796844710289356,
-      "resid_max_post_split": 3.9035868171121724,
-      "examples_bad": []
-    },
+    "elapsed_s": 15.3,
     "pass": true
   },
   "g3c": {
@@ -75,5 +67,5 @@
     "no_intervenidas_identicas": true
   },
   "pass": true,
-  "elapsed_s": 18.5
+  "elapsed_s": 15.3
 }

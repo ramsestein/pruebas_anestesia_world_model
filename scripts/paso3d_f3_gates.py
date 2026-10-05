@@ -100,39 +100,18 @@ def _sort_key(df: pd.DataFrame, time_col: str = "t") -> pd.DataFrame:
     return df.sort_values(["caseid", time_col], kind="stable").reset_index(drop=True)
 
 
-# ``run_full`` de tokenize aplica ``apply_normalization`` a las features
-# ``vent_*_t0`` / ``vent_*_t1`` con estadísticos ACUMULADOS sobre el corpus
-# procesado, así que son z-scores: cambiar cualquier caso del corpus desplaza
-# TODOS los valores del corpus (media y desviación) y ninguna fila —ni siquiera
-# las de real— puede ser idéntica bit a bit entre dos corpus distintos. Para las
-# filas NO intervenidas la relación debe ser EXACTAMENTE afín (misma x cruda,
-# otra media/desv):
-#     v_nuevo = a + b * v_viejo,  con a = (m1 - m2)/s2  y  b = s1/s2
-# Eso es lo que se comprueba con el ajuste afín. Las demás columnas
-# (drug_*, ctx_*, vent_*_proxy, vent_*_mask y los metadatos) no se normalizan
-# así y se exigen idénticas.
-AFFINE_ATOL = 2e-2   # z-scores en float32
-
-
-def _is_affine_col(col: str) -> bool:
-    return col.startswith("vent_") and (col.endswith("_t0") or col.endswith("_t1"))
-
-
-def _affine_fit(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
-    """(a, b, r2, max_abs_resid) de ``y ~ a + b x``, ignorando NaN."""
-    m = np.isfinite(x) & np.isfinite(y)
-    if int(m.sum()) < 3:
-        return (np.nan, np.nan, np.nan, np.nan)
-    xv = x[m].astype(np.float64)
-    yv = y[m].astype(np.float64)
-    if float(np.ptp(xv)) == 0.0:
-        return (float(yv.mean()), 0.0, 1.0, float(np.abs(yv - yv.mean()).max()))
-    b, a = np.polyfit(xv, yv, 1)
-    resid = np.abs(yv - (a + b * xv))
-    ss_res = float((resid ** 2).sum())
-    ss_tot = float(((yv - yv.mean()) ** 2).sum())
-    r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 1.0
-    return (float(a), float(b), float(r2), float(resid.max()))
+# EPISODIO decided_post_hoc, NO ADOPTADO (paso 3d, Corrección A).
+# Con la normalización ACUMULADA sobre el corpus, las features ``vent_*_t0/t1``
+# salen z-scoreadas con la media y la desviación del corpus procesado, así que
+# regenerar una cohorte cambia los valores de TODAS las demás. Llegué a sustituir
+# la igualdad exacta por un ajuste afín (v_nuevo = a + b*v_viejo) para esas
+# columnas, y se midió: R2_min 0.9999996 y residuo máximo 0.0017 en las filas no
+# intervenidas frente a 3.90 en las posteriores al split. El ajuste describía bien
+# el síntoma, pero ADOPTARLO habría consagrado el defecto de diseño (que
+# regenerar una cohorte cambie los tokens de real). La corrección es congelar los
+# estadísticos (``tokenize --stats-from``), con lo que la igualdad EXACTA se
+# recupera en todas las columnas y este criterio queda sin uso. Se conserva el
+# registro del episodio, no el código.
 
 
 def _task_identity(task: dict) -> dict:
@@ -152,7 +131,6 @@ def _task_identity(task: dict) -> dict:
     win_len = float(task.get("win_len", 0.0))
     a = _sort_key(_read_parquet(dir_a / rel), time_col)
     b = _sort_key(_read_parquet(dir_b / rel), time_col)
-    affine = bool(task.get("affine", False))
     res: dict = {"rel": rel, "source": source, "rows": int(len(a))}
     if len(a) != len(b):
         res["diffs"] = ["<filas>"]
@@ -179,38 +157,11 @@ def _task_identity(task: dict) -> dict:
     res["rows_intervened_post"] = int(m_post.sum())
 
     def _diffs(mask: np.ndarray) -> list[str]:
-        d = _diff_columns(a.loc[mask].reset_index(drop=True),
-                          b.loc[mask].reset_index(drop=True))
-        return [c for c in d if c.startswith("<") or not affine or not _is_affine_col(c)]
+        return _diff_columns(a.loc[mask].reset_index(drop=True),
+                             b.loc[mask].reset_index(drop=True))
 
     res["diffs"] = _diffs(m_ni)
     res["post_rows_differ"] = bool(_diffs(m_post)) if m_post.any() else False
-
-    if affine:
-        cols = [c for c in a.columns if _is_affine_col(c)]
-        r2_min, res_max = 1.0, 0.0
-        res_max_post, cols_bad = 0.0, []
-        for c in cols:
-            xa = a[c].to_numpy(dtype=np.float64)
-            yb = b[c].to_numpy(dtype=np.float64)
-            a_fit, b_fit, r2, rmax = _affine_fit(xa[m_ni], yb[m_ni])
-            if not np.isfinite(r2) or r2 < 1.0 - 1e-6 or (np.isfinite(rmax) and rmax > AFFINE_ATOL):
-                cols_bad.append(c)
-            if np.isfinite(r2):
-                r2_min = min(r2_min, float(r2))
-            if np.isfinite(rmax):
-                res_max = max(res_max, float(rmax))
-            if m_post.any() and np.isfinite(rmax):
-                m = np.isfinite(xa) & np.isfinite(yb)
-                mp = m_post & m
-                if mp.any():
-                    rp = np.abs(yb[mp] - (a_fit + b_fit * xa[mp]))
-                    res_max_post = max(res_max_post, float(rp.max()))
-        res["affine_cols"] = len(cols)
-        res["affine_cols_bad"] = cols_bad
-        res["affine_r2_min"] = r2_min
-        res["affine_resid_max"] = res_max
-        res["affine_resid_max_post"] = res_max_post
     return res
 
 
@@ -229,12 +180,9 @@ def _task_missing(task: dict) -> dict:
 
 
 def identity_gate(dir_a: Path, dir_b: Path, workers: int, win_len: float,
-                  label: str = "", time_col: str = "t",
-                  affine: bool = False) -> dict:
-    """Identidad de las filas NO intervenidas entre dos raíces de particiones
-    (``<raíz>/source=*/split=*/part-*.parquet``). ``affine=True`` para tokens:
-    las columnas ``vent_*_t0/t1`` son z-scores del corpus y se comprueban con un
-    ajuste afín en vez de por igualdad exacta."""
+                  label: str = "", time_col: str = "t") -> dict:
+    """Identidad EXACTA (todas las columnas) de las filas NO intervenidas entre
+    dos raíces de particiones (``<raíz>/source=*/split=*/part-*.parquet``)."""
     tasks: list[dict] = []
     for src in sorted(dir_a.glob("source=*")):
         source = src.name.split("=", 1)[1]
@@ -242,7 +190,7 @@ def identity_gate(dir_a: Path, dir_b: Path, workers: int, win_len: float,
             rel = str(part.relative_to(dir_a)).replace("\\", "/")
             tasks.append({"rel": rel, "source": source, "dir_a": str(dir_a),
                           "dir_b": str(dir_b), "win_len": win_len,
-                          "time_col": time_col, "affine": affine,
+                          "time_col": time_col,
                           "missing": not (dir_b / rel).exists()})
     print(f"{label}: {len(tasks)} particiones")
     res: list[dict] = []
@@ -263,16 +211,9 @@ def identity_gate(dir_a: Path, dir_b: Path, workers: int, win_len: float,
     cf = [r for r in res if r["source"] == "cf_v7"]
     bad_non_cf = [r for r in non_cf if r.get("diffs")]
     bad_cf = [r for r in cf if r.get("diffs") or r.get("unknown_caseids")]
-    affine_bad = [r for r in res if r.get("affine_cols_bad")]
-    r2_vals = [r.get("affine_r2_min") for r in res if np.isfinite(r.get("affine_r2_min", np.nan))]
-    resmax = [r.get("affine_resid_max") for r in res if np.isfinite(r.get("affine_resid_max", np.nan))]
-    respost = [r.get("affine_resid_max_post") for r in res
-               if np.isfinite(r.get("affine_resid_max_post", np.nan))]
     out: dict = {
         "n_partitions": len(res),
-        "criterio": ("columnas exactas identicas en filas no intervenidas"
-                     + (" + ajuste afin (R2=1) en las z-scores vent_*_t0/t1"
-                        if affine else "")),
+        "criterio": "igualdad EXACTA en TODAS las columnas de las filas no intervenidas",
         "non_cf": {
             "n_partitions": len(non_cf),
             "rows": int(sum(r.get("rows", 0) for r in non_cf)),
@@ -295,17 +236,7 @@ def identity_gate(dir_a: Path, dir_b: Path, workers: int, win_len: float,
         },
         "elapsed_s": round(_time.time() - t0, 1),
     }
-    if affine:
-        out["affine"] = {
-            "n_cols_per_partition": int(sum(r.get("affine_cols", 0) for r in res)),
-            "n_partitions_all_cols_affine": len(res) - len(affine_bad),
-            "r2_min": float(min(r2_vals)) if r2_vals else None,
-            "resid_max": float(max(resmax)) if resmax else None,
-            "resid_max_post_split": float(max(respost)) if respost else None,
-            "examples_bad": [{"rel": r["rel"], "cols": r["affine_cols_bad"]}
-                             for r in affine_bad[:5]],
-        }
-    out["pass"] = bool(not bad_non_cf and not bad_cf and not affine_bad
+    out["pass"] = bool(not bad_non_cf and not bad_cf
                        and out["cf"]["unknown_caseids"] == 0)
     return out
 
@@ -379,10 +310,10 @@ def main() -> int:
               f"conteos identicos: {result['counts_identical']} | "
               f"densos identicos: {result['dense_counts_identical']} | "
               f"pares identicos: {result['pairs_identical']}")
-        print("G3b — identidad/afinidad de las filas no intervenidas (tokens)")
+        print("G3b — identidad EXACTA de las filas no intervenidas (tokens)")
         result["g3b"] = identity_gate(T2 / "windows", T21 / "windows",
                                        args.workers, 0.0, "G3b-tokens",
-                                       time_col="t1", affine=True)
+                                       time_col="t1")
         # G3c — el contexto (context_v2) se reutiliza; la verificación es
         # indirecta pero concluyente: si el vocabulario o los tokens de contexto
         # hubieran cambiado, TODAS las filas (incluidas las de real, las de
